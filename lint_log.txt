@@ -1,0 +1,97 @@
+
+> sleepyhollows@0.1.0 lint
+> eslint
+
+
+/Users/kylebeggan/dev/sleepyhollows/app/(auth)/pending/page.tsx
+  30:28  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/Users/kylebeggan/dev/sleepyhollows/app/(dashboard)/admin/approvals/page.tsx
+  26:11  warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/kylebeggan/dev/sleepyhollows/app/(dashboard)/admin/capabilities/page.tsx
+  6:8  warning  'Input' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/kylebeggan/dev/sleepyhollows/app/(dashboard)/admin/users/page.tsx
+   6:8   warning  'Button' is defined but never used                                                                              @typescript-eslint/no-unused-vars
+  32:8   warning  React Hook useEffect has a missing dependency: 'filterUsers'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  68:17  error    'updates' is never reassigned. Use 'const' instead                                                              prefer-const
+  68:26  error    Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+
+/Users/kylebeggan/dev/sleepyhollows/app/(dashboard)/profile/page.tsx
+  59:69  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/kylebeggan/dev/sleepyhollows/app/api/admin/approvals/route.ts
+  22:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/kylebeggan/dev/sleepyhollows/app/api/admin/capabilities/route.ts
+   22:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   48:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   85:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  103:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  135:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/kylebeggan/dev/sleepyhollows/app/api/admin/users/route.ts
+  22:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  62:60  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  80:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/kylebeggan/dev/sleepyhollows/app/api/auth/[...nextauth]/route.ts
+   31:30  warning  'account' is defined but never used             @typescript-eslint/no-unused-vars
+   36:49  warning  'authError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  105:34  error    Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  115:38  error    Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  116:38  error    Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  119:38  error    Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  120:38  error    Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+
+/Users/kylebeggan/dev/sleepyhollows/app/api/commitments/route.ts
+  2:10  warning  'authOptions' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/kylebeggan/dev/sleepyhollows/app/api/profile/route.ts
+  52:57  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  81:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/kylebeggan/dev/sleepyhollows/app/api/sessions/route.ts
+  42:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  46:66  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  48:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  86:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/kylebeggan/dev/sleepyhollows/components/admin/CapabilityModal.tsx
+  52:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/kylebeggan/dev/sleepyhollows/components/admin/CapabilityModal.tsx:52:13
+  50 |     useEffect(() => {
+  51 |         if (isOpen) {
+> 52 |             setName(initialName);
+     |             ^^^^^^^ Avoid calling setState() directly within an effect
+  53 |             setSelectedIcon(initialIcon);
+  54 |         }
+  55 |     }, [isOpen, initialName, initialIcon]);  react-hooks/set-state-in-effect
+
+/Users/kylebeggan/dev/sleepyhollows/components/calendar/MonthlyCalendar.tsx
+  3:20  warning  'useEffect' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/kylebeggan/dev/sleepyhollows/components/calendar/SessionIndicator.tsx
+  14:7  warning  'coreCapabilities' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/kylebeggan/dev/sleepyhollows/components/calendar/SessionModal.tsx
+   7:8   warning  'Badge' is defined but never used         @typescript-eslint/no-unused-vars
+  22:62  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/kylebeggan/dev/sleepyhollows/middleware.ts
+  4:28  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/kylebeggan/dev/sleepyhollows/types/next-auth.d.ts
+  1:8  warning  'NextAuth' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 38 problems (26 errors, 12 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+
