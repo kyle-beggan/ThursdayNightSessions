@@ -158,16 +158,54 @@ export async function GET(request: NextRequest) {
             allTimeEnd = dateRangeData[dateRangeData.length - 1].date;
         }
 
+        // 6. Fetch Songs Stats (Total count & Key Distribution)
+        const { data: songsData, error: songsError } = await supabaseAdmin
+            .from('songs')
+            .select('key');
+
+        if (songsError) {
+            console.error('Error fetching songs stats:', songsError);
+        }
+
+        const totalSongs = songsData?.length || 0;
+
+        // Calculate Key Distribution
+        const keyCounts: Record<string, number> = {};
+        songsData?.forEach(s => {
+            if (s.key) {
+                // Normalize slightly if needed, but assuming standard format
+                const key = s.key.trim();
+                keyCounts[key] = (keyCounts[key] || 0) + 1;
+            }
+        });
+
+        const songKeyDistribution = Object.entries(keyCounts)
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 5); // Top 5 keys
+
+        // 7. Fetch Total Recordings
+        const { count: recordingsCount, error: recordingsError } = await supabaseAdmin
+            .from('session_recordings')
+            .select('*', { count: 'exact', head: true });
+
+        if (recordingsError) {
+            console.error('Error fetching recordings count:', recordingsError);
+        }
+
         return NextResponse.json({
             stats: {
                 totalSessions: sessionCount || 0,
                 activeUsers: userCount || 0,
                 avgAttendance,
+                totalSongs,
+                totalRecordings: recordingsCount || 0
             },
             charts: {
                 attendanceHistory,
                 memberAttendance,
-                instrumentDistribution
+                instrumentDistribution,
+                songKeyDistribution
             },
             meta: {
                 allTime: {

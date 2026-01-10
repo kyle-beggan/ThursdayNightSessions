@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Button from '@/components/ui/Button';
 import AddSongModal from '@/components/songs/AddSongModal';
+import FindSongModal from '@/components/songs/FindSongModal';
 import SongCapabilitiesModal from '@/components/songs/SongCapabilitiesModal';
 import { Song } from '@/lib/types';
 import Link from 'next/link';
@@ -15,6 +16,37 @@ export default function SongsPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isFindModalOpen, setIsFindModalOpen] = useState(false);
+
+    const handleAddRecommendedSongs = async (recommendedSongs: any[]) => {
+        try {
+            setLoading(true);
+            // Process each song sequentially
+            for (const song of recommendedSongs) {
+                const res = await fetch('/api/songs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: song.title,
+                        artist: song.artist,
+                        key: song.key,
+                        tempo: song.tempo,
+                        resource_url: song.youtubeUrl,
+                    })
+                });
+
+                if (!res.ok) {
+                    console.error('Failed to add song:', song.title);
+                }
+            }
+            await fetchSongs();
+        } catch (error) {
+            console.error('Error adding recommended songs:', error);
+            alert('Some songs may not have been added.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Capabilities Modal State
     const [selectedSongForCaps, setSelectedSongForCaps] = useState<Song | null>(null);
@@ -74,11 +106,16 @@ export default function SongsPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-text-primary">Song Library</h1>
-                    <p className="text-text-secondary">Manage the band's repertoire</p>
+                    <p className="text-text-secondary">Manage the band's backlog of songs to record</p>
                 </div>
-                <Button onClick={() => setIsAddModalOpen(true)} variant="primary">
-                    + Add Song
-                </Button>
+                <div className="flex gap-3">
+                    <Button onClick={() => setIsFindModalOpen(true)} variant="secondary">
+                        Find Songs
+                    </Button>
+                    <Button onClick={() => setIsAddModalOpen(true)} variant="primary">
+                        + Add Song
+                    </Button>
+                </div>
             </div>
 
             {/* Search Bar */}
@@ -150,15 +187,13 @@ export default function SongsPage() {
                                     </td>
                                     <td className="p-4">
                                         {song.resource_url && (
-                                            <a
-                                                href={song.resource_url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-primary hover:text-primary-light hover:underline"
-                                                title="Open resource"
+                                            <Button
+                                                variant="primary"
+                                                className="text-xs px-3 py-1.5 h-auto"
+                                                onClick={() => window.open(song.resource_url, '_blank')}
                                             >
-                                                🔗
-                                            </a>
+                                                Open
+                                            </Button>
                                         )}
                                     </td>
                                 </tr>
@@ -172,6 +207,12 @@ export default function SongsPage() {
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
                 onSongAdded={fetchSongs}
+            />
+
+            <FindSongModal
+                isOpen={isFindModalOpen}
+                onClose={() => setIsFindModalOpen(false)}
+                onAddSongs={handleAddRecommendedSongs}
             />
 
             <SongCapabilitiesModal

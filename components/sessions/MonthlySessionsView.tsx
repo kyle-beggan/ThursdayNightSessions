@@ -52,8 +52,8 @@ export default function MonthlySessionsView({ sessions, onRefresh }: MonthlySess
         <div className="space-y-0">
             {MONTHS.map((month, index) => {
                 const monthSessions = sessionsByMonth[index] || [];
-                const hasMoreThan6 = monthSessions.length > 6;
-                const displaySessions = monthSessions.slice(0, 6);
+                const hasMoreThan4 = monthSessions.length > 4;
+                const displaySessions = monthSessions.slice(0, 4);
 
                 return (
                     <div key={month} className="mb-[25px]">
@@ -76,7 +76,7 @@ export default function MonthlySessionsView({ sessions, onRefresh }: MonthlySess
                         >
                             {monthSessions.length > 0 ? (
                                 <div className="h-full overflow-y-auto pr-2">
-                                    <div className="grid grid-cols-6 gap-4 h-full">
+                                    <div className="grid grid-cols-4 gap-4 h-full">
                                         {displaySessions.map(session => (
                                             <div key={session.id} className="h-full">
                                                 <SessionIndicator
@@ -87,9 +87,9 @@ export default function MonthlySessionsView({ sessions, onRefresh }: MonthlySess
                                             </div>
                                         ))}
                                     </div>
-                                    {hasMoreThan6 && (
+                                    {hasMoreThan4 && (
                                         <div className="text-center py-4 text-sm text-text-secondary w-full">
-                                            +{monthSessions.length - 6} more sessions
+                                            +{monthSessions.length - 4} more sessions
                                         </div>
                                     )}
                                 </div>

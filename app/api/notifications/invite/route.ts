@@ -56,6 +56,13 @@ export async function POST(request: NextRequest) {
 
                             <p>Please log in to the dashboard to RSVP if you can make it!</p>
                             
+                            <div style="text-align: center; margin: 30px 0;">
+                                <a href="${process.env.NEXTAUTH_URL || 'https://tns.sleepyhollows.com'}/dashboard" 
+                                   style="background-color: #8b5cf6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+                                    View Dashboard
+                                </a>
+                            </div>
+                            
                             <p>Best,<br/>The Sleepy Hollows Team</p>
                         </div>
                     `

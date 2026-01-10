@@ -1,0 +1,32 @@
+name: Deploy Production
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy via SSH
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PROD_HOST }}
+        username: ubuntu
+        key: ${{ secrets.PROD_SSH_KEY }}
+        script: |
+          # Navigate to project directory (Adjust path if you cloned elsewhere)
+          cd /var/www/sleepyhollows
+          
+          # Pull latest changes
+          git pull origin main
+          
+          # Install dependencies
+          npm install
+          
+          # Build the application
+          npm run build
+          
+          # Restart the application
+          # Reloads if running, starts if not
+          pm2 reload sleepyhollows || pm2 start npm --name "sleepyhollows" -- start

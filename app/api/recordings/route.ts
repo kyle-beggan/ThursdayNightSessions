@@ -51,3 +51,73 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
+
+export async function GET(request: NextRequest) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const supabaseAdmin = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+
+        // Fetch recordings with session date and player capabilities
+        const { data, error } = await supabaseAdmin
+            .from('session_recordings')
+            .select(`
+                id,
+                title,
+                url,
+                created_at,
+                session_id,
+                sessions (
+                    date,
+                    session_commitments (
+                        users ( name ),
+                        session_commitment_capabilities (
+                            capabilities ( icon, name )
+                        )
+                    )
+                )
+            `)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching recordings:', error);
+            return NextResponse.json({ error: 'Failed to fetch recordings' }, { status: 500 });
+        }
+
+        // Transform data for easier frontend consumption
+        const formattedRecordings = data.map((rec: any) => {
+            const players = rec.sessions?.session_commitments?.map((commitment: any) => {
+                const caps = commitment.session_commitment_capabilities?.map((cc: any) => ({
+                    icon: cc.capabilities?.icon,
+                    name: cc.capabilities?.name
+                })) || [];
+
+                return {
+                    name: commitment.users?.name || 'Unknown',
+                    capabilities: caps
+                };
+            }) || [];
+
+            return {
+                id: rec.id,
+                title: rec.title,
+                url: rec.url,
+                created_at: rec.created_at,
+                session_date: rec.sessions?.date,
+                players
+            };
+        });
+
+        return NextResponse.json(formattedRecordings);
+
+    } catch (error) {
+        console.error('Error in GET /api/recordings:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    }
+}

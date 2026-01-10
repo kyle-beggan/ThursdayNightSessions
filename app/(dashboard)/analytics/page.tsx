@@ -21,11 +21,14 @@ interface AnalyticsData {
         totalSessions: number;
         activeUsers: number;
         avgAttendance: number;
+        totalSongs?: number;
+        totalRecordings?: number;
     };
     charts: {
         attendanceHistory: { date: string; attendees: number }[];
         memberAttendance: { name: string; count: number }[];
         instrumentDistribution: { name: string; count: number }[];
+        songKeyDistribution?: { name: string; count: number }[];
     };
     meta?: {
         allTime: {
@@ -161,10 +164,12 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Metric Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
                 <MetricCard title="Total Sessions" value={data.stats.totalSessions} icon="📅" />
                 <MetricCard title="Active Users" value={data.stats.activeUsers} icon="👥" />
                 <MetricCard title="Avg. Attendance" value={data.stats.avgAttendance} icon="📊" />
+                <MetricCard title="Total Songs" value={data.stats.totalSongs || 0} icon="🎵" />
+                <MetricCard title="Recordings" value={data.stats.totalRecordings || 0} icon="🎙️" />
             </div>
 
             {/* Attendance Chart */}
@@ -240,6 +245,60 @@ export default function AnalyticsPage() {
                                 <Bar dataKey="count" fill="#10B981" radius={[0, 4, 4, 0]} barSize={20} />
                             </BarChart>
                         </ResponsiveContainer>
+                    </div>
+                </div>
+            </div>
+
+            {/* Song Keys & Top Contributors */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Key Distribution */}
+                <div className="bg-surface rounded-xl p-6 border border-border">
+                    <h3 className="text-xl font-semibold mb-6 text-text-primary">Popular Song Keys</h3>
+                    <div className="h-[300px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={data.charts.songKeyDistribution || []} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
+                                <XAxis dataKey="name" stroke="#888" />
+                                <YAxis stroke="#888" allowDecimals={false} />
+                                <Tooltip
+                                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                                    contentStyle={{ backgroundColor: '#1F2937', border: 'none', borderRadius: '8px' }}
+                                    itemStyle={{ color: '#E5E7EB' }}
+                                />
+                                <Bar dataKey="count" fill="#F59E0B" radius={[4, 4, 0, 0]} barSize={40} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                {/* Top Contributors Leaderboard */}
+                <div className="bg-surface rounded-xl p-6 border border-border">
+                    <h3 className="text-xl font-semibold mb-6 text-text-primary">Top Contributors 🏆</h3>
+                    <div className="space-y-4">
+                        {data.charts.memberAttendance.slice(0, 3).map((member, index) => {
+                            let rankColor = "bg-surface-secondary border-border";
+                            let icon = "👏";
+
+                            if (index === 0) { rankColor = "bg-yellow-500/10 border-yellow-500/50"; icon = "🥇"; }
+                            if (index === 1) { rankColor = "bg-gray-400/10 border-gray-400/50"; icon = "🥈"; }
+                            if (index === 2) { rankColor = "bg-orange-700/10 border-orange-700/50"; icon = "🥉"; }
+
+                            return (
+                                <div key={index} className={`flex items-center justify-between p-4 rounded-lg border ${rankColor}`}>
+                                    <div className="flex items-center gap-4">
+                                        <div className="text-2xl">{icon}</div>
+                                        <div>
+                                            <div className="font-bold text-text-primary text-lg">{member.name}</div>
+                                            <div className="text-xs text-text-secondary">Consistent Attendee</div>
+                                        </div>
+                                    </div>
+                                    <div className="text-xl font-bold text-primary">{member.count} <span className="text-sm font-normal text-text-secondary">Sessions</span></div>
+                                </div>
+                            );
+                        })}
+                        {data.charts.memberAttendance.length === 0 && (
+                            <div className="text-center text-text-secondary py-8">No attendance data yet.</div>
+                        )}
                     </div>
                 </div>
             </div>
