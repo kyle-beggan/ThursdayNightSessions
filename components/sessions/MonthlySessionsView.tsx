@@ -37,6 +37,17 @@ export default function MonthlySessionsView({ sessions, onRefresh }: MonthlySess
         );
     });
 
+    // Update selected session when sessions list changes (e.g. after refresh)
+    // This keeps the modal data fresh without closing it
+    const [lastSessions, setLastSessions] = useState(sessions);
+    if (sessions !== lastSessions) {
+        setLastSessions(sessions);
+        if (selectedSession) {
+            const updated = sessions.find(s => s.id === selectedSession.id);
+            if (updated) setSelectedSession(updated);
+        }
+    }
+
     return (
         <div className="space-y-0">
             {MONTHS.map((month, index) => {
@@ -100,7 +111,8 @@ export default function MonthlySessionsView({ sessions, onRefresh }: MonthlySess
                     session={selectedSession}
                     onUpdate={() => {
                         onRefresh();
-                        setSelectedSession(null);
+                        // Don't close here, let the modal handle closing if needed (e.g. RSVP)
+                        // This allows uploads to refresh data without closing the modal
                     }}
                 />
             )}

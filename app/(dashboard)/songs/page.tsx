@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Button from '@/components/ui/Button';
 import AddSongModal from '@/components/songs/AddSongModal';
+import SongCapabilitiesModal from '@/components/songs/SongCapabilitiesModal';
 import { Song } from '@/lib/types';
 import Link from 'next/link';
 import { formatDate } from '@/lib/utils';
@@ -14,6 +15,10 @@ export default function SongsPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+    // Capabilities Modal State
+    const [selectedSongForCaps, setSelectedSongForCaps] = useState<Song | null>(null);
+    const [isCapsModalOpen, setIsCapsModalOpen] = useState(false);
 
     // Session Modal State
     const [selectedSession, setSelectedSession] = useState<SessionWithDetails | null>(null);
@@ -104,6 +109,7 @@ export default function SongsPage() {
                                 <th className="p-4 font-medium w-32">Key</th>
                                 <th className="p-4 font-medium w-32">Tempo</th>
                                 <th className="p-4 font-medium w-40">Session</th>
+                                <th className="p-4 font-medium w-32">Requirements</th>
                                 <th className="p-4 font-medium w-24">Link</th>
                             </tr>
                         </thead>
@@ -125,6 +131,22 @@ export default function SongsPage() {
                                         ) : (
                                             <span className="text-text-secondary italic">To Be Done</span>
                                         )}
+                                    </td>
+                                    <td className="p-4">
+                                        <Button
+                                            onClick={() => {
+                                                setSelectedSongForCaps(song);
+                                                setIsCapsModalOpen(true);
+                                            }}
+                                            variant="ghost"
+                                            className="text-xs px-3 py-1.5 h-auto whitespace-nowrap"
+                                        >
+                                            {song.capabilities && song.capabilities.length > 0
+                                                ? `${song.capabilities.length} Req.`
+                                                : `+ Add Req.`}
+                                            {/* Debug ID */}
+                                            <span className="hidden group-hover:inline text-[8px] ml-1 text-gray-400">{song.id}</span>
+                                        </Button>
                                     </td>
                                     <td className="p-4">
                                         {song.resource_url && (
@@ -150,6 +172,13 @@ export default function SongsPage() {
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
                 onSongAdded={fetchSongs}
+            />
+
+            <SongCapabilitiesModal
+                isOpen={isCapsModalOpen}
+                onClose={() => setIsCapsModalOpen(false)}
+                song={selectedSongForCaps}
+                onSave={fetchSongs}
             />
 
             {selectedSession && (

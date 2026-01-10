@@ -1,12 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import MonthlySessionsView from '@/components/sessions/MonthlySessionsView';
 import { SessionWithDetails } from '@/lib/types';
+import Button from '@/components/ui/Button';
+import CreateSessionModal from '@/components/admin/CreateSessionModal';
 
 export default function DashboardPage() {
+    const { data: session } = useSession();
     const [sessions, setSessions] = useState<SessionWithDetails[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     const fetchSessions = async () => {
         try {
@@ -36,15 +41,31 @@ export default function DashboardPage() {
 
     return (
         <div className="pt-6">
-            <div className="mb-8 text-center">
-                <h2 className="text-4xl font-bold text-text-primary mb-2">
-                    Thursday Night Sessions
-                </h2>
-                <p className="text-text-secondary">
-                    View and commit to upcoming rehearsal sessions
-                </p>
+            <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 className="text-4xl font-bold text-text-primary mb-2">
+                        Thursday Night Sessions
+                    </h2>
+                    <p className="text-text-secondary">
+                        View and commit to upcoming rehearsal sessions
+                    </p>
+                </div>
+                {session?.user?.userType === 'admin' && (
+                    <Button onClick={() => setIsCreateModalOpen(true)} variant="primary">
+                        + Add Session
+                    </Button>
+                )}
             </div>
             <MonthlySessionsView sessions={sessions} onRefresh={fetchSessions} />
+
+            <CreateSessionModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                onSessionCreated={() => {
+                    fetchSessions();
+                    setIsCreateModalOpen(false);
+                }}
+            />
         </div>
     );
 }

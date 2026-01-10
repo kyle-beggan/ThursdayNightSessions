@@ -180,7 +180,7 @@ export default function ApprovalsPage() {
                                                 : 'bg-surface-secondary text-text-secondary hover:bg-surface-tertiary'
                                                 }`}
                                         >
-                                            {cap.name}
+                                            <span className="capitalize">{cap.name}</span>
                                         </button>
                                     ))}
                                 </div>

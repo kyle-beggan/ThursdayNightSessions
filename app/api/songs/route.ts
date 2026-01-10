@@ -50,7 +50,16 @@ export async function GET(request: NextRequest) {
 
         let query = supabaseAdmin
             .from('songs')
-            .select('*')
+            .select(`
+                *,
+                song_capabilities (
+                    capability:capabilities (
+                        id,
+                        name,
+                        icon
+                    )
+                )
+            `)
             .order('title', { ascending: true });
 
         // If available_only is requested, exclude assigned songs
@@ -62,24 +71,57 @@ export async function GET(request: NextRequest) {
             query = query.or(`title.ilike.%${search}%,artist.ilike.%${search}%`);
         }
 
-        const { data, error } = await query;
+        // eslint-disable-next-line prefer-const
+        let { data, error } = await query;
+
+        // Fallback: If fetch failed (likely due to missing song_capabilities table/relation), try fetching without it
+        if (error) {
+            console.warn('Failed to fetch songs with capabilities, trying fallback:', error.message);
+            let fallbackQuery = supabaseAdmin
+                .from('songs')
+                .select('*')
+                .order('title', { ascending: true });
+
+            if (availableOnly && usedSongNames.length > 0) {
+                fallbackQuery = fallbackQuery.not('title', 'in', `(${usedSongNames.map(name => `"${name}"`).join(',')})`);
+            }
+            if (search) {
+                fallbackQuery = fallbackQuery.or(`title.ilike.%${search}%,artist.ilike.%${search}%`);
+            }
+
+            const fallbackResult = await fallbackQuery;
+            data = fallbackResult.data;
+            error = fallbackResult.error;
+        }
 
         if (error) {
             console.error('Error fetching songs:', error);
             return NextResponse.json({ error: 'Failed to fetch songs' }, { status: 500 });
         }
 
-        // Attach session_date to songs if NOT filtering by availability
-        // (If we filter by availability, they naturally won't have a session date basically)
         // Attach session_date and session_id to songs
-        const enrichedData = data.map(song => {
+        // Also transform capabilities
+        const enrichedData = (data || []).map(song => {
             const sessionInfo = songSessionMap.get(song.title);
+            // Flatten capabilities
+            const capabilities = song.song_capabilities?.map((sc: any) => sc.capability) || [];
+
+            // Remove the raw relation property to clean up response
+            const { song_capabilities, ...songData } = song;
+
             return {
-                ...song,
+                ...songData,
+                capabilities,
                 session_date: sessionInfo?.date || null,
                 session_id: sessionInfo?.id || null
             };
         });
+
+        if (enrichedData.length > 0) {
+            console.log('Sample song from API:', enrichedData[0]);
+        } else {
+            console.log('API returning empty song list');
+        }
 
         return NextResponse.json(enrichedData);
     } catch (error) {

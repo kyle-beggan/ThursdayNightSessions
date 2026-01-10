@@ -71,28 +71,33 @@ export default function AnalyticsPage() {
         fetchData();
     }, [startDate, endDate]);
 
+    const formatDate = (d: Date) => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     const setRange = (range: 'last_month' | 'this_month' | 'last_6_months' | 'last_year' | 'all_time') => {
         const today = new Date();
-        let start = new Date();
-        let end = new Date(); // Default end is today
-
-        let useCustom = false;
+        let start = new Date(today);
+        let end = new Date(today); // Default end is today
 
         switch (range) {
             case 'last_month':
-                start.setMonth(today.getMonth() - 1);
-                start.setDate(1);
-                end.setDate(0); // Last day of previous month
+                // Safe way to get previous month
+                start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                end = new Date(today.getFullYear(), today.getMonth(), 0); // Last day of previous month
                 break;
             case 'this_month':
-                start.setDate(1);
-                // End date is today
+                start = new Date(today.getFullYear(), today.getMonth(), 1);
+                end = new Date(today.getFullYear(), today.getMonth() + 1, 0); // Last day of current month
                 break;
             case 'last_6_months':
-                start.setMonth(today.getMonth() - 6);
+                start = new Date(today.getFullYear(), today.getMonth() - 6, today.getDate());
                 break;
             case 'last_year':
-                start.setFullYear(today.getFullYear() - 1);
+                start = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
                 break;
             case 'all_time':
                 if (data?.meta?.allTime) {
@@ -101,12 +106,12 @@ export default function AnalyticsPage() {
                     return;
                 }
                 // Fallback if no meta
-                start.setFullYear(2020);
+                start = new Date(2020, 0, 1);
                 break;
         }
 
-        setStartDate(start.toISOString().split('T')[0]);
-        setEndDate(end.toISOString().split('T')[0]);
+        setStartDate(formatDate(start));
+        setEndDate(formatDate(end));
     };
 
     // Initial loading state
@@ -126,15 +131,15 @@ export default function AnalyticsPage() {
 
                 <div className="flex flex-col sm:flex-row items-center gap-4">
                     <div className="flex items-center gap-2 bg-surface p-1 rounded-lg border border-border text-sm">
-                        <button onClick={() => setRange('last_month')} className="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors">Last Month</button>
+                        <button type="button" onClick={() => setRange('last_month')} className="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors">Last Month</button>
                         <div className="w-[1px] h-4 bg-border"></div>
-                        <button onClick={() => setRange('this_month')} className="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors">This Month</button>
+                        <button type="button" onClick={() => setRange('this_month')} className="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors">This Month</button>
                         <div className="w-[1px] h-4 bg-border"></div>
-                        <button onClick={() => setRange('last_6_months')} className="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors">Last 6M</button>
+                        <button type="button" onClick={() => setRange('last_6_months')} className="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors">Last 6M</button>
                         <div className="w-[1px] h-4 bg-border"></div>
-                        <button onClick={() => setRange('last_year')} className="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors">Last Year</button>
+                        <button type="button" onClick={() => setRange('last_year')} className="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors">Last Year</button>
                         <div className="w-[1px] h-4 bg-border"></div>
-                        <button onClick={() => setRange('all_time')} className="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors">All Time</button>
+                        <button type="button" onClick={() => setRange('all_time')} className="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors">All Time</button>
                     </div>
 
                     <div className="flex items-center gap-2 bg-surface p-2 rounded-lg border border-border">
@@ -200,7 +205,10 @@ export default function AnalyticsPage() {
                                     outerRadius={100}
                                     fill="#8884d8"
                                     dataKey="count"
-                                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                    label={({ name, percent }) => {
+                                        if (!name || percent === undefined) return '';
+                                        return `${name.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} ${(percent * 100).toFixed(0)}%`;
+                                    }}
                                 >
                                     {data.charts.instrumentDistribution.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

@@ -230,7 +230,7 @@ export default function EditUserPage() {
                                     onChange={() => toggleCapability(cap.id)}
                                 />
                                 <span className="text-xl">{cap.icon || '🎵'}</span>
-                                <span className="text-sm font-medium text-text-primary">{cap.name}</span>
+                                <span className="text-sm font-medium text-text-primary capitalize">{cap.name}</span>
                             </label>
                         ))}
                     </div>

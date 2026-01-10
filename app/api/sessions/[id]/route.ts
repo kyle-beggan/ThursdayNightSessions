@@ -111,3 +111,80 @@ export async function DELETE(
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
+
+// context: { params: { id: string } }
+export async function PATCH(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        const session = await getServerSession(authOptions);
+
+        if (!session?.user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const { id } = await params;
+        if (!id) {
+            return NextResponse.json({ error: 'Session ID is required' }, { status: 400 });
+        }
+
+        const body = await request.json();
+        const { date, start_time, end_time, songs } = body;
+
+        // 1. Update Session Details
+        const { error: sessionError } = await supabaseAdmin
+            .from('sessions')
+            .update({
+                date,
+                start_time,
+                end_time
+            })
+            .eq('id', id);
+
+        if (sessionError) {
+            console.error('Error updating session:', sessionError);
+            return NextResponse.json({ error: 'Failed to update session' }, { status: 500 });
+        }
+
+        // 2. Update Songs (if provided)
+        // Strategy: Delete all existing songs for this session and re-insert the new list.
+        // This handles additions, removals, and reordering in one go.
+        if (songs) {
+            // Delete existing songs
+            const { error: deleteError } = await supabaseAdmin
+                .from('session_songs')
+                .delete()
+                .eq('session_id', id);
+
+            if (deleteError) {
+                console.error('Error deleting old session songs:', deleteError);
+                return NextResponse.json({ error: 'Failed to update session songs' }, { status: 500 });
+            }
+
+            // Insert new songs
+            if (songs.length > 0) {
+                const songsToInsert = songs.map((song: any, index: number) => ({
+                    session_id: id,
+                    song_name: song.song_name,
+                    song_url: song.song_url || null,
+                    order: index,
+                }));
+
+                const { error: insertError } = await supabaseAdmin
+                    .from('session_songs')
+                    .insert(songsToInsert);
+
+                if (insertError) {
+                    console.error('Error inserting new session songs:', insertError);
+                    return NextResponse.json({ error: 'Failed to update session songs' }, { status: 500 });
+                }
+            }
+        }
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('Error in PATCH /api/sessions/[id]:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    }
+}

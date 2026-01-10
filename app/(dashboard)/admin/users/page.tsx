@@ -272,7 +272,7 @@ export default function UsersPage() {
                                                     key={cap.id}
                                                     className="px-2 py-0.5 bg-surface-tertiary text-text-secondary text-xs rounded"
                                                 >
-                                                    {cap.name}
+                                                    <span className="capitalize">{cap.name}</span>
                                                 </span>
                                             ))}
                                             {user.capabilities.length > 3 && (
@@ -284,47 +284,44 @@ export default function UsersPage() {
                                     </td>
                                     <td className="px-4 py-3">
                                         <div className="flex gap-2">
-                                            {user.status === 'pending' && (
-                                                <>
+                                            <div className="flex gap-2">
+                                                {user.status === 'pending' && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleQuickAction(user.id, 'approve')}
+                                                            className="px-3 py-1.5 text-xs font-medium bg-green-500/10 text-green-400 hover:bg-green-500/20 rounded-md transition-colors"
+                                                        >
+                                                            Approve
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleQuickAction(user.id, 'reject')}
+                                                            className="px-3 py-1.5 text-xs font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-md transition-colors"
+                                                        >
+                                                            Reject
+                                                        </button>
+                                                    </>
+                                                )}
+                                                {user.user_type !== 'admin' && user.status === 'approved' && (
                                                     <button
-                                                        onClick={() => handleQuickAction(user.id, 'approve')}
-                                                        className="text-green-400 hover:text-green-300 text-sm"
-                                                        title="Approve"
+                                                        onClick={() => handleQuickAction(user.id, 'make-admin')}
+                                                        className="px-3 py-1.5 text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 rounded-md transition-colors"
                                                     >
-                                                        ✅
+                                                        Make Admin
                                                     </button>
-                                                    <button
-                                                        onClick={() => handleQuickAction(user.id, 'reject')}
-                                                        className="text-red-400 hover:text-red-300 text-sm"
-                                                        title="Reject"
-                                                    >
-                                                        ❌
-                                                    </button>
-                                                </>
-                                            )}
-                                            {user.user_type !== 'admin' && user.status === 'approved' && (
-                                                <button
-                                                    onClick={() => handleQuickAction(user.id, 'make-admin')}
-                                                    className="text-primary hover:text-primary-light text-sm"
-                                                    title="Make Admin"
+                                                )}
+                                                <Link
+                                                    href={`/admin/users/${user.id}`}
+                                                    className="px-3 py-1.5 text-xs font-medium bg-surface-tertiary text-text-secondary hover:text-text-primary hover:bg-surface-hover rounded-md transition-colors"
                                                 >
-                                                    ⭐
+                                                    Edit
+                                                </Link>
+                                                <button
+                                                    onClick={() => handleDeleteClick(user)}
+                                                    className="px-3 py-1.5 text-xs font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-md transition-colors"
+                                                >
+                                                    Delete
                                                 </button>
-                                            )}
-                                            <Link
-                                                href={`/admin/users/${user.id}`}
-                                                className="text-text-secondary hover:text-text-primary text-sm"
-                                                title="View Details"
-                                            >
-                                                👁️
-                                            </Link>
-                                            <button
-                                                onClick={() => handleDeleteClick(user)}
-                                                className="text-red-400 hover:text-red-300 text-sm ml-1"
-                                                title="Delete User"
-                                            >
-                                                🗑️
-                                            </button>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>

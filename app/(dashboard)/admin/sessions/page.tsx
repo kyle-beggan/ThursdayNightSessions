@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
+import CreateSessionModal from '@/components/admin/CreateSessionModal';
+import { Song } from '@/lib/types';
 
 type Session = {
     id: string;
@@ -11,14 +13,16 @@ type Session = {
     end_time: string;
     created_at: string;
     commitments_count?: number;
+    songs?: any[]; // Using any[] for now as structure varies from raw DB
 };
-
-import CreateSessionModal from '@/components/admin/CreateSessionModal';
 
 export default function SessionsPage() {
     const [sessions, setSessions] = useState<Session[]>([]);
     const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+    // Add state for editing
+    const [editingSession, setEditingSession] = useState<Session | null>(null);
 
     useEffect(() => {
         fetchSessions();
@@ -36,6 +40,31 @@ export default function SessionsPage() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleEditSession = (session: Session) => {
+        // Prepare session data for modal
+        // We need to transform session.songs to match Song type expected by modal
+        // session.songs from API is usually session_songs table rows { song_name, song_url, ... }
+        // The modal matches by ID or Title. Since we might not have original ID here, we rely on Title match.
+
+        const preparedSession = {
+            ...session,
+            songs: session.songs?.map((s, index) => ({
+                id: s.id || `temp-${index}`, // Fallback ID
+                title: s.song_name,
+                artist: '', // Information lost in session_songs table
+                resource_url: s.song_url
+            })) as Song[]
+        };
+
+        setEditingSession(preparedSession);
+        setIsCreateModalOpen(true);
+    };
+
+    const handleModalClose = () => {
+        setIsCreateModalOpen(false);
+        setEditingSession(null);
     };
 
     const handleDeleteSession = async (id: string, date: string) => {
@@ -57,6 +86,19 @@ export default function SessionsPage() {
             console.error('Error deleting session:', error);
             alert('Failed to delete session');
         }
+    };
+
+    const formatTime = (time: string) => {
+        if (!time) return '';
+        const [hours, minutes] = time.split(':');
+        const date = new Date();
+        date.setHours(parseInt(hours, 10));
+        date.setMinutes(parseInt(minutes, 10));
+        return date.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
     };
 
     if (loading) {
@@ -144,26 +186,24 @@ export default function SessionsPage() {
                                             })}
                                         </td>
                                         <td className="px-4 py-3 text-text-secondary">
-                                            {session.start_time} - {session.end_time}
+                                            {formatTime(session.start_time)} - {formatTime(session.end_time)}
                                         </td>
                                         <td className="px-4 py-3 text-text-secondary">
                                             {session.commitments_count || 0} committed
                                         </td>
                                         <td className="px-4 py-3">
                                             <div className="flex gap-2">
-                                                <Link
-                                                    href={`/dashboard?date=${session.date}`}
-                                                    className="text-primary hover:text-primary-light text-sm"
-                                                    title="View in Calendar"
+                                                <button
+                                                    onClick={() => handleEditSession(session)}
+                                                    className="px-3 py-1.5 text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 rounded-md transition-colors"
                                                 >
-                                                    👁️
-                                                </Link>
+                                                    Edit
+                                                </button>
                                                 <button
                                                     onClick={() => handleDeleteSession(session.id, session.date)}
-                                                    className="text-red-400 hover:text-red-300 text-sm"
-                                                    title="Delete"
+                                                    className="px-3 py-1.5 text-xs font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-md transition-colors"
                                                 >
-                                                    🗑️
+                                                    Delete
                                                 </button>
                                             </div>
                                         </td>
@@ -209,19 +249,26 @@ export default function SessionsPage() {
                                             })}
                                         </td>
                                         <td className="px-4 py-3 text-text-secondary">
-                                            {session.start_time} - {session.end_time}
+                                            {formatTime(session.start_time)} - {formatTime(session.end_time)}
                                         </td>
                                         <td className="px-4 py-3 text-text-secondary">
                                             {session.commitments_count || 0} attended
                                         </td>
                                         <td className="px-4 py-3">
-                                            <button
-                                                onClick={() => handleDeleteSession(session.id, session.date)}
-                                                className="text-red-400 hover:text-red-300 text-sm"
-                                                title="Delete"
-                                            >
-                                                🗑️
-                                            </button>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => handleEditSession(session)}
+                                                    className="px-3 py-1.5 text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 rounded-md transition-colors"
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteSession(session.id, session.date)}
+                                                    className="px-3 py-1.5 text-xs font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-md transition-colors"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
@@ -233,8 +280,9 @@ export default function SessionsPage() {
 
             <CreateSessionModal
                 isOpen={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
+                onClose={handleModalClose}
                 onSessionCreated={fetchSessions}
+                initialData={editingSession}
             />
         </div>
     );

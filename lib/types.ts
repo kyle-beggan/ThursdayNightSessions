@@ -17,6 +17,7 @@ export interface Song {
     updated_at: string;
     session_date?: string; // Derived field for display
     session_id?: string;   // Derived field for linking
+    capabilities?: { id: string; name: string; icon?: string }[];
 }
 
 export interface User {
@@ -62,6 +63,8 @@ export interface SessionSong {
     song_name: string;
     song_url?: string;
     order: number;
+    song_artist?: string; // Enriched from songs table
+    capabilities?: Capability[]; // Enriched from songs table
 }
 
 export interface SessionCommitment {
@@ -85,6 +88,15 @@ export interface Notification {
 }
 
 // Extended types with relations
+export interface SessionRecording {
+    id: string;
+    session_id: string;
+    url: string;
+    title: string;
+    created_at: string;
+    created_by?: string;
+}
+
 export interface UserWithCapabilities extends User {
     capabilities: Capability[];
 }
@@ -92,4 +104,5 @@ export interface UserWithCapabilities extends User {
 export interface SessionWithDetails extends Session {
     songs: SessionSong[];
     commitments: (SessionCommitment & { user: UserWithCapabilities })[];
+    recordings?: SessionRecording[];
 }

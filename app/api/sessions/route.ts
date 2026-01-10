@@ -38,7 +38,8 @@ export async function GET() {
           capabilities:session_commitment_capabilities(
              capability:capabilities(*)
           )
-        )
+        ),
+        recordings:session_recordings(*)
       `)
             .order('date', { ascending: true });
 
@@ -47,9 +48,50 @@ export async function GET() {
             return NextResponse.json({ error: 'Failed to fetch sessions' }, { status: 500 });
         }
 
+        // Fetch artist info AND capabilities for all songs in these sessions
+        // We have to match by name since session_songs doesn't seem to have a proper FK in the current schema assumption
+        const allSongNames = sessions?.flatMap(s => s.songs?.map((ss: any) => ss.song_name)) || [];
+        const uniqueSongNames = [...new Set(allSongNames)];
+
+        let songDetailsMap: Record<string, { artist: string, capabilities: any[] }> = {};
+
+        if (uniqueSongNames.length > 0) {
+            const { data: songsData } = await supabaseAdmin
+                .from('songs')
+                .select(`
+                    title, 
+                    artist,
+                    song_capabilities (
+                        capability:capabilities (
+                            id,
+                            name,
+                            icon
+                        )
+                    )
+                `)
+                .in('title', uniqueSongNames);
+
+            if (songsData) {
+                songsData.forEach(s => {
+                    songDetailsMap[s.title] = {
+                        artist: s.artist,
+                        capabilities: s.song_capabilities?.map((sc: any) => sc.capability) || []
+                    };
+                });
+            }
+        }
+
         // Transform the data to match our types
         const transformedSessions = sessions?.map(session => ({
             ...session,
+            songs: session.songs?.map((s: Record<string, unknown>) => {
+                const details = songDetailsMap[s.song_name as string];
+                return {
+                    ...s,
+                    song_artist: details?.artist || null,
+                    capabilities: details?.capabilities || []
+                };
+            }),
             commitments: session.commitments?.map((c: Record<string, unknown>) => ({
                 ...c,
                 user: {
@@ -60,6 +102,7 @@ export async function GET() {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 capabilities: (c.capabilities as any[])?.map((cc: Record<string, unknown>) => (cc as any).capability) || [],
             })) || [],
+            commitments_count: session.commitments?.length || 0,
         })) || [];
 
         return NextResponse.json(transformedSessions);

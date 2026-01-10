@@ -7,9 +7,16 @@ interface CreateSessionModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSessionCreated: () => void;
+    initialData?: {
+        id: string;
+        date: string;
+        start_time: string;
+        end_time: string;
+        songs?: Song[];
+    } | null;
 }
 
-export default function CreateSessionModal({ isOpen, onClose, onSessionCreated }: CreateSessionModalProps) {
+export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, initialData }: CreateSessionModalProps) {
     const [formData, setFormData] = useState({
         date: '',
         start_time: '19:30',
@@ -24,13 +31,31 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated }
     useEffect(() => {
         if (isOpen) {
             fetchSongs();
+            if (initialData) {
+                setFormData({
+                    date: initialData.date,
+                    start_time: initialData.start_time.slice(0, 5),
+                    end_time: initialData.end_time.slice(0, 5),
+                });
+                if (initialData.songs) {
+                    setSelectedSongs(initialData.songs);
+                }
+            } else {
+                setFormData({
+                    date: '',
+                    start_time: '19:30',
+                    end_time: '23:30',
+                });
+                setSelectedSongs([]);
+            }
         }
-    }, [isOpen]);
+    }, [isOpen, initialData]);
 
     const fetchSongs = async () => {
         setIsLoadingSongs(true);
         try {
-            const res = await fetch('/api/songs?available_only=true');
+            const queryParams = !initialData ? '?available_only=true' : '';
+            const res = await fetch(`/api/songs${queryParams}`);
             if (res.ok) {
                 const data = await res.json();
                 setAvailableSongs(data);
@@ -55,8 +80,14 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated }
         setIsSubmitting(true);
 
         try {
-            const res = await fetch('/api/sessions', {
-                method: 'POST',
+            const url = initialData?.id
+                ? `/api/sessions/${initialData.id}`
+                : '/api/sessions';
+
+            const method = initialData?.id ? 'PATCH' : 'POST';
+
+            const res = await fetch(url, {
+                method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...formData,
@@ -69,33 +100,35 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated }
                 })
             });
 
-            if (!res.ok) throw new Error('Failed to create session');
+            if (!res.ok) throw new Error(`Failed to ${initialData ? 'update' : 'create'} session`);
 
-            setFormData({
-                date: '',
-                start_time: '19:30',
-                end_time: '23:30',
-            });
-            setSelectedSongs([]);
+            if (!initialData) {
+                setFormData({
+                    date: '',
+                    start_time: '19:30',
+                    end_time: '23:30',
+                });
+                setSelectedSongs([]);
+            }
+
             setSongSearch('');
             onSessionCreated();
             onClose();
         } catch (error) {
-            console.error('Error creating session:', error);
-            alert('Failed to create session');
+            console.error('Error saving session:', error);
+            alert('Failed to save session');
         } finally {
             setIsSubmitting(false);
         }
     };
 
     const filteredSongs = availableSongs.filter(song =>
-        !selectedSongs.some(s => s.id === song.id) &&
-        (song.title.toLowerCase().includes(songSearch.toLowerCase()) ||
-            song.artist?.toLowerCase().includes(songSearch.toLowerCase()))
+    (song.title.toLowerCase().includes(songSearch.toLowerCase()) ||
+        song.artist?.toLowerCase().includes(songSearch.toLowerCase()))
     );
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Create New Session" size="lg">
+        <Modal isOpen={isOpen} onClose={onClose} title={initialData ? "Edit Session" : "Create New Session"} size="xl">
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Date & Time Section */}
                 <div className="space-y-4">
@@ -108,7 +141,7 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated }
                             className="w-full px-4 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert"
                             value={formData.date}
                             onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                            min={new Date().toISOString().split('T')[0]}
+                            min={initialData ? undefined : new Date().toISOString().split('T')[0]}
                         />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -137,64 +170,62 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated }
 
                 {/* Song Selection Section */}
                 <div className="space-y-4 pt-4 border-t border-border">
-                    <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider">Add Songs</h3>
+                    <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider">Select Songs</h3>
 
-                    {/* Selected Songs */}
-                    {selectedSongs.length > 0 && (
-                        <div className="space-y-2 mb-4">
-                            <label className="block text-sm font-medium text-text-secondary">Selected Songs:</label>
-                            <div className="flex flex-wrap gap-2">
-                                {selectedSongs.map(song => (
-                                    <div key={song.id} className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">
-                                        <span>{song.title}</span>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleSongToggle(song)}
-                                            className="hover:text-primary-dark font-bold"
-                                        >
-                                            ×
-                                        </button>
-                                    </div>
-                                ))}
+                    <input
+                        type="text"
+                        placeholder="Search songs..."
+                        className="w-full px-4 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                        value={songSearch}
+                        onChange={(e) => setSongSearch(e.target.value)}
+                    />
+
+                    <div className="max-h-[400px] overflow-y-auto rounded-lg bg-surface/50 border border-border p-4">
+                        {isLoadingSongs ? (
+                            <div className="text-center text-text-secondary py-8">Loading songs...</div>
+                        ) : filteredSongs.length === 0 ? (
+                            <div className="text-center text-text-secondary py-8">
+                                {songSearch ? 'No matching songs found' : 'No available songs'}
                             </div>
-                        </div>
-                    )}
-
-                    {/* Search & List */}
-                    <div className="space-y-2">
-                        <input
-                            type="text"
-                            placeholder="Search available songs..."
-                            className="w-full px-4 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                            value={songSearch}
-                            onChange={(e) => setSongSearch(e.target.value)}
-                        />
-
-                        <div className="max-h-48 overflow-y-auto border border-border rounded-lg bg-surface/50">
-                            {isLoadingSongs ? (
-                                <div className="p-4 text-center text-text-secondary text-sm">Loading songs...</div>
-                            ) : filteredSongs.length === 0 ? (
-                                <div className="p-4 text-center text-text-secondary text-sm">
-                                    {songSearch ? 'No matching songs found' : 'No available songs to add'}
-                                </div>
-                            ) : (
-                                <div className="divide-y divide-border">
-                                    {filteredSongs.map(song => (
+                        ) : (
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                {filteredSongs.map(song => {
+                                    const isSelected = selectedSongs.some(s => s.id === song.id || s.title === song.title);
+                                    return (
                                         <div
                                             key={song.id}
-                                            className="p-3 hover:bg-surface-hover cursor-pointer flex justify-between items-center group"
                                             onClick={() => handleSongToggle(song)}
+                                            className={`
+                                                cursor-pointer p-2 rounded-xl border transition-all duration-200 flex flex-col items-center justify-center text-center h-[80px] relative group
+                                                ${isSelected
+                                                    ? 'bg-primary/10 border-primary shadow-[0_0_15px_rgba(139,92,246,0.3)]'
+                                                    : 'bg-surface border-border hover:border-primary/50 hover:bg-surface-hover hover:shadow-lg'
+                                                }
+                                            `}
                                         >
-                                            <div>
-                                                <div className="text-sm font-medium text-text-primary">{song.title}</div>
-                                                <div className="text-xs text-text-secondary">{song.artist}</div>
+                                            {isSelected && (
+                                                <div className="absolute top-1 right-1 flex items-center justify-center w-4 h-4 bg-primary text-white rounded-full text-[10px] font-bold">
+                                                    ✓
+                                                </div>
+                                            )}
+                                            <div className="w-full px-1">
+                                                <h4 className={`font-medium text-xs mb-0.5 line-clamp-2 leading-tight ${isSelected ? 'text-primary' : 'text-text-primary'}`}>
+                                                    {song.title}
+                                                </h4>
+                                                {song.artist && (
+                                                    <p className="text-[10px] text-text-secondary line-clamp-1">{song.artist}</p>
+                                                )}
                                             </div>
-                                            <span className="text-primary opacity-0 group-hover:opacity-100 transition-opacity text-xl">+</span>
                                         </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Selection Summary */}
+                    <div className="text-xs text-text-secondary text-right">
+                        {selectedSongs.length} song{selectedSongs.length !== 1 ? 's' : ''} selected
                     </div>
                 </div>
 
@@ -212,7 +243,7 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated }
                         variant="primary"
                         disabled={isSubmitting}
                     >
-                        {isSubmitting ? 'Creating...' : 'Create Session'}
+                        {isSubmitting ? (initialData ? 'Updating...' : 'Creating...') : (initialData ? 'Update Session' : 'Create Session')}
                     </Button>
                 </div>
             </form>

@@ -175,7 +175,7 @@ export default function CapabilitiesPage() {
                                     </div>
                                     <div>
                                         <h3 className="font-medium text-text-primary capitalize">
-                                            {capability.name}
+                                            <div className="font-medium text-text-primary capitalize">{capability.name}</div>
                                         </h3>
                                     </div>
                                 </div>

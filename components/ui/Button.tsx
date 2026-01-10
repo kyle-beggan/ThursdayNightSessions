@@ -18,9 +18,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         };
 
         const sizes = {
-            sm: 'px-5 py-2 text-xs',
-            md: 'px-6 py-2.5 text-sm',
-            lg: 'px-8 py-3 text-base',
+            sm: 'px-4 py-2 text-xs',
+            md: 'px-6 py-2.5 text-sm',       // Standard padding
+            lg: 'px-8 py-3 text-base',       // Standard large padding
         };
 
         return (

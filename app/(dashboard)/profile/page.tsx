@@ -256,47 +256,56 @@ export default function ProfilePage() {
                 </p>
 
                 {isEditing ? (
-                    <div className="space-y-2">
-                        {allCapabilities.map(cap => (
-                            <button
-                                key={cap.id}
-                                onClick={() => toggleCapability(cap.id)}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${formData.selectedCapabilities.includes(cap.id)
-                                    ? 'bg-primary text-white'
-                                    : 'bg-surface-secondary text-text-secondary hover:bg-surface-tertiary'
-                                    }`}
-                            >
-                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-xl ${formData.selectedCapabilities.includes(cap.id)
-                                    ? 'bg-white/20'
-                                    : 'bg-primary/20'
-                                    }`}>
-                                    {cap.icon || '🎸'}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {allCapabilities.map(cap => {
+                            const isSelected = formData.selectedCapabilities.includes(cap.id);
+                            return (
+                                <div
+                                    key={cap.id}
+                                    onClick={() => toggleCapability(cap.id)}
+                                    className={`
+                                        cursor-pointer p-4 rounded-xl border transition-all duration-200 flex flex-col items-center justify-center text-center h-[120px] relative group
+                                        ${isSelected
+                                            ? 'bg-primary/10 border-primary shadow-[0_0_15px_rgba(139,92,246,0.3)]'
+                                            : 'bg-surface border-border hover:border-primary/50 hover:bg-surface-hover hover:shadow-lg'
+                                        }
+                                    `}
+                                >
+                                    {isSelected && (
+                                        <div className="absolute top-2 right-2 flex items-center justify-center w-5 h-5 bg-primary text-white rounded-full text-xs font-bold">
+                                            ✓
+                                        </div>
+                                    )}
+                                    <div className="text-3xl mb-2">
+                                        {cap.icon || '🎸'}
+                                    </div>
+                                    <h4 className={`font-medium text-sm capitalize ${isSelected ? 'text-primary' : 'text-text-primary'}`}>
+                                        {cap.name}
+                                    </h4>
                                 </div>
-                                <span className="capitalize text-left flex-1">{cap.name}</span>
-                                {formData.selectedCapabilities.includes(cap.id) && (
-                                    <span className="text-lg">✓</span>
-                                )}
-                            </button>
-                        ))}
+                            );
+                        })}
                     </div>
                 ) : (
-                    <div className="space-y-2">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {user.capabilities.length > 0 ? (
                             user.capabilities.map(cap => (
                                 <div
                                     key={cap.id}
-                                    className="flex items-center gap-3 px-4 py-3 bg-surface-secondary rounded-lg"
+                                    className="p-4 rounded-xl border border-border bg-surface flex flex-col items-center justify-center text-center h-[120px]"
                                 >
-                                    <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center text-xl">
+                                    <div className="text-3xl mb-2">
                                         {cap.icon || '🎸'}
                                     </div>
-                                    <span className="font-medium text-text-primary capitalize">
+                                    <h4 className="font-medium text-sm text-text-primary capitalize">
                                         {cap.name}
-                                    </span>
+                                    </h4>
                                 </div>
                             ))
                         ) : (
-                            <p className="text-text-secondary italic">No capabilities assigned yet</p>
+                            <div className="col-span-full text-center py-8 text-text-secondary italic bg-surface-secondary rounded-lg border border-border border-dashed">
+                                No capabilities assigned yet
+                            </div>
                         )}
                     </div>
                 )}
