@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import ChatWindow from '@/components/chat/ChatWindow';
 import { useSession } from 'next-auth/react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
-import Badge from '@/components/ui/Badge';
 import { SessionWithDetails, SessionCommitment, Capability } from '@/lib/types';
 import { formatDate, formatTime } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
@@ -25,10 +25,12 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
     const [isLoadingCapabilities, setIsLoadingCapabilities] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<'details' | 'chat'>('details');
 
     const userId = sessionData?.user?.id;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const userType = (sessionData?.user as any)?.userType;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const userType = sessionData?.user?.userType;
     const userCommitment = session.commitments?.find((c: SessionCommitment) => c.user_id === userId);
     const isCommitted = !!userCommitment;
 
@@ -150,7 +152,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
             });
 
             if (!signRes.ok) throw new Error('Failed to get upload permission');
-            const { signedUrl, token, path } = await signRes.json();
+            const { token, path } = await signRes.json();
 
             // 2. Upload to Supabase using the signed URL/token
             const { error: uploadError } = await supabase.storage
@@ -189,146 +191,177 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={handleClose} title={step === 'details' ? "Session Details" : "Confirm RSVP"} size="xl" className="!p-5">
-            <div className="space-y-6">
+        <Modal isOpen={isOpen} onClose={handleClose} title={step === 'details' ? "Session Details" : "Confirm RSVP"} size="xl" className="!p-5 h-[80vh] flex flex-col">
+            <div className="flex-1 flex flex-col min-h-0">
+                {step === 'details' && (
+                    <div className="flex gap-4 border-b border-border mb-4">
+                        <button
+                            className={`pb-2 text-sm font-medium transition-colors ${activeTab === 'details'
+                                ? 'text-primary border-b-2 border-primary'
+                                : 'text-text-secondary hover:text-text-primary'
+                                }`}
+                            onClick={() => setActiveTab('details')}
+                        >
+                            Details
+                        </button>
+                        <button
+                            className={`pb-2 text-sm font-medium transition-colors ${activeTab === 'chat'
+                                ? 'text-primary border-b-2 border-primary'
+                                : 'text-text-secondary hover:text-text-primary'
+                                }`}
+                            onClick={() => setActiveTab('chat')}
+                        >
+                            Chat
+                        </button>
+                    </div>
+                )}
+
                 {step === 'details' ? (
                     <>
-                        {/* Date and Time */}
-                        <div>
-                            <h4 className="text-sm font-semibold text-text-secondary mb-2">Date & Time</h4>
-                            <p className="text-text-primary">
-                                {formatDate(session.date)}
-                            </p>
-                            <p className="text-text-secondary">
-                                {formatTime(session.start_time)} - {formatTime(session.end_time)} EST
-                            </p>
-                        </div>
-
-                        {/* Songs */}
-                        <div>
-                            <h4 className="text-sm font-semibold text-text-secondary mb-2">Songs</h4>
-                            {session.songs && session.songs.length > 0 ? (
-                                <div className="space-y-2">
-                                    {session.songs.map((song) => (
-                                        <div key={song.id} className="bg-surface/50 rounded-lg p-3">
-                                            <div className="font-medium text-text-primary">{song.song_name}</div>
-                                            {song.song_artist && (
-                                                <div className="text-sm text-text-secondary">{song.song_artist}</div>
-                                            )}
-                                            {song.song_url && (
-                                                <a
-                                                    href={song.song_url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-sm text-secondary hover:underline mt-1 inline-block"
-                                                >
-                                                    Listen →
-                                                </a>
-                                            )}
-                                        </div>
-                                    ))}
+                        {activeTab === 'chat' ? (
+                            <div className="flex-1 min-h-0">
+                                <ChatWindow sessionId={session.id} className="h-full border-0" />
+                            </div>
+                        ) : (
+                            <div className="space-y-4 overflow-y-auto flex-1 pr-2 min-h-0">
+                                {/* Date and Time */}
+                                <div>
+                                    <h4 className="text-base font-bold text-text-primary mb-1">Date & Time</h4>
+                                    <p className="text-text-primary text-sm">
+                                        {formatDate(session.date)} • {formatTime(session.start_time)} - {formatTime(session.end_time)} EST
+                                    </p>
                                 </div>
-                            ) : (
-                                <p className="text-text-secondary italic text-sm">Songs TBD</p>
-                            )}
-                        </div>
 
-                        {/* Committed Players */}
-                        <div>
-                            <h4 className="text-sm font-semibold text-text-secondary mb-2">
-                                Committed Players ({session.commitments?.length || 0})
-                            </h4>
-                            {session.commitments && session.commitments.length > 0 ? (
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    {session.commitments.map((commitment) => (
-                                        <div key={commitment.id} className="bg-primary/5 border border-primary/20 hover:bg-primary/10 hover:border-primary/50 hover:shadow-[0_0_15px_rgba(139,92,246,0.5)] rounded-lg p-3 transition-all duration-200 group flex flex-col items-center text-center">
-                                            <div className="font-medium text-text-primary mb-2 w-full truncate">
-                                                {commitment.user?.name}
-                                            </div>
-                                            <div className="flex flex-wrap gap-1 justify-center">
-                                                {/* Use capabilities from the commitment, fallback to user capabilities if migration not fully applied for old data */}
-                                                {(commitment.capabilities && commitment.capabilities.length > 0
-                                                    ? commitment.capabilities
-                                                    : commitment.user?.capabilities
-                                                )?.map((cap) => (
-                                                    <span
-                                                        key={cap.id}
-                                                        className="inline-flex items-center gap-1 px-3 py-1 bg-primary/20 text-primary rounded-full text-sm font-medium"
-                                                    >
-                                                        <span className="text-base">{cap.icon || '🎵'}</span>
-                                                        <span className="capitalize">{cap.name}</span>
-                                                    </span>
-                                                ))}
-                                            </div>
+                                {/* Songs */}
+                                <div className="flex-1 min-h-[120px]">
+                                    <h4 className="text-base font-bold text-text-primary mb-2 pt-[20px]">Songs</h4>
+                                    {session.songs && session.songs.length > 0 ? (
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                            {session.songs.map((song) => (
+                                                <div key={song.id} className="bg-surface/50 rounded-lg p-3 border border-border flex items-center justify-between gap-2 hover:border-primary/50 transition-colors group">
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="font-medium text-text-primary mb-0.5 truncate text-sm" title={song.song_name}>{song.song_name}</div>
+                                                        {song.song_artist && (
+                                                            <div className="text-xs text-text-secondary truncate" title={song.song_artist}>{song.song_artist}</div>
+                                                        )}
+                                                    </div>
+                                                    {song.song_url && (
+                                                        <a
+                                                            href={song.song_url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="shrink-0"
+                                                        >
+                                                            <Button size="sm" variant="secondary" className="w-[40px] px-0 text-[10px] h-7 flex items-center justify-center">
+                                                                Play
+                                                            </Button>
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            ))}
                                         </div>
-                                    ))}
+                                    ) : (
+                                        <p className="text-text-secondary italic text-xs">Songs TBD</p>
+                                    )}
                                 </div>
-                            ) : (
-                                <p className="text-text-secondary text-sm">No commitments yet</p>
-                            )}
-                        </div>
 
-                        {/* Recordings */}
-                        <div>
-                            <div className="flex items-center justify-between mb-2">
-                                <h4 className="text-sm font-semibold text-text-secondary">
-                                    Recordings ({session.recordings?.length || 0})
-                                </h4>
-                                {userType === 'admin' && (
-                                    <div className="relative">
-                                        <input
-                                            type="file"
-                                            accept="audio/*,video/*"
-                                            onChange={handleFileUpload}
-                                            disabled={isUploading}
-                                            className="hidden"
-                                            id="recording-upload"
-                                        />
-                                        <label
-                                            htmlFor="recording-upload"
-                                            className={`
+                                {/* Committed Players */}
+                                <div>
+                                    <h4 className="text-base font-bold text-text-primary mb-2">
+                                        Committed Players ({session.commitments?.length || 0})
+                                    </h4>
+                                    {session.commitments && session.commitments.length > 0 ? (
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                            {session.commitments.map((commitment) => (
+                                                <div key={commitment.id} className="bg-primary/5 border border-primary/20 hover:bg-primary/10 hover:border-primary/50 hover:shadow-[0_0_15px_rgba(139,92,246,0.5)] rounded-lg p-2 transition-all duration-200 group flex flex-col items-center text-center">
+                                                    <div className="font-medium text-text-primary mb-1 w-full truncate text-sm">
+                                                        {commitment.user?.name}
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-1 justify-center">
+                                                        {(commitment.capabilities && commitment.capabilities.length > 0
+                                                            ? commitment.capabilities
+                                                            : commitment.user?.capabilities
+                                                        )?.map((cap) => (
+                                                            <span
+                                                                key={cap.id}
+                                                                className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/20 text-primary rounded-full text-[10px] font-medium"
+                                                            >
+                                                                <span className="text-sm">{cap.icon || '🎵'}</span>
+                                                                <span className="capitalize">{cap.name}</span>
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-text-secondary text-xs">No commitments yet</p>
+                                    )}
+                                </div>
+
+                                {/* Recordings */}
+                                <div className="flex-1 min-h-[100px]">
+                                    <div className="flex items-center justify-between mb-2 pt-[20px]">
+                                        <h4 className="text-base font-bold text-text-primary">
+                                            Recordings ({session.recordings?.length || 0})
+                                        </h4>
+                                        {userType === 'admin' && (
+                                            <div className="relative">
+                                                <input
+                                                    type="file"
+                                                    accept="audio/*,video/*"
+                                                    onChange={handleFileUpload}
+                                                    disabled={isUploading}
+                                                    className="hidden"
+                                                    id="recording-upload"
+                                                />
+                                                <label
+                                                    htmlFor="recording-upload"
+                                                    className={`
                                             cursor-pointer text-xs bg-surface border border-border px-2 py-1 rounded 
                                             hover:bg-surface-hover transition-colors
                                             ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}
                                         `}
-                                        >
-                                            {isUploading ? 'Uploading...' : '+ Add Recording'}
-                                        </label>
-                                    </div>
-                                )}
-                            </div>
-
-                            {uploadError && (
-                                <div className="text-red-500 text-xs mb-2">{uploadError}</div>
-                            )}
-
-                            <div className="space-y-2">
-                                {session.recordings && session.recordings.length > 0 ? (
-                                    session.recordings.map((rec: any) => (
-                                        <div key={rec.id} className="flex items-center justify-between bg-surface/50 rounded-lg p-2 text-sm">
-                                            <div className="truncate max-w-[200px] text-text-primary" title={rec.title}>
-                                                {rec.title}
+                                                >
+                                                    {isUploading ? 'Uploading...' : '+ Add'}
+                                                </label>
                                             </div>
-                                            <a
-                                                href={rec.url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-primary hover:underline text-xs"
-                                            >
-                                                Play
-                                            </a>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p className="text-text-secondary text-xs italic">
-                                        No recordings yet.
-                                    </p>
-                                )}
-                            </div>
-                        </div>
+                                        )}
+                                    </div>
 
-                        {/* Action Buttons */}
-                        <div className="flex justify-center gap-3 pt-4 border-t border-border">
+                                    {uploadError && (
+                                        <div className="text-red-500 text-xs mb-2">{uploadError}</div>
+                                    )}
+
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        {session.recordings && session.recordings.length > 0 ? (
+                                            session.recordings.map((rec) => (
+                                                <div key={rec.id} className="bg-surface/50 rounded-lg p-3 border border-border flex items-center justify-between gap-2 hover:border-primary/50 transition-colors group">
+                                                    <div className="font-medium text-text-primary truncate mb-0 text-xs min-w-0 flex-1" title={rec.title}>
+                                                        {rec.title}
+                                                    </div>
+                                                    <a
+                                                        href={rec.url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="shrink-0"
+                                                    >
+                                                        <Button size="sm" variant="secondary" className="w-[40px] px-0 text-[10px] h-7 flex items-center justify-center">
+                                                            Play
+                                                        </Button>
+                                                    </a>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-text-secondary text-xs italic col-span-3">
+                                                No recordings yet.
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        <div className="flex justify-center gap-3 pt-4 border-t border-border mt-auto shrink-0">
                             {isCommitted ? (
                                 <Button
                                     onClick={handleCancelRsvp}
@@ -356,7 +389,6 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                 Close
                             </Button>
                         </div>
-
                     </>
                 ) : (
                     <>
@@ -432,8 +464,9 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                             </Button>
                         </div>
                     </>
-                )}
-            </div>
-        </Modal>
+                )
+                }
+            </div >
+        </Modal >
     );
 }

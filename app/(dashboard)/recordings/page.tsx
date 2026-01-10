@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Button from '@/components/ui/Button';
+import { useSortableData } from '@/hooks/useSortableData';
 
 interface Player {
     name: string;
@@ -19,6 +20,7 @@ interface Recording {
 
 export default function RecordingsPage() {
     const [recordings, setRecordings] = useState<Recording[]>([]);
+    const { items: sortedRecordings, requestSort, sortConfig } = useSortableData(recordings);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -74,8 +76,13 @@ export default function RecordingsPage() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-surface-secondary border-b border-border">
-                                <th className="p-4 text-sm font-semibold text-text-secondary">Title/Filename</th>
-                                <th className="p-4 text-sm font-semibold text-text-secondary">Session Date</th>
+
+                                <th className="p-4 text-sm font-semibold text-text-secondary cursor-pointer hover:text-text-primary transition-colors" onClick={() => requestSort('title')}>
+                                    Title/Filename {sortConfig?.key === 'title' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                </th>
+                                <th className="p-4 text-sm font-semibold text-text-secondary cursor-pointer hover:text-text-primary transition-colors" onClick={() => requestSort('session_date')}>
+                                    Session Date {sortConfig?.key === 'session_date' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                </th>
                                 <th className="p-4 text-sm font-semibold text-text-secondary">Players</th>
                                 <th className="p-4 text-sm font-semibold text-text-secondary text-right">Actions</th>
                             </tr>
@@ -88,7 +95,7 @@ export default function RecordingsPage() {
                                     </td>
                                 </tr>
                             ) : (
-                                recordings.map((rec) => (
+                                sortedRecordings.map((rec) => (
                                     <tr key={rec.id} className="hover:bg-surface-hover transition-colors group">
                                         <td className="p-4">
                                             <div className="font-medium text-text-primary">{rec.title}</div>

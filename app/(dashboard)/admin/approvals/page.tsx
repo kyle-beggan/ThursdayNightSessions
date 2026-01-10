@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import StatusBadge from '@/components/admin/StatusBadge';
 import Button from '@/components/ui/Button';
+import { useSortableData } from '@/hooks/useSortableData';
 
 type User = {
     id: string;
@@ -25,6 +26,7 @@ type Capability = {
 export default function ApprovalsPage() {
     const router = useRouter();
     const [users, setUsers] = useState<User[]>([]);
+    const { items: sortedUsers, requestSort, sortConfig } = useSortableData(users);
     const [capabilities, setCapabilities] = useState<Capability[]>([]);
     const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
     const [selectedCapabilities, setSelectedCapabilities] = useState<string[]>([]);
@@ -217,22 +219,22 @@ export default function ApprovalsPage() {
                                             className="rounded"
                                         />
                                     </th>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
-                                        Name
+                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('name')}>
+                                        Name {sortConfig?.key === 'name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                                     </th>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
-                                        Email
+                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('email')}>
+                                        Email {sortConfig?.key === 'email' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                                     </th>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
-                                        Status
+                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('status')}>
+                                        Status {sortConfig?.key === 'status' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                                     </th>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
-                                        Registered
+                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('created_at')}>
+                                        Registered {sortConfig?.key === 'created_at' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                                     </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border">
-                                {users.map(user => (
+                                {sortedUsers.map(user => (
                                     <tr key={user.id} className="hover:bg-surface-secondary transition-colors">
                                         <td className="px-4 py-3">
                                             <input

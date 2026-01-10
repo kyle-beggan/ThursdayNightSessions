@@ -5,10 +5,18 @@ import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import { Capability } from '@/lib/types';
 
+interface RecommendedSong {
+    title: string;
+    artist: string;
+    key: string;
+    tempo: string;
+    youtubeUrl: string;
+}
+
 interface FindSongModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onAddSongs: (songs: any[]) => void;
+    onAddSongs: (songs: RecommendedSong[]) => void;
 }
 
 export default function FindSongModal({ isOpen, onClose, onAddSongs }: FindSongModalProps) {
@@ -19,7 +27,7 @@ export default function FindSongModal({ isOpen, onClose, onAddSongs }: FindSongM
     const [isLoadingCaps, setIsLoadingCaps] = useState(false);
 
     // Recommendations state
-    const [recommendations, setRecommendations] = useState<any[]>([]);
+    const [recommendations, setRecommendations] = useState<RecommendedSong[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [searchError, setSearchError] = useState<string | null>(null);
     const [selectedSongs, setSelectedSongs] = useState<Set<number>>(new Set()); // Indices of selected songs
@@ -86,6 +94,7 @@ export default function FindSongModal({ isOpen, onClose, onAddSongs }: FindSongM
             const data = await res.json();
             setRecommendations(data);
             setStep('results');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error('Search error:', error);
             setSearchError(error.message || 'Something went wrong finding songs.');

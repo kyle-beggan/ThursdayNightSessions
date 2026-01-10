@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import CreateSessionModal from '@/components/admin/CreateSessionModal';
 import { Song } from '@/lib/types';
+import { useSortableData } from '@/hooks/useSortableData';
 
 type Session = {
     id: string;
@@ -21,8 +22,17 @@ export default function SessionsPage() {
     const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
+    // Add state for filtration
+    const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all');
+
     // Add state for editing
     const [editingSession, setEditingSession] = useState<Session | null>(null);
+
+    const upcomingSessions = sessions.filter(s => new Date(s.date) >= new Date());
+    const pastSessions = sessions.filter(s => new Date(s.date) < new Date());
+
+    const { items: sortedUpcoming, requestSort: sortUpcoming, sortConfig: upcomingConfig } = useSortableData(upcomingSessions);
+    const { items: sortedPast, requestSort: sortPast, sortConfig: pastConfig } = useSortableData(pastSessions);
 
     useEffect(() => {
         fetchSessions();
@@ -109,8 +119,7 @@ export default function SessionsPage() {
         );
     }
 
-    const upcomingSessions = sessions.filter(s => new Date(s.date) >= new Date());
-    const pastSessions = sessions.filter(s => new Date(s.date) < new Date());
+
 
     return (
         <div className="space-y-6">
@@ -131,6 +140,8 @@ export default function SessionsPage() {
                 <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}>Create New Session</Button>
             </div>
 
+
+
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-surface border border-border rounded-lg p-4">
@@ -147,90 +158,125 @@ export default function SessionsPage() {
                 </div>
             </div>
 
-            {/* Upcoming Sessions */}
-            <div>
-                <h2 className="text-xl font-semibold text-text-primary mb-4">Upcoming Sessions</h2>
-                {upcomingSessions.length === 0 ? (
-                    <div className="bg-surface border border-border rounded-lg p-8 text-center">
-                        <div className="text-4xl mb-2">📅</div>
-                        <p className="text-text-secondary">No upcoming sessions scheduled</p>
-                    </div>
-                ) : (
-                    <div className="bg-surface border border-border rounded-lg overflow-hidden">
-                        <table className="w-full">
-                            <thead className="bg-surface-secondary">
-                                <tr>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
-                                        Date
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
-                                        Time
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
-                                        Commitments
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
-                                        Actions
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-border">
-                                {upcomingSessions.map(session => (
-                                    <tr key={session.id} className="hover:bg-surface-secondary transition-colors">
-                                        <td className="px-4 py-3 font-medium text-text-primary">
-                                            {new Date(session.date + 'T00:00:00').toLocaleDateString('en-US', {
-                                                weekday: 'short',
-                                                year: 'numeric',
-                                                month: 'short',
-                                                day: 'numeric'
-                                            })}
-                                        </td>
-                                        <td className="px-4 py-3 text-text-secondary">
-                                            {formatTime(session.start_time)} - {formatTime(session.end_time)}
-                                        </td>
-                                        <td className="px-4 py-3 text-text-secondary">
-                                            {session.commitments_count || 0} committed
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={() => handleEditSession(session)}
-                                                    className="px-3 py-1.5 text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 rounded-md transition-colors"
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDeleteSession(session.id, session.date)}
-                                                    className="px-3 py-1.5 text-xs font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-md transition-colors"
-                                                >
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+            {/* Filters */}
+            <div className="flex justify-end mb-4">
+                <div className="flex items-center gap-2 bg-surface border border-border p-1 rounded-lg w-fit">
+                    <button
+                        onClick={() => setFilter('all')}
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${filter === 'all'
+                            ? 'bg-primary text-white shadow-sm'
+                            : 'text-text-secondary hover:text-text-primary hover:bg-surface-secondary'
+                            }`}
+                    >
+                        All
+                    </button>
+                    <button
+                        onClick={() => setFilter('upcoming')}
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${filter === 'upcoming'
+                            ? 'bg-primary text-white shadow-sm'
+                            : 'text-text-secondary hover:text-text-primary hover:bg-surface-secondary'
+                            }`}
+                    >
+                        Upcoming
+                    </button>
+                    <button
+                        onClick={() => setFilter('past')}
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${filter === 'past'
+                            ? 'bg-primary text-white shadow-sm'
+                            : 'text-text-secondary hover:text-text-primary hover:bg-surface-secondary'
+                            }`}
+                    >
+                        Past
+                    </button>
+                </div>
             </div>
 
+            {/* Upcoming Sessions */}
+            {(filter === 'all' || filter === 'upcoming') && (
+                <div>
+                    <h2 className="text-xl font-semibold text-text-primary mb-4">Sessions</h2>
+                    {upcomingSessions.length === 0 ? (
+                        <div className="bg-surface border border-border rounded-lg p-8 text-center">
+                            <div className="text-4xl mb-2">📅</div>
+                            <p className="text-text-secondary">No upcoming sessions scheduled</p>
+                        </div>
+                    ) : (
+                        <div className="bg-surface border border-border rounded-lg overflow-hidden">
+                            <table className="w-full">
+                                <thead className="bg-surface-secondary">
+                                    <tr>
+                                        <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => sortUpcoming('date')}>
+                                            Date {upcomingConfig?.key === 'date' && (upcomingConfig.direction === 'ascending' ? '↑' : '↓')}
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => sortUpcoming('start_time')}>
+                                            Time {upcomingConfig?.key === 'start_time' && (upcomingConfig.direction === 'ascending' ? '↑' : '↓')}
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => sortUpcoming('commitments_count')}>
+                                            Commitments {upcomingConfig?.key === 'commitments_count' && (upcomingConfig.direction === 'ascending' ? '↑' : '↓')}
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-border">
+                                    {sortedUpcoming.map(session => (
+                                        <tr key={session.id} className="hover:bg-surface-secondary transition-colors">
+                                            <td className="px-4 py-3 font-medium text-text-primary">
+                                                {new Date(session.date + 'T00:00:00').toLocaleDateString('en-US', {
+                                                    weekday: 'short',
+                                                    year: 'numeric',
+                                                    month: 'short',
+                                                    day: 'numeric'
+                                                })}
+                                            </td>
+                                            <td className="px-4 py-3 text-text-secondary">
+                                                {formatTime(session.start_time)} - {formatTime(session.end_time)}
+                                            </td>
+                                            <td className="px-4 py-3 text-text-secondary">
+                                                {session.commitments_count || 0} committed
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => handleEditSession(session)}
+                                                        className="px-3 py-1.5 text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 rounded-md transition-colors"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteSession(session.id, session.date)}
+                                                        className="px-3 py-1.5 text-xs font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-md transition-colors"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            )}
+
             {/* Past Sessions */}
-            {pastSessions.length > 0 && (
+            {(filter === 'all' || filter === 'past') && pastSessions.length > 0 && (
                 <div>
                     <h2 className="text-xl font-semibold text-text-primary mb-4">Past Sessions</h2>
                     <div className="bg-surface border border-border rounded-lg overflow-hidden">
                         <table className="w-full">
                             <thead className="bg-surface-secondary">
                                 <tr>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
-                                        Date
+                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => sortPast('date')}>
+                                        Date {pastConfig?.key === 'date' && (pastConfig.direction === 'ascending' ? '↑' : '↓')}
                                     </th>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
-                                        Time
+                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => sortPast('start_time')}>
+                                        Time {pastConfig?.key === 'start_time' && (pastConfig.direction === 'ascending' ? '↑' : '↓')}
                                     </th>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
-                                        Commitments
+                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => sortPast('commitments_count')}>
+                                        Commitments {pastConfig?.key === 'commitments_count' && (pastConfig.direction === 'ascending' ? '↑' : '↓')}
                                     </th>
                                     <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
                                         Actions
@@ -238,7 +284,7 @@ export default function SessionsPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border">
-                                {pastSessions.slice(0, 10).map(session => (
+                                {sortedPast.slice(0, 10).map(session => (
                                     <tr key={session.id} className="hover:bg-surface-secondary transition-colors opacity-60">
                                         <td className="px-4 py-3 font-medium text-text-primary">
                                             {new Date(session.date + 'T00:00:00').toLocaleDateString('en-US', {

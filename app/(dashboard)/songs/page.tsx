@@ -10,9 +10,11 @@ import Link from 'next/link';
 import { formatDate } from '@/lib/utils';
 import SessionModal from '@/components/calendar/SessionModal';
 import { SessionWithDetails } from '@/lib/types';
+import { useSortableData } from '@/hooks/useSortableData';
 
 export default function SongsPage() {
     const [songs, setSongs] = useState<Song[]>([]);
+    const { items: sortedSongs, requestSort, sortConfig } = useSortableData(songs);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -141,17 +143,27 @@ export default function SongsPage() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-surface-secondary border-b border-border text-text-secondary text-sm uppercase tracking-wider">
-                                <th className="p-4 font-medium">Title</th>
-                                <th className="p-4 font-medium">Artist</th>
-                                <th className="p-4 font-medium w-32">Key</th>
-                                <th className="p-4 font-medium w-32">Tempo</th>
-                                <th className="p-4 font-medium w-40">Session</th>
+                                <th className="p-4 font-medium cursor-pointer hover:text-text-primary transition-colors" onClick={() => requestSort('title')}>
+                                    Title {sortConfig?.key === 'title' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                </th>
+                                <th className="p-4 font-medium cursor-pointer hover:text-text-primary transition-colors" onClick={() => requestSort('artist')}>
+                                    Artist {sortConfig?.key === 'artist' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                </th>
+                                <th className="p-4 font-medium w-32 cursor-pointer hover:text-text-primary transition-colors" onClick={() => requestSort('key')}>
+                                    Key {sortConfig?.key === 'key' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                </th>
+                                <th className="p-4 font-medium w-32 cursor-pointer hover:text-text-primary transition-colors" onClick={() => requestSort('tempo')}>
+                                    Tempo {sortConfig?.key === 'tempo' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                </th>
+                                <th className="p-4 font-medium w-40 cursor-pointer hover:text-text-primary transition-colors" onClick={() => requestSort('session_date')}>
+                                    Session {sortConfig?.key === 'session_date' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                </th>
                                 <th className="p-4 font-medium w-32">Requirements</th>
                                 <th className="p-4 font-medium w-24">Link</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
-                            {songs.map((song) => (
+                            {sortedSongs.map((song) => (
                                 <tr key={song.id} className="hover:bg-surface-hover transition-colors">
                                     <td className="p-4 text-text-primary font-medium">{song.title}</td>
                                     <td className="p-4 text-text-secondary">{song.artist || '-'}</td>

@@ -25,7 +25,7 @@ export default function SongCapabilitiesModal({ isOpen, onClose, song, onSave }:
     useEffect(() => {
         if (isOpen && song) {
             fetchCapabilities();
-            setSelectedCapabilities(song.capabilities?.map((c: any) => c.id) || []);
+            setSelectedCapabilities(song.capabilities?.map((c) => c.id) || []);
         }
     }, [isOpen, song]);
 

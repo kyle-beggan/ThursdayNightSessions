@@ -5,6 +5,7 @@ import Link from 'next/link';
 import StatusBadge from '@/components/admin/StatusBadge';
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
+import { useSortableData } from '@/hooks/useSortableData';
 
 // Checking imports, I don't see toaster in the file list but I can check if it exists.
 // Actually, I'll stick to 'alert' fallback if toast doesn't exist, but wait, the plan said "toast/notification".
@@ -27,6 +28,7 @@ type User = {
 export default function UsersPage() {
     const [users, setUsers] = useState<User[]>([]);
     const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+    const { items: sortedUsers, requestSort, sortConfig } = useSortableData(filteredUsers);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -223,17 +225,17 @@ export default function UsersPage() {
                 <table className="w-full">
                     <thead className="bg-surface-secondary">
                         <tr>
-                            <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
-                                Name
+                            <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('name')}>
+                                Name {sortConfig?.key === 'name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                             </th>
-                            <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
-                                Email
+                            <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('email')}>
+                                Email {sortConfig?.key === 'email' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                             </th>
-                            <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
-                                Status
+                            <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('status')}>
+                                Status {sortConfig?.key === 'status' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                             </th>
-                            <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
-                                Type
+                            <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('user_type')}>
+                                Type {sortConfig?.key === 'user_type' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                             </th>
                             <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
                                 Capabilities
@@ -244,14 +246,14 @@ export default function UsersPage() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
-                        {filteredUsers.length === 0 ? (
+                        {sortedUsers.length === 0 ? (
                             <tr>
                                 <td colSpan={6} className="px-4 py-8 text-center text-text-secondary">
                                     No users found
                                 </td>
                             </tr>
                         ) : (
-                            filteredUsers.map(user => (
+                            sortedUsers.map(user => (
                                 <tr key={user.id} className="hover:bg-surface-secondary transition-colors">
                                     <td className="px-4 py-3">
                                         <div className="font-medium text-text-primary">{user.name}</div>
