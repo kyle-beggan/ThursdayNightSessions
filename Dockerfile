@@ -24,7 +24,13 @@ COPY . .
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line in case you want to disable telemetry during the build.
+# Uncomment the following line in case you want to disable telemetry during the build.
 ENV NEXT_TELEMETRY_DISABLED 1
+
+# Dummy environment variables to satisfy Next.js build
+ENV NEXT_PUBLIC_SUPABASE_URL=http://placeholder
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=placeholder
+
 
 # Build the app
 RUN \
