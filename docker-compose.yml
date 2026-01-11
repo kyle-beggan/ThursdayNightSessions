@@ -3,7 +3,7 @@ version: '3'
 services:
   web:
     container_name: sleepyhollows_web
-    image: ghcr.io/kyle-beggan/sleepyhollows:latest
+    image: ghcr.io/kyle-beggan/thursdaynightsessions:latest
     # build:
     #   context: .
     #   dockerfile: Dockerfile

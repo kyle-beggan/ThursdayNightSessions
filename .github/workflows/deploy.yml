@@ -50,7 +50,7 @@ jobs:
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: tns.sleepyhollows.com
-          username: ubuntu
+          username: bitnami
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             # Pull new image
