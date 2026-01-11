@@ -27,9 +27,16 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 ENV NEXT_TELEMETRY_DISABLED 1
 
-# Dummy environment variables to satisfy Next.js build
-ENV NEXT_PUBLIC_SUPABASE_URL=http://placeholder
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=placeholder
+# Set build-time arguments (used by Next.js during `npm run build`)
+ARG NEXT_PUBLIC_SUPABASE_URL=http://placeholder
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY=placeholder
+
+# Persist them as env vars if needed, though usually only ARG is needed for the build step
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+# Build the app
+
 
 
 # Build the app
