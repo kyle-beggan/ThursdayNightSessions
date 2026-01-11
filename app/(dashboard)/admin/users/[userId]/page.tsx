@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
@@ -37,13 +37,9 @@ export default function EditUserPage() {
     });
     const [selectedCapabilities, setSelectedCapabilities] = useState<string[]>([]);
 
-    useEffect(() => {
-        if (userId) {
-            fetchData();
-        }
-    }, [userId]);
 
-    const fetchData = async () => {
+
+    const fetchData = useCallback(async () => {
         try {
             setLoading(true);
 
@@ -92,7 +88,13 @@ export default function EditUserPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [userId, router]);
+
+    useEffect(() => {
+        if (userId) {
+            fetchData();
+        }
+    }, [userId, fetchData]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

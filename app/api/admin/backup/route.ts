@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createClient } from '@supabase/supabase-js';
@@ -16,7 +16,7 @@ const supabaseAdmin = createClient(
     }
 );
 
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
         const session = await getServerSession(authOptions);
         if (!session?.user) { // add userType check if strictly admin
@@ -45,8 +45,8 @@ export async function GET(request: NextRequest) {
             supabaseAdmin.from('song_capabilities').select('*')
         ]);
 
-        if (usersError || songsError || sessionsError || capsError || commsError) {
-            console.error('Error fetching backup data:', { usersError, songsError, sessionsError });
+        if (usersError || songsError || sessionsError || capsError || commsError || userCapsError || sessionSongsError || songCapsError) {
+            console.error('Error fetching backup data:', { usersError, songsError, sessionsError, capsError, userCapsError });
             return NextResponse.json({ error: 'Failed to fetch database data' }, { status: 500 });
         }
 

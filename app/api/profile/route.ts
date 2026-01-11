@@ -76,13 +76,14 @@ export async function PATCH(request: Request) {
 
         const userId = session.user.id;
         const body = await request.json();
-        const { name, email, phone, capabilities } = body;
+        const { name, email, phone, image, capabilities } = body;
 
         // Update user basic info
         const updates: Record<string, unknown> = {};
         if (name !== undefined) updates.name = name;
         if (email !== undefined) updates.email = email;
         if (phone !== undefined) updates.phone = phone;
+        if (image !== undefined) updates.image = image;
 
         if (Object.keys(updates).length > 0) {
             const { error: updateError } = await supabase

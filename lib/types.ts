@@ -105,4 +105,5 @@ export interface SessionWithDetails extends Session {
     songs: SessionSong[];
     commitments: (SessionCommitment & { user: UserWithCapabilities })[];
     recordings?: SessionRecording[];
+    newMessageCount?: number;
 }

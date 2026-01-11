@@ -33,6 +33,9 @@ export const useChat = (sessionId: string | null = null) => {
                 if (res.ok) {
                     const data = await res.json();
                     setMessages(data);
+                } else {
+                    const text = await res.text();
+                    console.error(`Chat GET Error (${res.status}):`, text);
                 }
             } catch (error) {
                 console.error('Error fetching messages:', error);
@@ -83,7 +86,7 @@ export const useChat = (sessionId: string | null = null) => {
                                 id,
                                 name,
                                 email,
-                                avatar_url
+                                avatar_url: image
                             )
                         `)
                         .eq('id', newMessage.id)
@@ -115,15 +118,28 @@ export const useChat = (sessionId: string | null = null) => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ content, sessionId }),
+                credentials: 'include', // Ensure cookies are sent
             });
 
             if (!res.ok) {
-                throw new Error('Failed to send message');
+                const text = await res.text();
+                console.error(`API Error (${res.status} ${res.statusText}):`, text);
+                let errData = {};
+                try {
+                    errData = JSON.parse(text);
+                } catch {
+                    // ignore invalid json
+                }
+                throw new Error((errData as { error?: string }).error || `Request failed: ${res.status} ${res.statusText}`);
             }
 
-            // We rely on real-time subscription to add the message to the list
-            // Or we could return the data and add it manually for perceived speed.
-            // Let's rely on realtime for simplicity first.
+            const newMessage = await res.json();
+
+            setMessages((prev) => {
+                // Avoid duplicates if realtime already picked it up
+                if (prev.some(m => m.id === newMessage.id)) return prev;
+                return [...prev, newMessage];
+            });
         } catch (error) {
             console.error('Error sending message:', error);
             throw error;

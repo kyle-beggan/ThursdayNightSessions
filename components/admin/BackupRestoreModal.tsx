@@ -10,7 +10,7 @@ interface BackupRestoreModalProps {
 export default function BackupRestoreModal({ isOpen, onClose }: BackupRestoreModalProps) {
     const [isRestoring, setIsRestoring] = useState(false);
     const [file, setFile] = useState<File | null>(null);
-    const [restoreResult, setRestoreResult] = useState<any>(null);
+    const [restoreResult, setRestoreResult] = useState<{ success: boolean; details?: unknown; error?: string } | null>(null);
 
     const handleBackup = () => {
         // Trigger download via direct link

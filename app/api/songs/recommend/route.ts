@@ -60,11 +60,13 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Failed to parse AI response' }, { status: 500 });
         }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error in POST /api/songs/recommend:', error);
 
+        const err = error as { status?: number; message?: string };
+
         // Handle OpenAI Quota Exceeded
-        if (error?.status === 429) {
+        if (err?.status === 429) {
             return NextResponse.json(
                 { error: "This feature costs actual money. Need to add credits to OpenAI account for this to work." },
                 { status: 429 }
@@ -72,6 +74,6 @@ export async function POST(request: NextRequest) {
         }
 
         // Return the actual error message for clearer debugging
-        return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+        return NextResponse.json({ error: err?.message || 'Internal server error' }, { status: 500 });
     }
 }

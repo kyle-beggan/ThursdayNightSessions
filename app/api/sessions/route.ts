@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient as createServerClient } from '@/lib/supabase/server';
+
 import { createClient } from '@supabase/supabase-js';
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function GET() {
     try {
-        // TODO: Implement proper session check with next-auth beta
-        // For now, sessions API is open - will be secured after auth is properly configured
+        const session = await getServerSession(authOptions);
 
         // Initialize admin client to ensure we can fetch all data including capabilities (bypassing RLS)
         const supabaseAdmin = createClient(
@@ -18,6 +19,31 @@ export async function GET() {
                 }
             }
         );
+
+        // Fetch user's last_sign_in_at and read receipts if logged in
+        let lastSignInAt: string | null = null;
+        const readReceipts: Record<string, string> = {}; // sessionId -> last_read_at
+
+        if (session?.user?.id) {
+            const { data: userData } = await supabaseAdmin
+                .from('users')
+                .select('last_sign_in_at')
+                .eq('id', session.user.id)
+                .single();
+            lastSignInAt = userData?.last_sign_in_at;
+
+            const { data: receipts } = await supabaseAdmin
+                .from('chat_read_receipts')
+                .select('session_id, last_read_at')
+                .eq('user_id', session.user.id)
+                .not('session_id', 'is', null);
+
+            if (receipts) {
+                receipts.forEach((r: { session_id: string; last_read_at: string }) => {
+                    readReceipts[r.session_id] = r.last_read_at;
+                });
+            }
+        }
 
         // Fetch sessions with songs and commitments
         const { data: sessions, error } = await supabaseAdmin
@@ -48,12 +74,58 @@ export async function GET() {
             return NextResponse.json({ error: 'Failed to fetch sessions' }, { status: 500 });
         }
 
+        // Calculate new message counts
+        // Logic: Count messages where created_at > MAX(last_sign_in_at, last_read_at_for_session)
+        const newMessageCounts: Record<string, number> = {};
+
+        // We need to fetch messages for all visible sessions to count efficiently
+        // Or we can do a grouped query. Let's try a grouped query for all messages newer than the global last_sign_in_at first
+        // But since each session has a different "last read" time, we might need to be smarter.
+        // Simple approach: Fetch all recent messages (e.g. last 30 days) and filter in memory, OR
+        // fetch counts per session.
+
+        // Let's fetch all messages created after the user's *oldest* relevant timestamp (likely last_sign_in_at)
+        // AND match the session IDs we just fetched.
+        if (lastSignInAt || Object.keys(readReceipts).length > 0) {
+            // Find the baseline timestamp to fetch messages from. 
+            // If we have read receipts, usage that. If not, use sign in.
+            // Safest is to just fetch messages for the displayed sessions.
+            const sessionIds = sessions?.map(s => s.id) || [];
+
+            if (sessionIds.length > 0) {
+                const { data: messages } = await supabaseAdmin
+                    .from('chat_messages')
+                    .select('session_id, created_at')
+                    .in('session_id', sessionIds); // This might be heavy if lots of messages. ideally filter by date.
+
+                if (messages) {
+                    messages.forEach((msg: { session_id: string; created_at: string }) => {
+                        const sessionReadTime = readReceipts[msg.session_id];
+                        // Effective read time is the LATER of (last_sign_in, last_read_receipt)
+                        // If no read receipt, it defaults to last_sign_in
+                        let threshold = lastSignInAt ? new Date(lastSignInAt).getTime() : 0;
+
+                        if (sessionReadTime) {
+                            const readTime = new Date(sessionReadTime).getTime();
+                            if (readTime > threshold) {
+                                threshold = readTime;
+                            }
+                        }
+
+                        if (new Date(msg.created_at).getTime() > threshold) {
+                            newMessageCounts[msg.session_id] = (newMessageCounts[msg.session_id] || 0) + 1;
+                        }
+                    });
+                }
+            }
+        }
+
         // Fetch artist info AND capabilities for all songs in these sessions
         // We have to match by name since session_songs doesn't seem to have a proper FK in the current schema assumption
-        const allSongNames = sessions?.flatMap(s => s.songs?.map((ss: any) => ss.song_name)) || [];
+        const allSongNames = sessions?.flatMap(s => s.songs?.map((ss: { song_name: string }) => ss.song_name)) || [];
         const uniqueSongNames = [...new Set(allSongNames)];
 
-        let songDetailsMap: Record<string, { artist: string, capabilities: any[] }> = {};
+        const songDetailsMap: Record<string, { artist: string, capabilities: unknown[] }> = {};
 
         if (uniqueSongNames.length > 0) {
             const { data: songsData } = await supabaseAdmin
@@ -75,7 +147,7 @@ export async function GET() {
                 songsData.forEach(s => {
                     songDetailsMap[s.title] = {
                         artist: s.artist,
-                        capabilities: s.song_capabilities?.map((sc: any) => sc.capability) || []
+                        capabilities: s.song_capabilities?.map((sc: { capability: unknown }) => sc.capability) || []
                     };
                 });
             }
@@ -103,6 +175,7 @@ export async function GET() {
                 capabilities: (c.capabilities as any[])?.map((cc: Record<string, unknown>) => (cc as any).capability) || [],
             })) || [],
             commitments_count: session.commitments?.length || 0,
+            newMessageCount: newMessageCounts[session.id] || 0,
         })) || [];
 
         return NextResponse.json(transformedSessions);
@@ -112,8 +185,7 @@ export async function GET() {
     }
 }
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+
 
 export async function POST(request: NextRequest) {
     try {

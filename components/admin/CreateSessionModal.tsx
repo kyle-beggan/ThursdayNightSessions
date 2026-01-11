@@ -49,6 +49,7 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
                 setSelectedSongs([]);
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, initialData]);
 
     const fetchSongs = async () => {

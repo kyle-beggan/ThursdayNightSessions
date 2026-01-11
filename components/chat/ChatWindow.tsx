@@ -22,6 +22,22 @@ export default function ChatWindow({ sessionId = null, className = '' }: ChatWin
         scrollToBottom();
     }, [messages]);
 
+    // Mark as read on mount
+    useEffect(() => {
+        const markAsRead = async () => {
+            try {
+                await fetch('/api/chat/read', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId })
+                });
+            } catch (error) {
+                console.error('Failed to mark chat as read:', error);
+            }
+        };
+        markAsRead();
+    }, [sessionId]);
+
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newMessage.trim() || isSending) return;

@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
         // in the loop or use what is passed if we trust deployment. 
         // Let's rely on the passed `candidates` array which we already have in the modal.
 
-        const selectedUsers = candidates.filter((c: any) => userIds.includes(c.id));
+        const selectedUsers = candidates.filter((c: { id: string }) => userIds.includes(c.id));
         const results = [];
 
         for (const user of selectedUsers) {

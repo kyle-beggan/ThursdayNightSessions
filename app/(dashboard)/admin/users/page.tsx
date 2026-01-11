@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import StatusBadge from '@/components/admin/StatusBadge';
 import Button from '@/components/ui/Button';
@@ -38,13 +38,7 @@ export default function UsersPage() {
     const [userToDelete, setUserToDelete] = useState<User | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    useEffect(() => {
-        fetchUsers();
-    }, []);
 
-    useEffect(() => {
-        filterUsers();
-    }, [users, searchTerm, statusFilter]);
 
     const fetchUsers = async () => {
         try {
@@ -60,7 +54,11 @@ export default function UsersPage() {
         }
     };
 
-    const filterUsers = () => {
+    useEffect(() => {
+        fetchUsers();
+    }, []);
+
+    const filterUsers = useCallback(() => {
         let filtered = users;
 
         if (statusFilter === 'admin') {
@@ -78,7 +76,11 @@ export default function UsersPage() {
         }
 
         setFilteredUsers(filtered);
-    };
+    }, [users, searchTerm, statusFilter]);
+
+    useEffect(() => {
+        filterUsers();
+    }, [users, searchTerm, statusFilter, filterUsers]);
 
     const handleQuickAction = async (userId: string, action: 'approve' | 'reject' | 'make-admin') => {
         try {

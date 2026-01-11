@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 
 interface NavItem {
@@ -25,6 +25,25 @@ export default function Sidebar() {
     const pathname = usePathname();
     const [isCollapsed, setIsCollapsed] = useState(false);
     const { data: session } = useSession();
+    const [unreadChatCount, setUnreadChatCount] = useState(0);
+
+    // Fetch unread chat count on mount
+    useEffect(() => {
+        const fetchUnreadCount = async () => {
+            if (!session?.user) return;
+            try {
+                const res = await fetch('/api/chat/unread');
+                if (res.ok) {
+                    const data = await res.json();
+                    setUnreadChatCount(data.count);
+                }
+            } catch (error) {
+                console.error('Failed to fetch unread chat count:', error);
+            }
+        };
+
+        fetchUnreadCount();
+    }, [session]);
 
     return (
         <aside
@@ -56,15 +75,31 @@ export default function Sidebar() {
                         <Link
                             key={item.href}
                             href={item.href}
-                            className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 ${isActive
+                            className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 relative group ${isActive
                                 ? 'bg-primary/20 text-primary border border-primary/50'
                                 : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
                                 }`}
                             title={isCollapsed ? item.name : undefined}
                         >
-                            <span className="text-xl flex-shrink-0">{item.icon}</span>
+                            <span className="text-xl flex-shrink-0 relative">
+                                {item.icon}
+                                {/* Collapsed State Badge */}
+                                {isCollapsed && item.name === 'Chat' && unreadChatCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white border-2 border-surface animate-bounce-in">
+                                        {/* Dot only for collapsed to save space, or mini number */}
+                                    </span>
+                                )}
+                            </span>
                             {!isCollapsed && (
-                                <span className="font-medium text-sm">{item.name}</span>
+                                <span className="font-medium text-sm flex-1 flex items-center justify-between">
+                                    {item.name}
+                                    {/* Expanded State Badge */}
+                                    {item.name === 'Chat' && unreadChatCount > 0 && (
+                                        <span className="ml-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white animate-bounce-in">
+                                            {unreadChatCount > 9 ? '9+' : unreadChatCount}
+                                        </span>
+                                    )}
+                                </span>
                             )}
                             {!isCollapsed && item.adminOnly && (
                                 <span className="ml-auto text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">

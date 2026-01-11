@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
         const session = await getServerSession(authOptions);
         if (!session?.user) {
@@ -90,10 +90,27 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Failed to fetch recordings' }, { status: 500 });
         }
 
+        // Define expected DB shape
+        interface RecordingDB {
+            id: string;
+            title: string;
+            url: string;
+            created_at: string;
+            sessions: {
+                date: string;
+                session_commitments: {
+                    users: { name: string } | null;
+                    session_commitment_capabilities: {
+                        capabilities: { icon: string; name: string } | null;
+                    }[];
+                }[];
+            } | null;
+        }
+
         // Transform data for easier frontend consumption
-        const formattedRecordings = data.map((rec: any) => {
-            const players = rec.sessions?.session_commitments?.map((commitment: any) => {
-                const caps = commitment.session_commitment_capabilities?.map((cc: any) => ({
+        const formattedRecordings = (data as unknown as RecordingDB[]).map((rec) => {
+            const players = rec.sessions?.session_commitments?.map((commitment) => {
+                const caps = commitment.session_commitment_capabilities?.map((cc) => ({
                     icon: cc.capabilities?.icon,
                     name: cc.capabilities?.name
                 })) || [];

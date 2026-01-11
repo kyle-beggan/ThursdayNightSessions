@@ -46,7 +46,7 @@ export default function FindSongModal({ isOpen, onClose, onAddSongs }: FindSongM
             setSelectedSongs(new Set());
             setSearchError(null);
         }
-    }, [isOpen]);
+    }, [isOpen, capabilities.length]);
 
     const fetchCapabilities = async () => {
         setIsLoadingCaps(true);

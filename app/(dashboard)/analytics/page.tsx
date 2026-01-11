@@ -81,7 +81,7 @@ export default function AnalyticsPage() {
         return `${year}-${month}-${day}`;
     };
 
-    const setRange = (range: 'last_month' | 'this_month' | 'last_6_months' | 'last_year' | 'all_time') => {
+    const setRange = (range: 'last_month' | 'this_month' | 'next_month' | 'last_6_months' | 'last_year' | 'all_time') => {
         const today = new Date();
         let start = new Date(today);
         let end = new Date(today); // Default end is today
@@ -95,6 +95,10 @@ export default function AnalyticsPage() {
             case 'this_month':
                 start = new Date(today.getFullYear(), today.getMonth(), 1);
                 end = new Date(today.getFullYear(), today.getMonth() + 1, 0); // Last day of current month
+                break;
+            case 'next_month':
+                start = new Date(today.getFullYear(), today.getMonth() + 1, 1); // 1st day of next month
+                end = new Date(today.getFullYear(), today.getMonth() + 2, 0); // Last day of next month
                 break;
             case 'last_6_months':
                 start = new Date(today.getFullYear(), today.getMonth() - 6, today.getDate());
@@ -134,15 +138,17 @@ export default function AnalyticsPage() {
 
                 <div className="flex flex-col sm:flex-row items-center gap-4">
                     <div className="flex items-center gap-2 bg-surface p-1 rounded-lg border border-border text-sm">
-                        <button type="button" onClick={() => setRange('last_month')} className="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors">Last Month</button>
+                        <button type="button" onClick={() => setRange('last_month')} className="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded transition-colors">Last Month</button>
                         <div className="w-[1px] h-4 bg-border"></div>
-                        <button type="button" onClick={() => setRange('this_month')} className="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors">This Month</button>
+                        <button type="button" onClick={() => setRange('this_month')} className="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded transition-colors">This Month</button>
                         <div className="w-[1px] h-4 bg-border"></div>
-                        <button type="button" onClick={() => setRange('last_6_months')} className="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors">Last 6M</button>
+                        <button type="button" onClick={() => setRange('next_month')} className="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded transition-colors">Next Month</button>
                         <div className="w-[1px] h-4 bg-border"></div>
-                        <button type="button" onClick={() => setRange('last_year')} className="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors">Last Year</button>
+                        <button type="button" onClick={() => setRange('last_6_months')} className="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded transition-colors">Last 6M</button>
                         <div className="w-[1px] h-4 bg-border"></div>
-                        <button type="button" onClick={() => setRange('all_time')} className="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors">All Time</button>
+                        <button type="button" onClick={() => setRange('last_year')} className="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded transition-colors">Last Year</button>
+                        <div className="w-[1px] h-4 bg-border"></div>
+                        <button type="button" onClick={() => setRange('all_time')} className="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded transition-colors">All Time</button>
                     </div>
 
                     <div className="flex items-center gap-2 bg-surface p-2 rounded-lg border border-border">
@@ -190,7 +196,7 @@ export default function AnalyticsPage() {
                                 itemStyle={{ color: '#E5E7EB' }}
                                 labelFormatter={(date) => new Date(date).toLocaleDateString()}
                             />
-                            <Line type="monotone" dataKey="attendees" stroke="#8B5CF6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 8 }} />
+                            <Line type="monotone" dataKey="attendees" stroke="#8B5CF6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 8 }} animationDuration={500} />
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
@@ -214,6 +220,7 @@ export default function AnalyticsPage() {
                                         if (!name || percent === undefined) return '';
                                         return `${name.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} ${(percent * 100).toFixed(0)}%`;
                                     }}
+                                    animationDuration={500}
                                 >
                                     {data.charts.instrumentDistribution.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -242,7 +249,7 @@ export default function AnalyticsPage() {
                                     contentStyle={{ backgroundColor: '#1F2937', border: 'none', borderRadius: '8px' }}
                                     itemStyle={{ color: '#E5E7EB' }}
                                 />
-                                <Bar dataKey="count" fill="#10B981" radius={[0, 4, 4, 0]} barSize={20} />
+                                <Bar dataKey="count" fill="#10B981" radius={[0, 4, 4, 0]} barSize={20} animationDuration={500} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -265,7 +272,7 @@ export default function AnalyticsPage() {
                                     contentStyle={{ backgroundColor: '#1F2937', border: 'none', borderRadius: '8px' }}
                                     itemStyle={{ color: '#E5E7EB' }}
                                 />
-                                <Bar dataKey="count" fill="#F59E0B" radius={[4, 4, 0, 0]} barSize={40} />
+                                <Bar dataKey="count" fill="#F59E0B" radius={[4, 4, 0, 0]} barSize={40} animationDuration={500} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>

@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
             'song_capabilities'
         ];
 
-        const results: Record<string, any> = {};
+        const results: Record<string, { status: string; error?: string; count?: number; reason?: string }> = {};
 
         for (const tableName of tables) {
             const sheet = workbook.Sheets[tableName];
@@ -79,8 +79,8 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({ success: true, results });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error in restore route:', error);
-        return NextResponse.json({ error: `Restore failed: ${error.message}` }, { status: 500 });
+        return NextResponse.json({ error: `Restore failed: ${(error as Error).message}` }, { status: 500 });
     }
 }

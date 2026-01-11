@@ -74,11 +74,12 @@ export const authOptions: NextAuthOptions = {
                 } else {
                     supabaseUserId = existingUser.id;
 
-                    // Update existing user's name and avatar if changed
+                    // Update existing user's name, avatar, and last_sign_in_at
                     await supabaseAdmin
                         .from('users')
                         .update({
                             name: user.name || 'Unknown',
+                            last_sign_in_at: new Date().toISOString(),
                         })
                         .eq('id', supabaseUserId);
                 }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
+
 import CapabilityModal from '@/components/admin/CapabilityModal';
 
 type Capability = {

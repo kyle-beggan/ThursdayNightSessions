@@ -1,16 +1,23 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { NextRequest, NextResponse } from 'next/server';
+
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
 export async function GET(request: Request) {
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get('sessionId');
 
-    const supabase = await createClient();
-
     try {
+        // Use Admin Client to bypass RLS since we've already authenticated via NextAuth
+        const supabase = createAdminClient();
+
         let query = supabase
             .from('chat_messages')
             .select(`
@@ -23,7 +30,7 @@ export async function GET(request: Request) {
                     id,
                     name,
                     email,
-                    u_avatar_url: avatar_url
+                    avatar_url: image
                 )
             `)
             .order('created_at', { ascending: true })
@@ -50,8 +57,9 @@ export async function GET(request: Request) {
     }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
+
     if (!session || !session.user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -72,7 +80,15 @@ export async function POST(request: Request) {
                 user_id: session.user.id,
                 session_id: sessionId || null, // null for global
             })
-            .select() // Return the inserted row
+            .select(`
+                *,
+                users (
+                    id,
+                    name,
+                    email,
+                    avatar_url: image
+                )
+            `) // Return the inserted row with user details
             .single();
 
         if (error) {

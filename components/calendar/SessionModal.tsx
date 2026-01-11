@@ -19,6 +19,7 @@ interface SessionModalProps {
 export default function SessionModal({ isOpen, onClose, session, onUpdate }: SessionModalProps) {
     const { data: sessionData } = useSession();
     const [isCommitting, setIsCommitting] = useState(false);
+
     const [step, setStep] = useState<'details' | 'rsvp'>('details');
     const [userCapabilities, setUserCapabilities] = useState<Capability[]>([]);
     const [selectedCapabilities, setSelectedCapabilities] = useState<string[]>([]);
@@ -194,20 +195,20 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
         <Modal isOpen={isOpen} onClose={handleClose} title={step === 'details' ? "Session Details" : "Confirm RSVP"} size="xl" className="!p-5 h-[80vh] flex flex-col">
             <div className="flex-1 flex flex-col min-h-0">
                 {step === 'details' && (
-                    <div className="flex gap-4 border-b border-border mb-4">
+                    <div className="flex p-1 bg-surface-secondary/30 border border-border rounded-xl mb-6">
                         <button
-                            className={`pb-2 text-sm font-medium transition-colors ${activeTab === 'details'
-                                ? 'text-primary border-b-2 border-primary'
-                                : 'text-text-secondary hover:text-text-primary'
+                            className={`flex-1 px-4 py-3 text-lg font-bold rounded-lg transition-all duration-300 ${activeTab === 'details'
+                                ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
+                                : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
                                 }`}
                             onClick={() => setActiveTab('details')}
                         >
                             Details
                         </button>
                         <button
-                            className={`pb-2 text-sm font-medium transition-colors ${activeTab === 'chat'
-                                ? 'text-primary border-b-2 border-primary'
-                                : 'text-text-secondary hover:text-text-primary'
+                            className={`flex-1 px-4 py-3 text-lg font-bold rounded-lg transition-all duration-300 ${activeTab === 'chat'
+                                ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
+                                : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
                                 }`}
                             onClick={() => setActiveTab('chat')}
                         >
@@ -278,15 +279,12 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                                         {commitment.user?.name}
                                                     </div>
                                                     <div className="flex flex-wrap gap-1 justify-center">
-                                                        {(commitment.capabilities && commitment.capabilities.length > 0
-                                                            ? commitment.capabilities
-                                                            : commitment.user?.capabilities
-                                                        )?.map((cap) => (
+                                                        {(commitment.capabilities || []).map((cap) => (
                                                             <span
                                                                 key={cap.id}
-                                                                className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/20 text-primary rounded-full text-[10px] font-medium"
+                                                                className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/20 text-primary text-xs rounded-full"
                                                             >
-                                                                <span className="text-sm">{cap.icon || '🎵'}</span>
+                                                                <span>{cap.icon || '🎵'}</span>
                                                                 <span className="capitalize">{cap.name}</span>
                                                             </span>
                                                         ))}

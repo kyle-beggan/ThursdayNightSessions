@@ -11,17 +11,13 @@ interface SessionIndicatorProps {
     className?: string;
 }
 
-// Core capabilities typically needed for a session
-const coreCapabilities = [
-    'vocalist',
-    'drums',
-    'bass guitar',
-    'keyboards',
-    'lead guitar',
-    'trumpet',
-    'alto sax',
-    'tenor sax',
-];
+
+
+const toProperCase = (str: string) => {
+    return str.replace(/\w\S*/g, (txt) => {
+        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+    });
+};
 
 export default function SessionIndicator({ session, onClick, className }: SessionIndicatorProps) {
     const [showTooltip, setShowTooltip] = useState(false);
@@ -56,6 +52,13 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
                         {format(new Date(session.date + 'T00:00:00'), 'MMMM d')} <span className="text-sm font-normal text-text-secondary">({format(new Date(session.date + 'T00:00:00'), 'EEE')})</span>
                     </div>
 
+                    {/* New Message Badge */}
+                    {session.newMessageCount && session.newMessageCount > 0 ? (
+                        <div className="absolute top-2 right-2 flex items-center justify-center w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full shadow-lg border-2 border-surface animate-bounce-in">
+                            {session.newMessageCount > 9 ? '9+' : session.newMessageCount}
+                        </div>
+                    ) : null}
+
                     <div className="text-xs font-medium text-primary mb-2">
                         {format(new Date(`2000-01-01T${session.start_time}`), 'h:mm a')}
                     </div>
@@ -82,8 +85,8 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
                                                         return (
                                                             <span
                                                                 key={cap.id || capIdx}
-                                                                title={isMissing ? `${cap.name} (Missing) - Click to find candidates` : cap.name}
-                                                                onClick={(e) => isMissing && handleMissingCapabilityClick(e, cap.id, cap.name)}
+                                                                title={isMissing ? `${toProperCase(cap.name)} (Missing) - Click to find candidates` : toProperCase(cap.name)}
+                                                                onClick={(e) => isMissing && handleMissingCapabilityClick(e, cap.id, toProperCase(cap.name))}
                                                                 className={`
                                                                     text-sm px-1 py-0 rounded-[3px] 
                                                                     bg-surface-secondary/50 text-text-secondary
@@ -123,7 +126,7 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
                                     <span className="truncate flex-1">{commitment.user.name}</span>
                                     <div className="flex gap-0.5">
                                         {(commitment.capabilities || []).slice(0, 6).map((cap, idx) => (
-                                            <span key={idx} className="text-sm" title={cap.name}>
+                                            <span key={idx} className="text-sm" title={toProperCase(cap.name)}>
                                                 {cap.icon || '🎵'}
                                             </span>
                                         ))}

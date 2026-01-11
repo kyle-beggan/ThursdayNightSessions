@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+
 import Link from 'next/link';
 import StatusBadge from '@/components/admin/StatusBadge';
 import Button from '@/components/ui/Button';
@@ -24,7 +24,7 @@ type Capability = {
 };
 
 export default function ApprovalsPage() {
-    const router = useRouter();
+
     const [users, setUsers] = useState<User[]>([]);
     const { items: sortedUsers, requestSort, sortConfig } = useSortableData(users);
     const [capabilities, setCapabilities] = useState<Capability[]>([]);

@@ -57,13 +57,13 @@ export async function GET(
         // Transform data to match frontend types (handling capabilities nesting)
         const transformedSession = {
             ...session,
-            commitments: session.commitments?.map((c: any) => ({
+            commitments: session.commitments?.map((c: { user?: { capabilities?: { capability: unknown }[] }; capabilities?: { capability: unknown }[] } & Record<string, unknown>) => ({
                 ...c,
                 user: {
                     ...c.user,
-                    capabilities: c.user?.capabilities?.map((uc: any) => uc.capability) || []
+                    capabilities: c.user?.capabilities?.map((uc) => uc.capability) || []
                 },
-                capabilities: c.capabilities?.map((cc: any) => cc.capability) || []
+                capabilities: c.capabilities?.map((cc) => cc.capability) || []
             })) || []
         };
 
@@ -164,7 +164,7 @@ export async function PATCH(
 
             // Insert new songs
             if (songs.length > 0) {
-                const songsToInsert = songs.map((song: any, index: number) => ({
+                const songsToInsert = songs.map((song: { song_name: string; song_url?: string }, index: number) => ({
                     session_id: id,
                     song_name: song.song_name,
                     song_url: song.song_url || null,

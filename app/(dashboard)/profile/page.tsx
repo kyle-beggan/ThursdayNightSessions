@@ -5,12 +5,14 @@ import { useSession } from 'next-auth/react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import StatusBadge from '@/components/admin/StatusBadge';
+import Image from 'next/image';
 
 type User = {
     id: string;
     name: string;
     email: string;
     phone: string;
+    image?: string;
     status: 'pending' | 'approved' | 'rejected';
     user_type: 'admin' | 'user';
     created_at: string;
@@ -30,12 +32,14 @@ export default function ProfilePage() {
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [activeTab, setActiveTab] = useState<'details' | 'capabilities' | 'avatar'>('details');
 
     // Form state
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         phone: '',
+        image: '',
         selectedCapabilities: [] as string[]
     });
 
@@ -44,6 +48,7 @@ export default function ProfilePage() {
             fetchProfile();
             fetchCapabilities();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [session]);
 
     const fetchProfile = async () => {
@@ -56,8 +61,24 @@ export default function ProfilePage() {
                     name: data.name,
                     email: data.email,
                     phone: data.phone,
+                    image: data.image || '',
                     selectedCapabilities: data.capabilities.map((c: Capability) => c.id)
                 });
+
+                // SYNC: If session image differs from DB image, update DB to match session (Source of Truth)
+                if (session?.user?.image && session.user.image !== data.image) {
+                    console.log('Syncing avatar from session to DB...');
+                    // Update local state immediately for UI
+                    setUser((prev) => prev ? { ...prev, image: session.user.image! } : null); // Non-null assertion safe due to if check
+                    setFormData((prev) => ({ ...prev, image: session.user.image! })); // Non-null assertion safe due to if check
+
+                    // Update DB in background
+                    fetch('/api/profile', {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image: session.user.image })
+                    }).catch(err => console.error('Failed to sync avatar:', err));
+                }
             }
         } catch (error) {
             console.error('Error fetching profile:', error);
@@ -88,6 +109,7 @@ export default function ProfilePage() {
                 name: user.name,
                 email: user.email,
                 phone: user.phone,
+                image: user.image || '',
                 selectedCapabilities: user.capabilities.map(c => c.id)
             });
         }
@@ -104,6 +126,7 @@ export default function ProfilePage() {
                     name: formData.name,
                     email: formData.email,
                     phone: formData.phone,
+                    image: formData.image,
                     capabilities: formData.selectedCapabilities
                 })
             });
@@ -111,6 +134,8 @@ export default function ProfilePage() {
             if (response.ok) {
                 await fetchProfile();
                 setIsEditing(false);
+                // Force reload to update session/header avatar if needed
+                window.location.reload();
             } else {
                 alert('Failed to update profile');
             }
@@ -123,6 +148,7 @@ export default function ProfilePage() {
     };
 
     const toggleCapability = (capId: string) => {
+        if (!isEditing) return;
         setFormData(prev => ({
             ...prev,
             selectedCapabilities: prev.selectedCapabilities.includes(capId)
@@ -159,169 +185,186 @@ export default function ProfilePage() {
                         Edit Profile
                     </Button>
                 )}
-            </div>
-
-            {/* Personal Information */}
-            <div className="bg-surface border border-border rounded-lg p-6">
-                <h2 className="text-xl font-semibold text-text-primary mb-4">Personal Information</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-sm font-medium text-text-secondary mb-2">
-                            Name
-                        </label>
-                        {isEditing ? (
-                            <Input
-                                type="text"
-                                value={formData.name}
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                required
-                            />
-                        ) : (
-                            <p className="text-text-primary font-medium">{user.name}</p>
-                        )}
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-text-secondary mb-2">
-                            Email
-                        </label>
-                        {isEditing ? (
-                            <Input
-                                type="email"
-                                value={formData.email}
-                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                required
-                            />
-                        ) : (
-                            <p className="text-text-primary font-medium">{user.email}</p>
-                        )}
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-text-secondary mb-2">
-                            Phone
-                        </label>
-                        {isEditing ? (
-                            <Input
-                                type="tel"
-                                value={formData.phone}
-                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                required
-                            />
-                        ) : (
-                            <p className="text-text-primary font-medium">{user.phone}</p>
-                        )}
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-text-secondary mb-2">
-                            Status
-                        </label>
-                        <StatusBadge status={user.status} />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-text-secondary mb-2">
-                            Account Type
-                        </label>
-                        <p className={`text-sm font-medium ${user.user_type === 'admin' ? 'text-primary' : 'text-text-primary'}`}>
-                            {user.user_type === 'admin' ? 'Administrator' : 'User'}
-                        </p>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-text-secondary mb-2">
-                            Member Since
-                        </label>
-                        <p className="text-text-primary font-medium">
-                            {new Date(user.created_at).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                            })}
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Capabilities */}
-            <div className="bg-surface border border-border rounded-lg p-6">
-                <h2 className="text-xl font-semibold text-text-primary mb-4">
-                    My Capabilities
-                </h2>
-                <p className="text-sm text-text-secondary mb-4">
-                    {isEditing
-                        ? 'Select the instruments and skills you can perform'
-                        : 'Your assigned instruments and skills'}
-                </p>
-
-                {isEditing ? (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {allCapabilities.map(cap => {
-                            const isSelected = formData.selectedCapabilities.includes(cap.id);
-                            return (
-                                <div
-                                    key={cap.id}
-                                    onClick={() => toggleCapability(cap.id)}
-                                    className={`
-                                        cursor-pointer p-4 rounded-xl border transition-all duration-200 flex flex-col items-center justify-center text-center h-[120px] relative group
-                                        ${isSelected
-                                            ? 'bg-primary/10 border-primary shadow-[0_0_15px_rgba(139,92,246,0.3)]'
-                                            : 'bg-surface border-border hover:border-primary/50 hover:bg-surface-hover hover:shadow-lg'
-                                        }
-                                    `}
-                                >
-                                    {isSelected && (
-                                        <div className="absolute top-2 right-2 flex items-center justify-center w-5 h-5 bg-primary text-white rounded-full text-xs font-bold">
-                                            ✓
-                                        </div>
-                                    )}
-                                    <div className="text-3xl mb-2">
-                                        {cap.icon || '🎸'}
-                                    </div>
-                                    <h4 className={`font-medium text-sm capitalize ${isSelected ? 'text-primary' : 'text-text-primary'}`}>
-                                        {cap.name}
-                                    </h4>
-                                </div>
-                            );
-                        })}
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {user.capabilities.length > 0 ? (
-                            user.capabilities.map(cap => (
-                                <div
-                                    key={cap.id}
-                                    className="p-4 rounded-xl border border-border bg-surface flex flex-col items-center justify-center text-center h-[120px]"
-                                >
-                                    <div className="text-3xl mb-2">
-                                        {cap.icon || '🎸'}
-                                    </div>
-                                    <h4 className="font-medium text-sm text-text-primary capitalize">
-                                        {cap.name}
-                                    </h4>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="col-span-full text-center py-8 text-text-secondary italic bg-surface-secondary rounded-lg border border-border border-dashed">
-                                No capabilities assigned yet
-                            </div>
-                        )}
+                {isEditing && (
+                    <div className="flex gap-3">
+                        <Button onClick={handleCancel} variant="ghost" disabled={isSaving}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleSave} variant="primary" disabled={isSaving}>
+                            {isSaving ? 'Saving...' : 'Save Changes'}
+                        </Button>
                     </div>
                 )}
             </div>
 
-            {/* Action Buttons */}
-            {isEditing && (
-                <div className="flex gap-4 justify-end">
-                    <Button onClick={handleCancel} variant="ghost" disabled={isSaving}>
-                        Cancel
-                    </Button>
-                    <Button onClick={handleSave} variant="primary" disabled={isSaving}>
-                        {isSaving ? 'Saving...' : 'Save Changes'}
-                    </Button>
+            {/* Current Avatar Header (Always visible) */}
+            <div className="flex items-center gap-4 bg-surface/50 border border-border rounded-lg p-4">
+                <div className="w-16 h-16 rounded-full bg-surface-secondary overflow-hidden border-2 border-primary/20">
+                    {formData.image ? (
+                        <Image
+                            src={formData.image}
+                            alt="Avatar"
+                            width={64}
+                            height={64}
+                            className="w-full h-full object-cover"
+                            unoptimized={formData.image.includes('supabase.co')}
+                        />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-2xl">
+                            👤
+                        </div>
+                    )}
                 </div>
-            )}
+                <div>
+                    <h2 className="text-lg font-bold text-text-primary">{formData.name || user.name}</h2>
+                    <p className="text-sm text-text-secondary">{formData.email || user.email}</p>
+                </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex p-1 bg-surface-secondary/30 border border-border rounded-xl mb-6">
+                <button
+                    onClick={() => setActiveTab('details')}
+                    className={`flex-1 px-4 py-3 text-lg font-bold rounded-lg transition-all duration-300 ${activeTab === 'details'
+                        ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
+                        : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
+                        }`}
+                >
+                    Profile Details
+                </button>
+                <button
+                    onClick={() => setActiveTab('capabilities')}
+                    className={`flex-1 px-4 py-3 text-lg font-bold rounded-lg transition-all duration-300 ${activeTab === 'capabilities'
+                        ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
+                        : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
+                        }`}
+                >
+                    Capabilities
+                </button>
+            </div>
+
+            {/* Tab Content */}
+            <div className="bg-surface border border-border rounded-lg p-6 min-h-[400px]">
+
+                {/* Details Tab */}
+                {activeTab === 'details' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-sm font-medium text-text-secondary mb-2">Name</label>
+                            {isEditing ? (
+                                <Input
+                                    type="text"
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    required
+                                />
+                            ) : (
+                                <p className="text-text-primary font-medium">{user.name}</p>
+                            )}
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-text-secondary mb-2">Email</label>
+                            {isEditing ? (
+                                <Input
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    required
+                                />
+                            ) : (
+                                <p className="text-text-primary font-medium">{user.email}</p>
+                            )}
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-text-secondary mb-2">Phone</label>
+                            {isEditing ? (
+                                <Input
+                                    type="tel"
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                    required
+                                />
+                            ) : (
+                                <p className="text-text-primary font-medium">{user.phone}</p>
+                            )}
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-text-secondary mb-2">Status</label>
+                            <StatusBadge status={user.status} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-text-secondary mb-2">Account Type</label>
+                            <p className="text-text-primary font-medium capitalize">{user.user_type}</p>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-text-secondary mb-2">Member Since</label>
+                            <p className="text-text-primary font-medium">
+                                {new Date(user.created_at).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                })}
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {/* Capabilities Tab */}
+                {activeTab === 'capabilities' && (
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-lg font-semibold text-text-primary">Assigned Instruments & Skills</h2>
+                            <p className="text-xs text-text-secondary">
+                                {isEditing ? 'Tap to select/deselect' : `${user.capabilities.length} selected`}
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {(isEditing ? allCapabilities : user.capabilities).map(cap => {
+                                const isSelected = isEditing
+                                    ? formData.selectedCapabilities.includes(cap.id)
+                                    : true; // In view mode, we iterate over user.capabilities which are all selected by definition
+
+                                return (
+                                    <div
+                                        key={cap.id}
+                                        onClick={() => toggleCapability(cap.id)}
+                                        className={`
+                                            p-4 rounded-xl border transition-all duration-200 flex flex-col items-center justify-center text-center h-[120px] relative group
+                                            ${isEditing ? 'cursor-pointer' : ''}
+                                            ${isSelected
+                                                ? 'bg-primary/10 border-primary shadow-[0_0_15px_rgba(139,92,246,0.3)]'
+                                                : isEditing
+                                                    ? 'bg-surface border-border hover:border-primary/50 opacity-60 hover:opacity-100' // Unselected in edit mode
+                                                    : 'bg-surface border-border' // View mode only sees selected
+                                            }
+                                        `}
+                                    >
+                                        {isSelected && isEditing && (
+                                            <div className="absolute top-2 right-2 flex items-center justify-center w-5 h-5 bg-primary text-white rounded-full text-xs font-bold">
+                                                ✓
+                                            </div>
+                                        )}
+                                        <div className="text-3xl mb-2">
+                                            {cap.icon || '🎸'}
+                                        </div>
+                                        <h4 className={`font-medium text-sm capitalize ${isSelected ? 'text-primary' : 'text-text-primary'}`}>
+                                            {cap.name}
+                                        </h4>
+                                    </div>
+                                );
+                            })}
+
+                            {/* Empty State for View Mode */}
+                            {!isEditing && user.capabilities.length === 0 && (
+                                <div className="col-span-full text-center py-8 text-text-secondary italic bg-surface-secondary rounded-lg border border-border border-dashed">
+                                    No capabilities assigned yet. Click Edit to add some!
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

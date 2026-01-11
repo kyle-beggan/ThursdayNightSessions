@@ -36,12 +36,18 @@ export async function GET(request: NextRequest) {
         const songSessionMap = new Map<string, { date: string, id: string }>();
         const usedSongNames: string[] = [];
 
-        usedSongs?.forEach((item: any) => {
+        usedSongs?.forEach((item: { song_name: string | null; session_id: string; session: { date: string | null }[] | { date: string | null } | null }) => {
             if (item.song_name) {
                 usedSongNames.push(item.song_name);
-                if (item.session?.date) {
+                // Supabase returns arrays for relations sometimes? No, it's singular if not array?
+                // Actually, the error said session is `{ date: any }[]` but required `{ date: string }`.
+                // It seems `item.session` might be array.
+                // Let's coerce.
+                const sess = Array.isArray(item.session) ? item.session[0] : item.session;
+
+                if (sess?.date) {
                     songSessionMap.set(item.song_name, {
-                        date: item.session.date,
+                        date: sess.date,
                         id: item.session_id
                     });
                 }
@@ -71,7 +77,7 @@ export async function GET(request: NextRequest) {
             query = query.or(`title.ilike.%${search}%,artist.ilike.%${search}%`);
         }
 
-        // eslint-disable-next-line prefer-const
+
         let { data, error } = await query;
 
         // Fallback: If fetch failed (likely due to missing song_capabilities table/relation), try fetching without it
@@ -104,10 +110,11 @@ export async function GET(request: NextRequest) {
         const enrichedData = (data || []).map(song => {
             const sessionInfo = songSessionMap.get(song.title);
             // Flatten capabilities
-            const capabilities = song.song_capabilities?.map((sc: any) => sc.capability) || [];
+            const capabilities = song.song_capabilities?.map((sc: { capability: unknown }) => sc.capability) || [];
 
             // Remove the raw relation property to clean up response
-            const { song_capabilities, ...songData } = song;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { song_capabilities: _song_capabilities, ...songData } = song;
 
             return {
                 ...songData,

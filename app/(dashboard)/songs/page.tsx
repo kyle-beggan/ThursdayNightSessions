@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Button from '@/components/ui/Button';
 import AddSongModal from '@/components/songs/AddSongModal';
 import FindSongModal from '@/components/songs/FindSongModal';
 import SongCapabilitiesModal from '@/components/songs/SongCapabilitiesModal';
 import { Song } from '@/lib/types';
-import Link from 'next/link';
 import { formatDate } from '@/lib/utils';
 import SessionModal from '@/components/calendar/SessionModal';
 import { SessionWithDetails } from '@/lib/types';
@@ -20,7 +19,7 @@ export default function SongsPage() {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isFindModalOpen, setIsFindModalOpen] = useState(false);
 
-    const handleAddRecommendedSongs = async (recommendedSongs: any[]) => {
+    const handleAddRecommendedSongs = async (recommendedSongs: { title: string; artist: string; key: string; tempo: string; youtubeUrl: string }[]) => {
         try {
             setLoading(true);
             // Process each song sequentially
@@ -57,7 +56,7 @@ export default function SongsPage() {
     // Session Modal State
     const [selectedSession, setSelectedSession] = useState<SessionWithDetails | null>(null);
     const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
-    const [isLoadingSession, setIsLoadingSession] = useState(false);
+    const [, setIsLoadingSession] = useState(false);
 
     const handleSessionClick = async (sessionId: string) => {
         setIsLoadingSession(true);
@@ -78,8 +77,9 @@ export default function SongsPage() {
         }
     };
 
-    const fetchSongs = async () => {
+    const fetchSongs = useCallback(async () => {
         try {
+            setLoading(true);
             const url = searchTerm
                 ? `/api/songs?search=${encodeURIComponent(searchTerm)}`
                 : '/api/songs';
@@ -93,7 +93,11 @@ export default function SongsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [searchTerm, setSongs, setLoading]);
+
+    useEffect(() => {
+        fetchSongs();
+    }, [fetchSongs]);
 
     useEffect(() => {
         // Debounce search
@@ -101,14 +105,14 @@ export default function SongsPage() {
             fetchSongs();
         }, 300);
         return () => clearTimeout(timer);
-    }, [searchTerm]);
+    }, [searchTerm, fetchSongs]); // Added fetchSongs to dependency array for completeness, though it's stable due to useCallback
 
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-text-primary">Song Library</h1>
-                    <p className="text-text-secondary">Manage the band's backlog of songs to record</p>
+                    <p className="text-text-secondary">Manage the band&apos;s backlog of songs to record</p>
                 </div>
                 <div className="flex gap-3">
                     <Button onClick={() => setIsFindModalOpen(true)} variant="secondary">

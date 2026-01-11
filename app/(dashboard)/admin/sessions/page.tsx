@@ -14,7 +14,11 @@ type Session = {
     end_time: string;
     created_at: string;
     commitments_count?: number;
-    songs?: any[]; // Using any[] for now as structure varies from raw DB
+    songs?: { id: string; song_name: string; song_url?: string }[];
+};
+
+type FormSession = Omit<Session, 'songs'> & {
+    songs?: Song[];
 };
 
 export default function SessionsPage() {
@@ -26,7 +30,7 @@ export default function SessionsPage() {
     const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all');
 
     // Add state for editing
-    const [editingSession, setEditingSession] = useState<Session | null>(null);
+    const [editingSession, setEditingSession] = useState<FormSession | null>(null);
 
     const upcomingSessions = sessions.filter(s => new Date(s.date) >= new Date());
     const pastSessions = sessions.filter(s => new Date(s.date) < new Date());
@@ -58,7 +62,7 @@ export default function SessionsPage() {
         // session.songs from API is usually session_songs table rows { song_name, song_url, ... }
         // The modal matches by ID or Title. Since we might not have original ID here, we rely on Title match.
 
-        const preparedSession = {
+        const preparedSession: FormSession = {
             ...session,
             songs: session.songs?.map((s, index) => ({
                 id: s.id || `temp-${index}`, // Fallback ID

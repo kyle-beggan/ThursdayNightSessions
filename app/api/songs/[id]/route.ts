@@ -59,7 +59,7 @@ export async function GET(
         // Transform structure to match frontend expectations if needed
         const enrichedSong = {
             ...song,
-            capabilities: song.song_capabilities?.map((sc: any) => sc.capability) || []
+            capabilities: song.song_capabilities?.map((sc: { capability: unknown }) => sc.capability) || []
         };
         delete enrichedSong.song_capabilities;
 
@@ -95,7 +95,7 @@ export async function PATCH(
         }
 
         // Filter out undefined values from update object to prevent accidental nulling or errors
-        const updateData: any = {};
+        const updateData: Record<string, string | number | null> = {};
         if (title !== undefined) updateData.title = title;
         if (artist !== undefined) updateData.artist = artist;
         if (key !== undefined) updateData.key = key;
