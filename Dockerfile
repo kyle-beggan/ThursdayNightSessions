@@ -30,10 +30,12 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Set build-time arguments (used by Next.js during `npm run build`)
 ARG NEXT_PUBLIC_SUPABASE_URL=http://placeholder
 ARG NEXT_PUBLIC_SUPABASE_ANON_KEY=placeholder
+ARG SUPABASE_SERVICE_ROLE_KEY=placeholder
 
 # Persist them as env vars if needed, though usually only ARG is needed for the build step
 ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
 ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY
 
 # Build the app
 
