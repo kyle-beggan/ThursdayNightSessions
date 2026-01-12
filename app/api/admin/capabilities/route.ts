@@ -50,15 +50,16 @@ export async function POST(request: Request) {
         }
 
         const body = await request.json();
-        const { name, icon = '🎸' } = body;
+        const { name, icon } = body;
 
         if (!name || typeof name !== 'string' || name.trim().length === 0) {
             return NextResponse.json({ error: 'Capability name is required' }, { status: 400 });
         }
 
+        // Allow icon to be null/empty for auto-detection
         const { data, error } = await supabaseAdmin
             .from('capabilities')
-            .insert({ name: name.trim().toLowerCase(), icon })
+            .insert({ name: name.trim().toLowerCase(), icon: icon || null })
             .select()
             .single();
 
@@ -101,8 +102,10 @@ export async function PATCH(request: Request) {
         }
 
         const updates: Record<string, unknown> = { name: name.trim().toLowerCase() };
-        if (icon) {
-            updates.icon = icon;
+        if (icon !== undefined) {
+            // If icon is provided (even empty string), update it.
+            // If empty string, convert to null for DB.
+            updates.icon = icon || null;
         }
 
         const { data, error } = await supabaseAdmin

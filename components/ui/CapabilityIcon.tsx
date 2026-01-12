@@ -19,6 +19,11 @@ const CapabilityIcon: React.FC<CapabilityIconProps> = ({ capability, className =
         xmlns: "http://www.w3.org/2000/svg"
     };
 
+    // If a specific icon is set in the DB, use it
+    if (dbIcon) {
+        return <span className={className}>{dbIcon}</span>;
+    }
+
     // --- Guitars ---
 
     // Acoustic Guitar: Rounded body, sound hole

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import CapabilityIcon from '@/components/ui/CapabilityIcon';
 
 type CapabilityModalProps = {
     isOpen: boolean;
@@ -104,6 +105,18 @@ export default function CapabilityModal({
                         Select Icon
                     </label>
                     <div className="grid grid-cols-6 gap-2">
+                        {/* Auto/Default Option */}
+                        <button
+                            onClick={() => setSelectedIcon('')}
+                            className={`p-3 text-xs flex items-center justify-center rounded-lg transition-all border border-dashed border-text-secondary/30 ${!selectedIcon
+                                ? 'bg-primary text-white ring-2 ring-primary'
+                                : 'bg-surface-secondary hover:bg-surface-tertiary text-text-secondary'
+                                }`}
+                            title="Auto-detect based on name"
+                        >
+                            Auto
+                        </button>
+
                         {MUSICAL_ICONS.map((icon) => (
                             <button
                                 key={icon.emoji}
@@ -125,11 +138,20 @@ export default function CapabilityModal({
                     <p className="text-sm text-text-secondary mb-2">Preview:</p>
                     <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center text-2xl">
-                            {selectedIcon}
+                            {/* Use CapabilityIcon for accurate preview */}
+                            <div className="w-8 h-8 flex items-center justify-center">
+                                <CapabilityIcon
+                                    capability={{ name: name || 'Capability', icon: selectedIcon }}
+                                    className="w-8 h-8"
+                                />
+                            </div>
                         </div>
                         <div>
                             <p className="font-medium text-text-primary capitalize">
                                 {name || 'Capability Name'}
+                            </p>
+                            <p className="text-xs text-text-secondary">
+                                {selectedIcon ? 'Custom Icon' : 'Auto-detected Icon'}
                             </p>
                         </div>
                     </div>
