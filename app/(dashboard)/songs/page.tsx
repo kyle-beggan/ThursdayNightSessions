@@ -181,10 +181,7 @@ export default function SongsPage() {
                         <thead>
                             <tr className="bg-surface-secondary border-b border-border text-text-secondary text-sm uppercase tracking-wider">
                                 <th className="p-4 font-medium cursor-pointer hover:text-text-primary transition-colors" onClick={() => requestSort('title')}>
-                                    Title {sortConfig?.key === 'title' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                                </th>
-                                <th className="p-4 font-medium cursor-pointer hover:text-text-primary transition-colors" onClick={() => requestSort('artist')}>
-                                    Artist {sortConfig?.key === 'artist' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                    Song {sortConfig?.key === 'title' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                                 </th>
                                 <th className="p-4 font-medium w-32 cursor-pointer hover:text-text-primary transition-colors" onClick={() => requestSort('key')}>
                                     Key {sortConfig?.key === 'key' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
@@ -196,15 +193,19 @@ export default function SongsPage() {
                                     Session {sortConfig?.key === 'session_date' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                                 </th>
                                 <th className="p-4 font-medium w-32">Requirements</th>
-                                <th className="p-4 font-medium w-32">Added By</th>
+                                <th className="p-4 font-medium w-32 text-center">Added By</th>
                                 <th className="p-4 font-medium w-48 text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
                             {sortedSongs.map((song) => (
                                 <tr key={song.id} className="hover:bg-surface-hover transition-colors">
-                                    <td className="p-4 text-text-primary font-medium">{song.title}</td>
-                                    <td className="p-4 text-text-secondary">{song.artist || '-'}</td>
+                                    <td className="p-4">
+                                        <div>
+                                            <div className="text-text-primary font-medium">{song.title}</div>
+                                            <div className="text-text-secondary text-sm">{song.artist || '-'}</div>
+                                        </div>
+                                    </td>
                                     <td className="p-4 text-text-secondary">{song.key || '-'}</td>
                                     <td className="p-4 text-text-secondary">{song.tempo || '-'}</td>
                                     <td className="p-4 text-text-secondary whitespace-nowrap">
@@ -236,7 +237,7 @@ export default function SongsPage() {
                                         </Button>
                                     </td>
                                     <td className="p-4">
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center justify-center gap-2">
                                             {song.creator ? (
                                                 <div className="flex items-center gap-2 group relative">
                                                     <div className="w-8 h-8 rounded-full overflow-hidden relative border border-border">
