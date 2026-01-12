@@ -33,7 +33,10 @@ export default function Header() {
                                 className="rounded-lg w-[35px] h-[35px] md:w-[50px] md:h-[50px]"
                             />
                             <div className="text-center">
-                                <h1 className="text-base md:text-xl font-bold text-text-primary">Sleepy Hollows Studios</h1>
+                                <h1 className="text-base md:text-xl font-bold text-text-primary leading-tight md:leading-normal">
+                                    <span>Sleepy Hollows</span>
+                                    <span className="block md:inline md:ml-1">Studio</span>
+                                </h1>
                                 <p className="text-[10px] md:text-sm text-text-secondary">Thursday Night Sessions</p>
                             </div>
                         </Link>
