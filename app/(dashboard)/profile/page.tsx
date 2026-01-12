@@ -34,6 +34,8 @@ export default function ProfilePage() {
     const [isSaving, setIsSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<'details' | 'capabilities' | 'avatar'>('details');
 
+    const [uploading, setUploading] = useState(false);
+
     // Form state
     const [formData, setFormData] = useState({
         name: '',
@@ -64,21 +66,6 @@ export default function ProfilePage() {
                     image: data.image || '',
                     selectedCapabilities: data.capabilities.map((c: Capability) => c.id)
                 });
-
-                // SYNC: If session image differs from DB image, update DB to match session (Source of Truth)
-                if (session?.user?.image && session.user.image !== data.image) {
-                    console.log('Syncing avatar from session to DB...');
-                    // Update local state immediately for UI
-                    setUser((prev) => prev ? { ...prev, image: session.user.image! } : null); // Non-null assertion safe due to if check
-                    setFormData((prev) => ({ ...prev, image: session.user.image! })); // Non-null assertion safe due to if check
-
-                    // Update DB in background
-                    fetch('/api/profile', {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ image: session.user.image })
-                    }).catch(err => console.error('Failed to sync avatar:', err));
-                }
             }
         } catch (error) {
             console.error('Error fetching profile:', error);
@@ -114,6 +101,50 @@ export default function ProfilePage() {
             });
         }
         setIsEditing(false);
+    };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) {
+            return;
+        }
+
+        const file = e.target.files[0];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${user?.id}-${Math.random()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        setUploading(true);
+
+        try {
+            // We need a client-side way to upload properly. 
+            // For now, since we don't have a public client object exposed in this file easily (it's in lib/supabase/client),
+            // and we might encounter RLS issues if we don't have authenticated context right,
+            // we will create a client here or assume one exists.
+
+            // NOTE: Ideally import createClient from your lib
+            const { createClient } = await import('@/lib/supabase/client');
+            const supabase = createClient();
+
+            const { error: uploadError } = await supabase.storage
+                .from('avatars')
+                .upload(filePath, file);
+
+            if (uploadError) {
+                throw uploadError;
+            }
+
+            // Get public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('avatars')
+                .getPublicUrl(filePath);
+
+            setFormData(prev => ({ ...prev, image: publicUrl }));
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            alert('Error uploading image');
+        } finally {
+            setUploading(false);
+        }
     };
 
     const handleSave = async () => {
@@ -199,7 +230,7 @@ export default function ProfilePage() {
 
             {/* Current Avatar Header (Always visible) */}
             <div className="flex items-center gap-4 bg-surface/50 border border-border rounded-lg p-4">
-                <div className="w-16 h-16 rounded-full bg-surface-secondary overflow-hidden border-2 border-primary/20">
+                <div className="w-16 h-16 rounded-full bg-surface-secondary overflow-hidden border-2 border-primary/20 relative group">
                     {formData.image ? (
                         <Image
                             src={formData.image}
@@ -213,6 +244,21 @@ export default function ProfilePage() {
                         <div className="w-full h-full flex items-center justify-center text-2xl">
                             👤
                         </div>
+                    )}
+
+                    {isEditing && (
+                        <label className="absolute inset-0 bg-black/50 flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span className="text-white text-xs font-bold text-center p-1">
+                                {uploading ? '...' : 'Edit'}
+                            </span>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleImageUpload}
+                                disabled={uploading}
+                            />
+                        </label>
                     )}
                 </div>
                 <div>
