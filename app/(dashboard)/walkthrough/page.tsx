@@ -28,7 +28,7 @@ export default function WalkthroughPage() {
                         <div className="bg-surface-secondary p-4 rounded-lg">
                             <h4 className="font-semibold text-primary mb-2">📅 Session Calendar</h4>
                             <p className="text-sm text-text-secondary">
-                                View sessions by month. Click session details to add to your <strong>Google Calendar</strong> or download an <strong>iCal</strong> file.
+                                View sessions by month. Click session details to access the <strong>Setlist</strong>, <strong>Session Chat</strong>, and <strong>Recordings</strong>.
                             </p>
                         </div>
                         <div className="bg-surface-secondary p-4 rounded-lg">
@@ -77,6 +77,33 @@ export default function WalkthroughPage() {
                             </div>
                         </li>
                     </ul>
+                </div>
+            )
+        },
+        {
+            id: 'recordings',
+            title: 'Recordings',
+            icon: '🎙️',
+            content: (
+                <div className="space-y-4">
+                    <h3 className="text-xl font-bold text-text-primary">Session Archive</h3>
+                    <p className="text-text-secondary">
+                        Listen back to the magic (and the mistakes). The Recording Library holds all uploaded tracks from past sessions.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div className="bg-surface-secondary p-4 rounded-lg">
+                            <h4 className="font-semibold text-primary mb-2">📂 Library View</h4>
+                            <p className="text-sm text-text-secondary">
+                                Browse recordings by session date. Filter by song title or players involved.
+                            </p>
+                        </div>
+                        <div className="bg-surface-secondary p-4 rounded-lg">
+                            <h4 className="font-semibold text-primary mb-2">▶️ One-Click Pay</h4>
+                            <p className="text-sm text-text-secondary">
+                                Instant playback for any track. Relive the "Seven Nation Army" jam instantly.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             )
         },
