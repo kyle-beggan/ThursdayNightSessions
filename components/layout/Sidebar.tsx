@@ -24,9 +24,27 @@ const navItems: NavItem[] = [
 
 export default function Sidebar() {
     const pathname = usePathname();
-    const [isCollapsed, setIsCollapsed] = useState(true);
+    const [isCollapsed, setIsCollapsed] = useState(false);
     const { data: session } = useSession();
     const [unreadChatCount, setUnreadChatCount] = useState(0);
+
+    // Initial responsive state
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 768) {
+                setIsCollapsed(true);
+            } else {
+                setIsCollapsed(false);
+            }
+        };
+
+        // Set initial state
+        handleResize();
+
+        // Optional: Listen for resize if we want it to auto-collapse/expand
+        // window.addEventListener('resize', handleResize);
+        // return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // Fetch unread chat count on mount
     useEffect(() => {
@@ -54,7 +72,7 @@ export default function Sidebar() {
             {/* Toggle Button */}
             <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="absolute -right-3 top-4 w-6 h-6 bg-surface border border-border rounded-full flex items-center justify-center hover:bg-surface-hover transition-colors"
+                className="absolute -right-3 top-4 w-6 h-6 bg-surface border border-border rounded-full flex items-center justify-center hover:bg-surface-hover transition-colors z-10"
                 aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
                 <span className="text-xs text-text-primary">
@@ -63,7 +81,7 @@ export default function Sidebar() {
             </button>
 
             {/* Navigation Items */}
-            <nav className="p-4 space-y-2">
+            <nav className={`space-y-2 ${isCollapsed ? 'p-2' : 'p-4'}`}>
                 {navItems.map((item) => {
                     const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
 
@@ -79,10 +97,10 @@ export default function Sidebar() {
                             className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 relative group ${isActive
                                 ? 'bg-primary/20 text-primary border border-primary/50'
                                 : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
-                                }`}
+                                } ${isCollapsed ? 'justify-center' : ''}`}
                             title={isCollapsed ? item.name : undefined}
                         >
-                            <span className="text-xl flex-shrink-0 relative">
+                            <span className="text-xl flex-shrink-0 relative flex items-center justify-center">
                                 {item.icon}
                                 {/* Collapsed State Badge */}
                                 {isCollapsed && item.name === 'Chat' && unreadChatCount > 0 && (
