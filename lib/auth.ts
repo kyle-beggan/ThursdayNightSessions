@@ -130,24 +130,10 @@ export const authOptions: NextAuthOptions = {
             return session;
         },
 
-        if(!error && userData) {
-            session.user.userType = userData.user_type;
-session.user.status = userData.status;
-// Use DB image if available, otherwise fall back to session image (provider) or null
-if (userData.image) {
-    session.user.image = userData.image;
-}
-                } else {
-    // Default values if fetch fails
-    session.user.userType = 'user';
-    session.user.status = 'pending';
-}
-            }
-return session;
-        },
+
     },
-pages: {
-    signIn: '/login',
+    pages: {
+        signIn: '/login',
     },
-secret: process.env.NEXTAUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET,
 };
