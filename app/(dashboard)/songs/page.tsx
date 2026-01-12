@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import Button from '@/components/ui/Button';
 import AddSongModal from '@/components/songs/AddSongModal';
 import FindSongModal from '@/components/songs/FindSongModal';
@@ -195,7 +196,8 @@ export default function SongsPage() {
                                     Session {sortConfig?.key === 'session_date' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                                 </th>
                                 <th className="p-4 font-medium w-32">Requirements</th>
-                                <th className="p-4 font-medium w-48 text-right pr-6">Actions</th>
+                                <th className="p-4 font-medium w-32">Added By</th>
+                                <th className="p-4 font-medium w-48 text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
@@ -233,8 +235,37 @@ export default function SongsPage() {
                                             <span className="hidden group-hover:inline text-[8px] ml-1 text-gray-400">{song.id}</span>
                                         </Button>
                                     </td>
-                                    <td className="p-4 text-right pr-6">
-                                        <div className="flex items-center justify-end gap-2">
+                                    <td className="p-4">
+                                        <div className="flex items-center gap-2">
+                                            {song.creator ? (
+                                                <div className="flex items-center gap-2 group relative">
+                                                    <div className="w-8 h-8 rounded-full overflow-hidden relative border border-border">
+                                                        {song.creator.image ? (
+                                                            <Image
+                                                                src={song.creator.image}
+                                                                alt={song.creator.name}
+                                                                fill
+                                                                className="object-cover"
+                                                                sizes="32px"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-full bg-surface-tertiary flex items-center justify-center text-xs">
+                                                                {song.creator.name.charAt(0)}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    {/* Tooltip */}
+                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black/80 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                                                        {song.creator.name}
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-text-secondary text-xs">-</span>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="p-4 text-center">
+                                        <div className="flex items-center justify-center gap-2">
                                             {song.resource_url && (
                                                 <Button
                                                     variant="secondary"
@@ -242,7 +273,7 @@ export default function SongsPage() {
                                                     onClick={() => window.open(song.resource_url, '_blank')}
                                                     title="Play"
                                                 >
-                                                    ▶ Play
+                                                    ▶
                                                 </Button>
                                             )}
                                             <Button

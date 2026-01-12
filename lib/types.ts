@@ -18,6 +18,7 @@ export interface Song {
     session_date?: string; // Derived field for display
     session_id?: string;   // Derived field for linking
     capabilities?: { id: string; name: string; icon?: string }[];
+    creator?: { name: string; image?: string };
 }
 
 export interface User {

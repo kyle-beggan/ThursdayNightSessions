@@ -64,6 +64,10 @@ export async function GET(request: NextRequest) {
                         name,
                         icon
                     )
+                ),
+                users (
+                    name,
+                    image
                 )
             `)
             .order('title', { ascending: true });
@@ -114,11 +118,15 @@ export async function GET(request: NextRequest) {
 
             // Remove the raw relation property to clean up response
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { song_capabilities: _song_capabilities, ...songData } = song;
+            const { song_capabilities: _song_capabilities, users, ...songData } = song;
+
+            // Coerce Supabase single relation response
+            const creator = Array.isArray(users) ? users[0] : users;
 
             return {
                 ...songData,
                 capabilities,
+                creator,
                 session_date: sessionInfo?.date || null,
                 session_id: sessionInfo?.id || null
             };
