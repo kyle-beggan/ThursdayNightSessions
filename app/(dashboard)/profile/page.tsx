@@ -109,36 +109,24 @@ export default function ProfilePage() {
         }
 
         const file = e.target.files[0];
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${user?.id}-${Math.random()}.${fileExt}`;
-        const filePath = `${fileName}`;
-
         setUploading(true);
 
         try {
-            // We need a client-side way to upload properly. 
-            // For now, since we don't have a public client object exposed in this file easily (it's in lib/supabase/client),
-            // and we might encounter RLS issues if we don't have authenticated context right,
-            // we will create a client here or assume one exists.
+            const formData = new FormData();
+            formData.append('file', file);
 
-            // NOTE: Ideally import createClient from your lib
-            const { createClient } = await import('@/lib/supabase/client');
-            const supabase = createClient();
+            const response = await fetch('/api/profile/upload', {
+                method: 'POST',
+                body: formData
+            });
 
-            const { error: uploadError } = await supabase.storage
-                .from('avatars')
-                .upload(filePath, file);
-
-            if (uploadError) {
-                throw uploadError;
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Upload failed');
             }
 
-            // Get public URL
-            const { data: { publicUrl } } = supabase.storage
-                .from('avatars')
-                .getPublicUrl(filePath);
-
-            setFormData(prev => ({ ...prev, image: publicUrl }));
+            const data = await response.json();
+            setFormData(prev => ({ ...prev, image: data.url }));
         } catch (error) {
             console.error('Error uploading image:', error);
             alert('Error uploading image');
