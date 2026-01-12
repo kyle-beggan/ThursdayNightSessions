@@ -108,3 +108,12 @@ export interface SessionWithDetails extends Session {
     recordings?: SessionRecording[];
     newMessageCount?: number;
 }
+
+export interface ChatReaction {
+    id: string;
+    message_id: string;
+    user_id: string;
+    emoji: string;
+    created_at: string;
+    user?: User; // Optional if we fetch user details
+}

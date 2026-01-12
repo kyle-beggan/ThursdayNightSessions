@@ -13,6 +13,13 @@ export interface ChatMessage {
         email: string;
         avatar_url?: string;
     };
+    reactions?: {
+        id: string;
+        message_id: string;
+        user_id: string;
+        emoji: string;
+        created_at: string;
+    }[];
 }
 
 export const useChat = (sessionId: string | null = null) => {
@@ -101,11 +108,45 @@ export const useChat = (sessionId: string | null = null) => {
                     }
                 }
             )
-            .subscribe((status) => {
-                if (status === 'SUBSCRIBED') {
-                    // console.log('Subscribed to chat:', sessionId || 'global');
+
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'chat_reactions'
+                },
+                async (payload) => {
+                    if (payload.eventType === 'INSERT') {
+                        const newReaction = payload.new as any;
+                        setMessages((prev) =>
+                            prev.map(msg => {
+                                if (msg.id === newReaction.message_id) {
+                                    return {
+                                        ...msg,
+                                        reactions: [...(msg.reactions || []), newReaction]
+                                    };
+                                }
+                                return msg;
+                            })
+                        );
+                    } else if (payload.eventType === 'DELETE') {
+                        const oldReaction = payload.old as any;
+                        setMessages((prev) =>
+                            prev.map(msg => {
+                                if (msg.id === oldReaction.message_id || msg.reactions?.some(r => r.id === oldReaction.id)) {
+                                    return {
+                                        ...msg,
+                                        reactions: (msg.reactions || []).filter(r => r.id !== oldReaction.id)
+                                    };
+                                }
+                                return msg;
+                            })
+                        );
+                    }
                 }
-            });
+            )
+            .subscribe();
 
         return () => {
             supabase.removeChannel(channel);

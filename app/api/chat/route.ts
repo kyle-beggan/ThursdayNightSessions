@@ -31,6 +31,13 @@ export async function GET(request: Request) {
                     name,
                     email,
                     avatar_url: image
+                ),
+                reactions:chat_reactions (
+                    id,
+                    message_id,
+                    user_id,
+                    emoji,
+                    created_at
                 )
             `)
             .order('created_at', { ascending: true })
@@ -85,8 +92,16 @@ export async function POST(request: NextRequest) {
                 users (
                     id,
                     name,
+                    name,
                     email,
                     avatar_url: image
+                ),
+                reactions:chat_reactions (
+                    id,
+                    message_id,
+                    user_id,
+                    emoji,
+                    created_at
                 )
             `) // Return the inserted row with user details
             .single();
