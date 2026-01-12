@@ -124,9 +124,9 @@ export default function WalkthroughPage() {
                             <div className="text-xs text-text-secondary mt-1">Upvote ideas you like</div>
                         </div>
                         <div className="flex-1 bg-surface-secondary p-4 rounded-lg text-center">
-                            <div className="text-2xl mb-2">📝</div>
-                            <div className="font-semibold">Submit</div>
-                            <div className="text-xs text-text-secondary mt-1">Share your own thoughts</div>
+                            <div className="text-2xl mb-2">💬</div>
+                            <div className="font-semibold">Discuss</div>
+                            <div className="text-xs text-text-secondary mt-1">Reply to feedback for clarification</div>
                         </div>
                     </div>
                 </div>

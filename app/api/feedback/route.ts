@@ -70,7 +70,8 @@ export async function GET(request: NextRequest) {
             .select(`
                 *,
                 user:users(name),
-                votes:feedback_votes(user_id, vote_type)
+                votes:feedback_votes(user_id, vote_type),
+                replies:feedback_replies(*, user:users(name, image))
             `)
             .order('created_at', { ascending: false });
 
@@ -91,7 +92,8 @@ export async function GET(request: NextRequest) {
                 upvotes,
                 downvotes,
                 user_vote: userVote,
-                user_name: item.user?.name || 'Unknown User'
+                user_name: item.user?.name || 'Unknown User',
+                replies: item.replies?.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) || []
             };
         });
 

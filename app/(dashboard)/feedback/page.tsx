@@ -15,6 +15,12 @@ interface FeedbackItem {
     upvotes: number;
     downvotes: number;
     user_vote: 'up' | 'down' | null;
+    replies?: {
+        id: string;
+        message: string;
+        created_at: string;
+        user: { name: string };
+    }[];
 }
 
 export default function FeedbackPage() {
@@ -245,18 +251,82 @@ export default function FeedbackPage() {
                                     <p className="text-text-primary text-sm whitespace-pre-wrap leading-relaxed mb-3">
                                         {item.message}
                                     </p>
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex items-center justify-between mb-4">
                                         <div className="text-xs text-text-secondary">
                                             by <span className="font-medium text-text-primary">{item.user_name}</span>
                                         </div>
                                         {item.status !== 'pending' && (
                                             <span className={`text-xs px-2 py-0.5 rounded capitalize ${item.status === 'implemented' ? 'bg-green-500/20 text-green-400' :
-                                                    item.status === 'closed' ? 'bg-gray-500/20 text-gray-400' :
-                                                        'bg-blue-500/20 text-blue-400'
+                                                item.status === 'closed' ? 'bg-gray-500/20 text-gray-400' :
+                                                    'bg-blue-500/20 text-blue-400'
                                                 }`}>
                                                 {item.status}
                                             </span>
                                         )}
+                                    </div>
+
+                                    {/* Replies Section */}
+                                    <div className="mt-4 pt-4 border-t border-border space-y-3">
+                                        {item.replies?.map(reply => (
+                                            <div key={reply.id} className="flex gap-3 text-sm bg-surface-secondary/50 p-3 rounded-lg">
+                                                <div className="font-bold text-text-primary text-xs shrink-0 mt-0.5">
+                                                    {reply.user?.name || 'User'}:
+                                                </div>
+                                                <div className="flex-1 text-text-secondary">
+                                                    {reply.message}
+                                                </div>
+                                                <div className="text-[10px] text-text-tertiary shrink-0">
+                                                    {formatDate(reply.created_at)}
+                                                </div>
+                                            </div>
+                                        ))}
+
+                                        {/* Reply Input */}
+                                        <div className="flex gap-2 items-center mt-2">
+                                            <input
+                                                type="text"
+                                                placeholder="Write a reply..."
+                                                className="flex-1 bg-surface-secondary border border-border rounded-lg px-3 py-1.5 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-text-tertiary"
+                                                onKeyDown={async (e) => {
+                                                    if (e.key === 'Enter') {
+                                                        const target = e.target as HTMLInputElement;
+                                                        const val = target.value.trim();
+                                                        if (!val) return;
+
+                                                        // Disable input while sending
+                                                        target.disabled = true;
+
+                                                        try {
+                                                            const res = await fetch('/api/feedback/reply', {
+                                                                method: 'POST',
+                                                                headers: { 'Content-Type': 'application/json' },
+                                                                body: JSON.stringify({ feedback_id: item.id, message: val })
+                                                            });
+
+                                                            if (res.ok) {
+                                                                const newReply = await res.json();
+                                                                setFeedbackList(prev => prev.map(f => {
+                                                                    if (f.id === item.id) {
+                                                                        return {
+                                                                            ...f,
+                                                                            replies: [...(f.replies || []), newReply]
+                                                                        };
+                                                                    }
+                                                                    return f;
+                                                                }));
+                                                                target.value = '';
+                                                            }
+                                                        } catch (err) {
+                                                            console.error('Error replying', err);
+                                                        } finally {
+                                                            target.disabled = false;
+                                                            target.focus();
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                            <span className="text-[10px] text-text-tertiary uppercase tracking-wider">Press Enter</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
