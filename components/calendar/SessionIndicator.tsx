@@ -54,7 +54,7 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
 
                     {/* New Message Badge */}
                     {session.newMessageCount && session.newMessageCount > 0 ? (
-                        <div className="absolute top-2 right-2 flex items-center justify-center w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full shadow-lg border-2 border-surface animate-bounce-in">
+                        <div className="absolute top-2 right-2 flex items-center justify-center w-6 h-6 bg-primary text-white text-xs font-bold rounded-full shadow-lg border-2 border-surface animate-bounce-in">
                             {session.newMessageCount > 9 ? '9+' : session.newMessageCount}
                         </div>
                     ) : null}
