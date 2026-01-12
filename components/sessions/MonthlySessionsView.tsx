@@ -58,12 +58,12 @@ export default function MonthlySessionsView({ sessions, onRefresh }: MonthlySess
                 return (
                     <div key={month} className="mb-[25px]">
                         {/* Month Header */}
-                        <div className="flex items-baseline gap-3 mb-4">
-                            <h2 className="text-2xl font-bold text-text-primary">
+                        <div className="flex items-baseline gap-2 md:gap-3 mb-4">
+                            <h2 className="text-lg md:text-2xl font-bold text-text-primary">
                                 {month} {currentYear}
                             </h2>
                             {monthSessions.length > 0 && (
-                                <span className="text-sm text-text-secondary">
+                                <span className="text-xs md:text-sm text-text-secondary whitespace-nowrap">
                                     {monthSessions.length} session{monthSessions.length !== 1 ? 's' : ''}
                                 </span>
                             )}
