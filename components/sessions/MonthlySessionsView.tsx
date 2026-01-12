@@ -76,7 +76,7 @@ export default function MonthlySessionsView({ sessions, onRefresh }: MonthlySess
                         >
                             {monthSessions.length > 0 ? (
                                 <div className="h-full overflow-y-auto pr-2">
-                                    <div className="grid grid-cols-4 gap-4 h-full">
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 h-full">
                                         {displaySessions.map(session => (
                                             <div key={session.id} className="h-full">
                                                 <SessionIndicator
