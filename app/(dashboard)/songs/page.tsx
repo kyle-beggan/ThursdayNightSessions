@@ -247,19 +247,17 @@ export default function SongsPage() {
                                             )}
                                             <Button
                                                 variant="ghost"
-                                                className="text-xs px-2 py-1.5 h-auto text-text-secondary hover:text-text-primary"
+                                                className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-text-primary"
                                                 onClick={() => handleEditSong(song)}
-                                                title="Edit"
                                             >
-                                                ✏️
+                                                Edit
                                             </Button>
                                             <Button
                                                 variant="ghost"
-                                                className="text-xs px-2 py-1.5 h-auto text-text-secondary hover:text-red-400"
+                                                className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-red-400"
                                                 onClick={() => handleDeleteSong(song.id)}
-                                                title="Delete"
                                             >
-                                                🗑️
+                                                Delete
                                             </Button>
                                         </div>
                                     </td>
