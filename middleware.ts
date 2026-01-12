@@ -32,17 +32,7 @@ export async function middleware(req: NextRequest) {
     // 3. Authenticated Logic
     const userStatus = token.status as string;
 
-    // Case: Pending User
-    if (userStatus === 'pending') {
-        // Allow access to /pending and /api/auth (for logout)
-        if (pathname === '/pending') {
-            return NextResponse.next();
-        }
-        // Redirect everything else to /pending
-        return NextResponse.redirect(new URL('/pending', req.url));
-    }
-
-    // Case: Approved/Rejected User
+    // Case: Approved/Admin User
     if (userStatus === 'approved' || userStatus === 'admin') {
         // If approved user tries to go to /pending, redirect to dashboard
         if (pathname === '/pending') {
@@ -51,8 +41,14 @@ export async function middleware(req: NextRequest) {
         return NextResponse.next();
     }
 
-    // Default fallback (e.g. rejected users might also go to pending or a specific rejected page)
-    return NextResponse.next();
+    // Default Case (Pending, Rejected, or Unknown Status) -> Treat as Pending
+    // Allow access to /pending only
+    if (pathname === '/pending') {
+        return NextResponse.next();
+    }
+
+    // Redirect everything else to /pending
+    return NextResponse.redirect(new URL('/pending', req.url));
 }
 
 export const config = {

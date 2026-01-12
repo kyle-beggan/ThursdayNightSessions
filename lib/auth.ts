@@ -93,10 +93,28 @@ export const authOptions: NextAuthOptions = {
                 return false;
             }
         },
-        async jwt({ token, user }) {
+        async jwt({ token, user, trigger, session }) {
+            // Initial sign in or update
             if (user) {
                 token.id = user.id;
             }
+
+            // If we have an ID but no status (or on every req if we want real-time), fetch status
+            // Taking a balanced approach: fetch if missing or if forced update
+            if (token.id && (!token.status || trigger === 'update')) {
+                const { data: userData } = await supabaseAdmin
+                    .from('users')
+                    .select('status, user_type, image')
+                    .eq('id', token.id)
+                    .single();
+
+                if (userData) {
+                    token.status = userData.status;
+                    token.userType = userData.user_type;
+                    if (userData.image) token.picture = userData.image; // optional: sync avatar
+                }
+            }
+
             return token;
         },
         async session({ session, token }) {
@@ -104,31 +122,32 @@ export const authOptions: NextAuthOptions = {
                 const userId = token.id as string;
                 session.user.id = userId;
 
-                // Fetch user details from Supabase
-                const { data: userData, error } = await supabaseAdmin
-                    .from('users')
-                    .select('user_type, status, image')
-                    .eq('id', userId)
-                    .single();
-
-                if (!error && userData) {
-                    session.user.userType = userData.user_type;
-                    session.user.status = userData.status;
-                    // Use DB image if available, otherwise fall back to session image (provider) or null
-                    if (userData.image) {
-                        session.user.image = userData.image;
-                    }
-                } else {
-                    // Default values if fetch fails
-                    session.user.userType = 'user';
-                    session.user.status = 'pending';
-                }
+                // Pass properties from token to session
+                session.user.status = token.status as string;
+                session.user.userType = token.userType as string;
+                if (token.picture) session.user.image = token.picture;
             }
             return session;
         },
+
+        if(!error && userData) {
+            session.user.userType = userData.user_type;
+session.user.status = userData.status;
+// Use DB image if available, otherwise fall back to session image (provider) or null
+if (userData.image) {
+    session.user.image = userData.image;
+}
+                } else {
+    // Default values if fetch fails
+    session.user.userType = 'user';
+    session.user.status = 'pending';
+}
+            }
+return session;
+        },
     },
-    pages: {
-        signIn: '/login',
+pages: {
+    signIn: '/login',
     },
-    secret: process.env.NEXTAUTH_SECRET,
+secret: process.env.NEXTAUTH_SECRET,
 };
