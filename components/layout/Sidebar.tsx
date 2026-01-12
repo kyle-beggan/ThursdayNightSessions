@@ -85,7 +85,7 @@ export default function Sidebar() {
                                 {item.icon}
                                 {/* Collapsed State Badge */}
                                 {isCollapsed && item.name === 'Chat' && unreadChatCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white border-2 border-surface animate-bounce-in">
+                                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white border-2 border-surface animate-bounce-in">
                                         {/* Dot only for collapsed to save space, or mini number */}
                                     </span>
                                 )}
@@ -95,7 +95,7 @@ export default function Sidebar() {
                                     {item.name}
                                     {/* Expanded State Badge */}
                                     {item.name === 'Chat' && unreadChatCount > 0 && (
-                                        <span className="ml-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white animate-bounce-in">
+                                        <span className="ml-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-xs font-bold text-white animate-bounce-in">
                                             {unreadChatCount > 9 ? '9+' : unreadChatCount}
                                         </span>
                                     )}

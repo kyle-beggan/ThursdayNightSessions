@@ -9,8 +9,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  //title: "Sleepy Hollows Studios - Thursday Night Sessions",
-  //description: "Band rehearsal scheduling and communication for Sleepy Hollows Studios",
+  title: "Thursday Night Sessions",
+  description: "Band rehearsal scheduling and communication for Sleepy Hollows Studios",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({
