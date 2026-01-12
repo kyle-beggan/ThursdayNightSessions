@@ -7,7 +7,7 @@ import { SessionWithDetails, SessionCommitment, Capability, Song } from '@/lib/t
 import CandidateListModal from './CandidateListModal';
 import AddSongModal from '@/components/songs/AddSongModal';
 import CapabilityIcon from '@/components/ui/CapabilityIcon';
-import { formatDate, formatTime } from '@/lib/utils';
+import { formatDate, formatTime, generateGoogleCalendarLink, downloadICSFile } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import SongPicker from '@/components/ui/SongPicker';
 
@@ -307,6 +307,26 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                     <p className="text-text-primary text-sm">
                                         {formatDate(session.date)} • {formatTime(session.start_time)} - {formatTime(session.end_time)} EST
                                     </p>
+                                    <div className="flex gap-2 mt-2">
+                                        <Button
+                                            size="sm"
+                                            variant="primary"
+                                            className="text-xs h-7 px-2 flex items-center gap-1"
+                                            onClick={() => window.open(generateGoogleCalendarLink(session), '_blank')}
+                                        >
+                                            <span className="text-sm">📅</span>
+                                            Google
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="primary"
+                                            className="text-xs h-7 px-2 flex items-center gap-1"
+                                            onClick={() => downloadICSFile(session)}
+                                        >
+                                            <span className="text-sm">📥</span>
+                                            iCal / Outlook
+                                        </Button>
+                                    </div>
                                 </div>
 
                                 {/* Songs */}

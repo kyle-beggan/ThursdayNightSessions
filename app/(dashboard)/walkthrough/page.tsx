@@ -28,7 +28,7 @@ export default function WalkthroughPage() {
                         <div className="bg-surface-secondary p-4 rounded-lg">
                             <h4 className="font-semibold text-primary mb-2">📅 Session Calendar</h4>
                             <p className="text-sm text-text-secondary">
-                                View sessions by month. Click on any session to see details, who's attending, and the setlist.
+                                View sessions by month. Click session details to add to your <strong>Google Calendar</strong> or download an <strong>iCal</strong> file.
                             </p>
                         </div>
                         <div className="bg-surface-secondary p-4 rounded-lg">
