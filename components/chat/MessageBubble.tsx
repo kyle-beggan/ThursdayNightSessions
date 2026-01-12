@@ -1,4 +1,5 @@
 import { useSession } from 'next-auth/react';
+import Image from 'next/image';
 import { format } from 'date-fns';
 
 interface Message {
@@ -26,12 +27,17 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
         <div className={`flex gap-3 mb-4 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
             {/* Avatar Circle */}
             <div className={`
-                w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0
+                w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 relative overflow-hidden
                 ${isMe ? 'bg-primary text-white' : 'bg-surface-tertiary text-text-secondary'}
             `}>
                 {avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={avatarUrl} alt={senderName} className="w-full h-full rounded-full object-cover" />
+                    <Image
+                        src={avatarUrl}
+                        alt={senderName}
+                        fill
+                        className="object-cover"
+                        sizes="32px"
+                    />
                 ) : (
                     // Generic User Icon
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 opacity-70">
