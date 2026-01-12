@@ -138,6 +138,43 @@ export default function SongsPage() {
         }
     };
 
+    const handleVote = async (song: Song) => {
+        // Optimistic update
+        setSongs(prev => prev.map(s => {
+            if (s.id === song.id) {
+                const hasVoted = !!s.user_has_voted;
+                return {
+                    ...s,
+                    user_has_voted: !hasVoted,
+                    vote_count: (s.vote_count || 0) + (hasVoted ? -1 : 1)
+                };
+            }
+            return s;
+        }));
+
+        try {
+            await fetch('/api/songs/vote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ songId: song.id })
+            });
+        } catch (error) {
+            console.error('Error voting:', error);
+            // Revert on error (could reuse fetchSongs but that's heavy, simpler to flip back)
+            setSongs(prev => prev.map(s => {
+                if (s.id === song.id) {
+                    const hasVoted = !!s.user_has_voted; // This is the *new* state we just set
+                    return {
+                        ...s,
+                        user_has_voted: !hasVoted, // Flip back
+                        vote_count: (s.vote_count || 0) + (hasVoted ? -1 : 1)
+                    };
+                }
+                return s;
+            }));
+        }
+    };
+
     // ... existing handlers ...
 
     return (
@@ -183,31 +220,33 @@ export default function SongsPage() {
                                 <th className="p-4 font-medium cursor-pointer hover:text-text-primary transition-colors" onClick={() => requestSort('title')}>
                                     Song {sortConfig?.key === 'title' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                                 </th>
-                                <th className="p-4 font-medium w-32 cursor-pointer hover:text-text-primary transition-colors" onClick={() => requestSort('key')}>
-                                    Key {sortConfig?.key === 'key' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                                </th>
-                                <th className="p-4 font-medium w-32 cursor-pointer hover:text-text-primary transition-colors" onClick={() => requestSort('tempo')}>
-                                    Tempo {sortConfig?.key === 'tempo' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                <th className="p-4 font-medium w-48 cursor-pointer hover:text-text-primary transition-colors" onClick={() => requestSort('key')}>
+                                    Key / Tempo
                                 </th>
                                 <th className="p-4 font-medium w-40 cursor-pointer hover:text-text-primary transition-colors" onClick={() => requestSort('session_date')}>
                                     Session {sortConfig?.key === 'session_date' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                                 </th>
                                 <th className="p-4 font-medium w-32">Requirements</th>
+                                <th className="p-4 font-medium w-32 text-center text-xs">Interested?</th>
                                 <th className="p-4 font-medium w-32 text-center">Added By</th>
-                                <th className="p-4 font-medium w-48 text-center">Actions</th>
+                                <th className="p-4 font-medium w-32 text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
                             {sortedSongs.map((song) => (
                                 <tr key={song.id} className="hover:bg-surface-hover transition-colors">
-                                    <td className="p-4">
+                                    <td className="p-4 max-w-[200px]">
                                         <div>
-                                            <div className="text-text-primary font-medium">{song.title}</div>
-                                            <div className="text-text-secondary text-sm">{song.artist || '-'}</div>
+                                            <div className="text-text-primary font-medium whitespace-nowrap overflow-hidden text-ellipsis" title={song.title}>{song.title}</div>
+                                            <div className="text-text-secondary text-sm whitespace-nowrap overflow-hidden text-ellipsis" title={song.artist}>{song.artist || '-'}</div>
                                         </div>
                                     </td>
-                                    <td className="p-4 text-text-secondary">{song.key || '-'}</td>
-                                    <td className="p-4 text-text-secondary">{song.tempo || '-'}</td>
+                                    <td className="p-4 text-text-secondary">
+                                        <div className="flex flex-col">
+                                            <span className="font-medium text-text-primary">{song.key || '-'}</span>
+                                            <span className="text-xs">{song.tempo ? `${song.tempo} bpm` : '-'}</span>
+                                        </div>
+                                    </td>
                                     <td className="p-4 text-text-secondary whitespace-nowrap">
                                         {song.session_date && song.session_id ? (
                                             <button
@@ -235,6 +274,43 @@ export default function SongsPage() {
                                             {/* Debug ID */}
                                             <span className="hidden group-hover:inline text-[8px] ml-1 text-gray-400">{song.id}</span>
                                         </Button>
+                                    </td>
+                                    <td className="p-4 text-center">
+                                        <div className="inline-flex items-center bg-surface-tertiary rounded-full p-1 border border-border">
+                                            <button
+                                                onClick={() => !song.user_has_voted && handleVote(song)}
+                                                className={`
+                                                    p-1.5 rounded-full transition-colors
+                                                    ${song.user_has_voted
+                                                        ? 'text-green-500 bg-green-500/10'
+                                                        : 'text-text-secondary hover:text-green-500 hover:bg-surface-hover'
+                                                    }
+                                                `}
+                                                title="I'm interested"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                                    <path d="M1 8.25a1.25 1.25 0 112.5 0v7.5a1.25 1.25 0 11-2.5 0v-7.5zM11 3V1.7c0-.268.14-.526.395-.607A2 2 0 0114 3c0 .995-.182 1.948-.514 2.826-.204.54.166 1.174.744 1.174h2.52c1.243 0 2.261 1.01 2.146 2.247a23.864 23.864 0 01-1.341 5.974C17.153 16.323 16.072 17 14.9 17h-3.192a3 3 0 01-1.341-.317l-2.734-1.366A3 3 0 006.292 15H5V8h.963c.685 0 1.258-.483 1.612-1.068a4.011 4.011 0 012.16-1.779A10.55 10.55 0 0011 3z" />
+                                                </svg>
+                                            </button>
+
+                                            <span className={`text-xs font-medium mx-1.5 min-w-[12px] ${song.user_has_voted ? 'text-green-500' : 'text-text-secondary'}`}>
+                                                {song.vote_count || 0}
+                                            </span>
+
+                                            <button
+                                                onClick={() => song.user_has_voted && handleVote(song)}
+                                                className={`
+                                                    p-1.5 rounded-full transition-colors text-text-secondary hover:text-red-400 hover:bg-surface-hover
+                                                    ${!song.user_has_voted ? 'opacity-50 cursor-not-allowed' : ''}
+                                                `}
+                                                disabled={!song.user_has_voted}
+                                                title="Not interested"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                                    <path d="M18.905 12.75a1.25 1.25 0 01-2.5 0v-7.5a1.25 1.25 0 112.5 0v7.5zM8.905 17v1.3c0 .268-.14.526-.395.607A2 2 0 015.905 17c0-.995.182-1.948.514-2.826.204-.54-.166-1.174-.744-1.174h-2.52c-1.243 0-2.261-1.01-2.146-2.247.193-2.08.652-4.082 1.341-5.974C2.752 3.677 3.833 3 5.005 3h3.192a3 3 0 011.341.317l2.734 1.366A3 3 0 0013.613 5h1.292v7h-.963c-.685 0-1.258.483-1.612 1.068a4.011 4.011 0 01-2.16 1.779 10.55 10.55 0 00-1.265 2.153z" />
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </td>
                                     <td className="p-4">
                                         <div className="flex items-center justify-center gap-2">
@@ -266,11 +342,11 @@ export default function SongsPage() {
                                         </div>
                                     </td>
                                     <td className="p-4 text-center">
-                                        <div className="flex items-center justify-center gap-2">
+                                        <div className="flex items-center justify-center gap-1">
                                             {song.resource_url && (
                                                 <Button
                                                     variant="secondary"
-                                                    className="text-xs px-3 py-1.5 h-auto text-green-400 hover:text-green-300 border-green-500/30 hover:bg-green-500/10"
+                                                    className="w-8 h-8 p-0 flex items-center justify-center text-green-400 hover:text-green-300 border-green-500/30 hover:bg-green-500/10 rounded-full"
                                                     onClick={() => window.open(song.resource_url, '_blank')}
                                                     title="Play"
                                                 >

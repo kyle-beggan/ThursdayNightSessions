@@ -59,6 +59,12 @@ export default function WalkthroughPage() {
                             </div>
                         </li>
                         <li className="flex items-start gap-3">
+                            <span className="bg-primary/20 text-primary p-1 rounded">👍</span>
+                            <div>
+                                <strong className="text-text-primary">Vote:</strong> Thumbs up songs you're interested in playing. This helps us prioritize what to learn next.
+                            </div>
+                        </li>
+                        <li className="flex items-start gap-3">
                             <span className="bg-primary/20 text-primary p-1 rounded">🎸</span>
                             <div>
                                 <strong className="text-text-primary">Requirements:</strong> Check what instruments are needed for each song (e.g., "Bass", "Drums").
@@ -87,12 +93,15 @@ export default function WalkthroughPage() {
                     <div className="bg-surface-secondary p-6 rounded-lg border border-border mt-4">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">K</div>
-                            <div className="bg-surface-tertiary p-3 rounded-tr-xl rounded-br-xl rounded-bl-xl text-sm">
+                            <div className="bg-surface-tertiary p-3 rounded-tr-xl rounded-br-xl rounded-bl-xl text-sm relative group">
                                 "Hey everyone, don't forget we're recording 'Seven Nation Army' next week!"
+                                <div className="absolute -bottom-2 right-0 bg-surface border border-border rounded-full px-1.5 py-0.5 text-[10px] shadow-sm">
+                                    🔥 2
+                                </div>
                             </div>
                         </div>
                         <p className="text-xs text-text-secondary text-center italic">
-                            Chats update in real-time. You'll see unread counts in the sidebar.
+                            Chats update in real-time. React with emojis to show your hype!
                         </p>
                     </div>
                 </div>

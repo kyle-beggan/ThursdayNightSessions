@@ -109,7 +109,31 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Failed to fetch songs' }, { status: 500 });
         }
 
-        // Attach session_date and session_id to songs
+        // Fetch vote counts and user status
+        // 1. Get all votes (for counts) - OPTIMIZATION: In production, use .rpc() for counts or separate analytics table
+        const { data: allVotes } = await supabaseAdmin
+            .from('song_votes')
+            .select('song_id');
+
+        // 2. Get current user's votes
+        let userVotedSongIds = new Set<string>();
+        const session = await getServerSession(authOptions);
+        if (session?.user?.id) {
+            const { data: userVotes } = await supabaseAdmin
+                .from('song_votes')
+                .select('song_id')
+                .eq('user_id', session.user.id);
+
+            userVotes?.forEach(v => userVotedSongIds.add(v.song_id));
+        }
+
+        // Count votes per song
+        const voteCounts = (allVotes || []).reduce((acc, curr) => {
+            acc[curr.song_id] = (acc[curr.song_id] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+
+        // Attach session_date, session_id, and votes to songs
         // Also transform capabilities
         const enrichedData = (data || []).map(song => {
             const sessionInfo = songSessionMap.get(song.title);
@@ -128,14 +152,15 @@ export async function GET(request: NextRequest) {
                 capabilities,
                 creator,
                 session_date: sessionInfo?.date || null,
-                session_id: sessionInfo?.id || null
+                session_id: sessionInfo?.id || null,
+                vote_count: voteCounts[song.id] || 0,
+                user_has_voted: userVotedSongIds.has(song.id)
             };
         });
 
+        // Debug log
         if (enrichedData.length > 0) {
-            console.log('Sample song from API:', enrichedData[0]);
-        } else {
-            console.log('API returning empty song list');
+            // console.log('Sample song from API:', enrichedData[0]);
         }
 
         return NextResponse.json(enrichedData);

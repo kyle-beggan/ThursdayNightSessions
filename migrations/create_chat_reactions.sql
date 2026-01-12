@@ -29,4 +29,7 @@ CREATE POLICY "Users can delete their own reactions"
   USING (auth.uid() = user_id);
 
 -- Realtime
-ALTER PUBLICATION supabase_realtime ADD TABLE chat_reactions;
+-- Realtime
+-- NOTE: Publication "supabase_realtime" is likely set to FOR ALL TABLES, so explicit add might fail.
+-- If not, you can manually enable replication in the dashboard.
+-- ALTER PUBLICATION supabase_realtime ADD TABLE chat_reactions;

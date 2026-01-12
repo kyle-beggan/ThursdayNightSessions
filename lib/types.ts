@@ -19,6 +19,8 @@ export interface Song {
     session_id?: string;   // Derived field for linking
     capabilities?: { id: string; name: string; icon?: string }[];
     creator?: { name: string; image?: string };
+    vote_count?: number;
+    user_has_voted?: boolean;
 }
 
 export interface User {

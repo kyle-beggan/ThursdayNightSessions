@@ -9,7 +9,7 @@ interface ChatWindowProps {
 }
 
 export default function ChatWindow({ sessionId = null, className = '' }: ChatWindowProps) {
-    const { messages, loading, sendMessage } = useChat(sessionId);
+    const { messages, loading, sendMessage, addReaction } = useChat(sessionId);
     const [newMessage, setNewMessage] = useState('');
     const [isSending, setIsSending] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -71,7 +71,11 @@ export default function ChatWindow({ sessionId = null, className = '' }: ChatWin
                 ) : (
                     <>
                         {messages.map((msg) => (
-                            <MessageBubble key={msg.id} message={msg} />
+                            <MessageBubble
+                                key={msg.id}
+                                message={msg}
+                                onReact={(emoji) => addReaction(msg.id, emoji)}
+                            />
                         ))}
                         <div ref={messagesEndRef} />
                     </>

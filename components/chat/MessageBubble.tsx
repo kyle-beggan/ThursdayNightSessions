@@ -18,9 +18,10 @@ interface Message {
 
 interface MessageBubbleProps {
     message: Message;
+    onReact: (emoji: string) => void;
 }
 
-export default function MessageBubble({ message }: MessageBubbleProps) {
+export default function MessageBubble({ message, onReact }: MessageBubbleProps) {
     const { data: session } = useSession();
     const isMe = session?.user?.id === message.user_id;
     const senderName = message.users?.name || 'Unknown User';
@@ -28,17 +29,9 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
 
     const [showPicker, setShowPicker] = useState(false);
 
-    const handleReaction = async (emoji: string) => {
-        try {
-            await fetch('/api/chat/react', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ messageId: message.id, emoji })
-            });
-            setShowPicker(false);
-        } catch (error) {
-            console.error('Error adding reaction:', error);
-        }
+    const handleReaction = (emoji: string) => {
+        onReact(emoji);
+        setShowPicker(false);
     };
 
     // Group reactions by emoji

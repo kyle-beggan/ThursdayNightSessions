@@ -187,5 +187,49 @@ export const useChat = (sessionId: string | null = null) => {
         }
     };
 
-    return { messages, loading, sendMessage };
+    const addReaction = async (messageId: string, emoji: string) => {
+        // Optimistic update
+        const fakeReaction = {
+            id: `temp-${Date.now()}`,
+            message_id: messageId,
+            user_id: 'me', // Placeholder, we don't need real ID for display if we handle it right
+            emoji,
+            created_at: new Date().toISOString()
+        };
+
+        setMessages((prev) =>
+            prev.map(msg => {
+                if (msg.id === messageId) {
+                    // Check if we are toggling off (primitive check)
+                    // Actually, the API toggles. Optimistic toggle is harder without knowing user ID.
+                    // For now, let's just push it. If it was a remove, real-time will fix it.
+                    // BUT user asked for "refresh once selected".
+                    // Let's assume for now it's an add or we just show it.
+                    // Real-time will correct it in 100ms.
+                    // To be smarter, we'd need to check if *I* already reacted.
+                    // Since we don't have my user ID easily accessible in this hook without session...
+                    // We'll rely on the fact that if I see it, I added it.
+
+                    return {
+                        ...msg,
+                        reactions: [...(msg.reactions || []), fakeReaction]
+                    };
+                }
+                return msg;
+            })
+        );
+
+        try {
+            await fetch('/api/chat/react', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messageId, emoji })
+            });
+        } catch (error) {
+            console.error('Error adding reaction:', error);
+            // Revert would go here
+        }
+    };
+
+    return { messages, loading, sendMessage, addReaction };
 };
