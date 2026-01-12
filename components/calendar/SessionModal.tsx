@@ -265,10 +265,10 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={handleClose} title={step === 'details' ? "Session Details" : "Confirm RSVP"} size="xl" className="!p-5 h-[80vh] flex flex-col">
+        <Modal isOpen={isOpen} onClose={handleClose} title={step === 'details' ? "Session Details" : "Confirm RSVP"} size="xl" className="!p-5 h-[90dvh] md:h-[80vh] flex flex-col">
             <div className="flex-1 flex flex-col min-h-0">
                 {step === 'details' && (
-                    <div className="flex p-1 bg-surface-secondary/30 border border-border rounded-xl mb-6">
+                    <div className="flex p-1 bg-surface-secondary/30 border border-border rounded-xl mb-6 shrink-0">
                         <button
                             className={`flex-1 px-4 py-3 text-lg font-bold rounded-lg transition-all duration-300 ${activeTab === 'details'
                                 ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
@@ -500,61 +500,64 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                     </>
                 ) : (
                     <>
-                        {/* RSVP Step Content - Unchanged */}
-                        <div className="bg-surface/50 rounded-lg p-4 mb-4">
-                            <p className="text-text-primary mb-4">
-                                What will you be playing/doing for this session?
-                            </p>
+                        {/* RSVP Step Content - Wrapped in scroll view */}
+                        <div className="flex-1 overflow-y-auto min-h-0">
+                            <div className="bg-surface/50 rounded-lg p-4 mb-4">
+                                <p className="text-text-primary mb-4">
+                                    What will you be playing/doing for this session?
+                                </p>
 
-                            {isLoadingCapabilities ? (
-                                <div className="text-center py-4 text-text-secondary">Loading capabilities...</div>
-                            ) : (
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    {userCapabilities.map(cap => {
-                                        const isSelected = selectedCapabilities.includes(cap.id);
-                                        return (
-                                            <div
-                                                key={cap.id}
-                                                onClick={() => handleCapabilityToggle(cap.id)}
-                                                className={`
+                                {isLoadingCapabilities ? (
+                                    <div className="text-center py-4 text-text-secondary">Loading capabilities...</div>
+                                ) : (
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        {userCapabilities.map(cap => {
+                                            const isSelected = selectedCapabilities.includes(cap.id);
+                                            return (
+                                                <div
+                                                    key={cap.id}
+                                                    onClick={() => handleCapabilityToggle(cap.id)}
+                                                    className={`
                                                 cursor-pointer p-3 rounded-xl border transition-all duration-200 flex flex-col items-center justify-center text-center h-[100px] relative group
                                                 ${isSelected
-                                                        ? 'bg-primary/10 border-primary shadow-[0_0_15px_rgba(139,92,246,0.3)]'
-                                                        : 'bg-surface border-border hover:border-primary/50 hover:bg-surface-hover hover:shadow-lg'
-                                                    }
+                                                            ? 'bg-primary/10 border-primary shadow-[0_0_15px_rgba(139,92,246,0.3)]'
+                                                            : 'bg-surface border-border hover:border-primary/50 hover:bg-surface-hover hover:shadow-lg'
+                                                        }
                                             `}
-                                            >
-                                                {isSelected && (
-                                                    <div className="absolute top-2 right-2 flex items-center justify-center w-5 h-5 bg-primary text-white rounded-full text-xs font-bold">
-                                                        ✓
+                                                >
+                                                    {isSelected && (
+                                                        <div className="absolute top-2 right-2 flex items-center justify-center w-5 h-5 bg-primary text-white rounded-full text-xs font-bold">
+                                                            ✓
+                                                        </div>
+                                                    )}
+                                                    <div className="absolute top-2 left-2 text-xl">
+                                                        {cap.icon || '🎵'}
                                                     </div>
-                                                )}
-                                                <div className="absolute top-2 left-2 text-xl">
-                                                    {cap.icon || '🎵'}
+                                                    <div className="mt-4 font-medium text-text-primary capitalize text-sm">
+                                                        {cap.name}
+                                                    </div>
                                                 </div>
-                                                <div className="mt-4 font-medium text-text-primary capitalize text-sm">
-                                                    {cap.name}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
+                                            );
+                                        })}
 
-                                    {userCapabilities.length === 0 && (
-                                        <p className="text-text-secondary text-sm col-span-full text-center">
-                                            No capabilities found.
-                                        </p>
-                                    )}
+                                        {userCapabilities.length === 0 && (
+                                            <p className="text-text-secondary text-sm col-span-full text-center">
+                                                No capabilities found.
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            {validationError && (
+                                <div className="text-red-500 text-sm text-center mb-2">
+                                    {validationError}
                                 </div>
                             )}
                         </div>
 
-                        {validationError && (
-                            <div className="text-red-500 text-sm text-center mb-2">
-                                {validationError}
-                            </div>
-                        )}
-
-                        <div className="flex justify-center gap-3 pt-4 border-t border-border">
+                        {/* Sticky Footer */}
+                        <div className="flex justify-center gap-3 pt-4 border-t border-border mt-auto shrink-0">
                             <Button
                                 onClick={handleConfirmRsvp}
                                 variant="primary"
@@ -577,5 +580,6 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                 }
             </div >
         </Modal >
+
     );
 }
