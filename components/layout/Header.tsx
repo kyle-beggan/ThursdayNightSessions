@@ -33,8 +33,8 @@ export default function Header() {
                                 className="rounded-lg w-[35px] h-[35px] md:w-[50px] md:h-[50px]"
                             />
                             <div className="text-center">
-                                <h1 className="text-lg md:text-xl font-bold text-text-primary">Sleepy Hollows Studios</h1>
-                                <p className="text-xs md:text-sm text-text-secondary">Thursday Night Sessions</p>
+                                <h1 className="text-base md:text-xl font-bold text-text-primary">Sleepy Hollows Studios</h1>
+                                <p className="text-[10px] md:text-sm text-text-secondary">Thursday Night Sessions</p>
                             </div>
                         </Link>
 
@@ -42,7 +42,7 @@ export default function Header() {
                             <div className="absolute right-4">
                                 <Menu as="div" className="relative inline-block text-left">
                                     <Menu.Button className="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-surface-secondary transition-colors text-text-primary font-medium focus:outline-none focus:ring-2 focus:ring-primary/50">
-                                        <div className="relative w-8 h-8 rounded-full overflow-hidden border border-border bg-surface-secondary">
+                                        <div className="relative w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden border border-border bg-surface-secondary">
                                             {session.user.image ? (
                                                 <Image
                                                     src={session.user.image}
