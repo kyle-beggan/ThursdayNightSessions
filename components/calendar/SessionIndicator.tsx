@@ -80,7 +80,7 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
                                                         session.commitments?.flatMap(c => c.capabilities?.map(cap => cap.id)) || []
                                                     );
 
-                                                    return song.capabilities.slice(0, 4).map((cap, capIdx) => {
+                                                    return song.capabilities.map((cap, capIdx) => {
                                                         const isMissing = !presentCapabilityIds.has(cap.id);
                                                         return (
                                                             <span
@@ -98,9 +98,6 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
                                                         );
                                                     });
                                                 })()}
-                                                {song.capabilities.length > 4 && (
-                                                    <span className="text-[8px] text-text-secondary opacity-60 self-center">...</span>
-                                                )}
                                             </div>
                                         )}
                                     </div>
