@@ -74,14 +74,40 @@ export const authOptions: NextAuthOptions = {
                 } else {
                     supabaseUserId = existingUser.id;
 
-                    // Update existing user's name, avatar, and last_sign_in_at
-                    await supabaseAdmin
+                    // Check if user exists in public.users
+                    const { data: publicUser } = await supabaseAdmin
                         .from('users')
-                        .update({
-                            name: user.name || 'Unknown',
-                            last_sign_in_at: new Date().toISOString(),
-                        })
-                        .eq('id', supabaseUserId);
+                        .select('id')
+                        .eq('id', supabaseUserId)
+                        .single();
+
+                    if (!publicUser) {
+                        // User exists in Auth but not in public table - Create record
+                        const { error: insertError } = await supabaseAdmin
+                            .from('users')
+                            .insert({
+                                id: supabaseUserId,
+                                email: user.email,
+                                name: user.name || 'Unknown',
+                                phone: '',
+                                user_type: 'user',
+                                status: 'pending', // Default to pending for "new" public records
+                            });
+
+                        if (insertError) {
+                            console.error("Error creating user record for existing auth user:", insertError);
+                            return false;
+                        }
+                    } else {
+                        // Update existing user's name and last_sign_in_at
+                        await supabaseAdmin
+                            .from('users')
+                            .update({
+                                name: user.name || 'Unknown',
+                                last_sign_in_at: new Date().toISOString(),
+                            })
+                            .eq('id', supabaseUserId);
+                    }
                 }
 
                 // Store Supabase user ID for use in session callback

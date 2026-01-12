@@ -118,6 +118,7 @@ export const useChat = (sessionId: string | null = null) => {
                 },
                 async (payload) => {
                     if (payload.eventType === 'INSERT') {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const newReaction = payload.new as any;
                         setMessages((prev) =>
                             prev.map(msg => {
@@ -131,6 +132,7 @@ export const useChat = (sessionId: string | null = null) => {
                             })
                         );
                     } else if (payload.eventType === 'DELETE') {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const oldReaction = payload.old as any;
                         setMessages((prev) =>
                             prev.map(msg => {

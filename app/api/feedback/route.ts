@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
         const session = await getServerSession(authOptions);
         // Allow unauthenticated fetch? No, stick to authenticated for now to show user votes
@@ -80,12 +80,34 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Failed to fetch feedback' }, { status: 500 });
         }
 
+        interface FeedbackVote {
+            user_id: string;
+            vote_type: 'up' | 'down';
+        }
+
+        interface FeedbackReply {
+            id: string;
+            created_at: string;
+            user: { name: string; image: string | null } | null;
+        }
+
+        interface FeedbackItemRaw {
+            id: string;
+            category: string;
+            message: string;
+            status: string;
+            created_at: string;
+            user: { name: string } | null;
+            votes: FeedbackVote[];
+            replies: FeedbackReply[];
+        }
+
         // Transform data to include counts and user status
-        const enrichedFeedback = feedbackData.map((item: any) => {
+        const enrichedFeedback = (feedbackData as unknown as FeedbackItemRaw[]).map((item) => {
             const votes = item.votes || [];
-            const upvotes = votes.filter((v: any) => v.vote_type === 'up').length;
-            const downvotes = votes.filter((v: any) => v.vote_type === 'down').length;
-            const userVote = votes.find((v: any) => v.user_id === userId)?.vote_type || null;
+            const upvotes = votes.filter((v) => v.vote_type === 'up').length;
+            const downvotes = votes.filter((v) => v.vote_type === 'down').length;
+            const userVote = votes.find((v) => v.user_id === userId)?.vote_type || null;
 
             return {
                 ...item,
@@ -93,7 +115,7 @@ export async function GET(request: NextRequest) {
                 downvotes,
                 user_vote: userVote,
                 user_name: item.user?.name || 'Unknown User',
-                replies: item.replies?.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) || []
+                replies: item.replies?.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) || []
             };
         });
 

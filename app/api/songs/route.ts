@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
             .select('song_id');
 
         // 2. Get current user's votes
-        let userVotedSongIds = new Set<string>();
+        const userVotedSongIds = new Set<string>();
         const session = await getServerSession(authOptions);
         if (session?.user?.id) {
             const { data: userVotes } = await supabaseAdmin

@@ -34,7 +34,7 @@ export default function WalkthroughPage() {
                         <div className="bg-surface-secondary p-4 rounded-lg">
                             <h4 className="font-semibold text-primary mb-2">✅ RSVP Status</h4>
                             <p className="text-sm text-text-secondary">
-                                Quickly mark yourself as "In" or "Out" for sessions. You can also specify which instruments you'll be playing.
+                                Quickly mark yourself as &quot;In&quot; or &quot;Out&quot; for sessions. You can also specify which instruments you&apos;ll be playing.
                             </p>
                         </div>
                     </div>
@@ -55,25 +55,25 @@ export default function WalkthroughPage() {
                         <li className="flex items-start gap-3">
                             <span className="bg-primary/20 text-primary p-1 rounded">🔍</span>
                             <div>
-                                <strong className="text-text-primary">Find Songs:</strong> Use the "Find Songs" button to search YouTube directly and add songs with auto-detected Key and Tempo.
+                                <strong className="text-text-primary">Find Songs:</strong> Use the &quot;Find Songs&quot; button to search YouTube directly and add songs with auto-detected Key and Tempo.
                             </div>
                         </li>
                         <li className="flex items-start gap-3">
                             <span className="bg-primary/20 text-primary p-1 rounded">👍</span>
                             <div>
-                                <strong className="text-text-primary">Vote:</strong> Thumbs up songs you're interested in playing. This helps us prioritize what to learn next.
+                                <strong className="text-text-primary">Vote:</strong> Thumbs up songs you&apos;re interested in playing. This helps us prioritize what to learn next.
                             </div>
                         </li>
                         <li className="flex items-start gap-3">
                             <span className="bg-primary/20 text-primary p-1 rounded">🎸</span>
                             <div>
-                                <strong className="text-text-primary">Requirements:</strong> Check what instruments are needed for each song (e.g., "Bass", "Drums").
+                                <strong className="text-text-primary">Requirements:</strong> Check what instruments are needed for each song (e.g., &quot;Bass&quot;, &quot;Drums&quot;).
                             </div>
                         </li>
                         <li className="flex items-start gap-3">
                             <span className="bg-primary/20 text-primary p-1 rounded">▶️</span>
                             <div>
-                                <strong className="text-text-primary">Practice:</strong> Click the "Play" button to open the reference track directly.
+                                <strong className="text-text-primary">Practice:</strong> Click the &quot;Play&quot; button to open the reference track directly.
                             </div>
                         </li>
                     </ul>
@@ -100,7 +100,7 @@ export default function WalkthroughPage() {
                         <div className="bg-surface-secondary p-4 rounded-lg">
                             <h4 className="font-semibold text-primary mb-2">▶️ One-Click Pay</h4>
                             <p className="text-sm text-text-secondary">
-                                Instant playback for any track. Relive the "Seven Nation Army" jam instantly.
+                                Instant playback for any track. Relive the &quot;Seven Nation Army&quot; jam instantly.
                             </p>
                         </div>
                     </div>
@@ -121,7 +121,7 @@ export default function WalkthroughPage() {
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">K</div>
                             <div className="bg-surface-tertiary p-3 rounded-tr-xl rounded-br-xl rounded-bl-xl text-sm relative group">
-                                "Hey everyone, don't forget we're recording 'Seven Nation Army' next week!"
+                                &quot;Hey everyone, don&apos;t forget we&apos;re recording &apos;Seven Nation Army&apos; next week!&quot;
                                 <div className="absolute -bottom-2 right-0 bg-surface border border-border rounded-full px-1.5 py-0.5 text-[10px] shadow-sm">
                                     🔥 2
                                 </div>
