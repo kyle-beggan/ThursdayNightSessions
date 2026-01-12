@@ -13,6 +13,8 @@ const supabaseAdmin = createClient(
     }
 );
 
+export const dynamic = 'force-dynamic';
+
 async function getStats() {
     // Run queries in parallel
     const [
@@ -32,7 +34,7 @@ async function getStats() {
         supabaseAdmin
             .from('sessions')
             .select('*', { count: 'exact', head: true })
-            .gte('date', new Date().toISOString()), // Upcoming sessions
+            .gte('date', new Date().toISOString().split('T')[0]), // Upcoming sessions (including today)
         supabaseAdmin
             .from('capabilities')
             .select('*', { count: 'exact', head: true })
