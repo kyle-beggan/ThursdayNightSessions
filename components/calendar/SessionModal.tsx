@@ -1,13 +1,12 @@
-'use client';
-
 import { useState } from 'react';
 import ChatWindow from '@/components/chat/ChatWindow';
 import { useSession } from 'next-auth/react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
-import { SessionWithDetails, SessionCommitment, Capability } from '@/lib/types';
+import { SessionWithDetails, SessionCommitment, Capability, Song } from '@/lib/types';
 import { formatDate, formatTime } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
+import SongPicker from '@/components/ui/SongPicker';
 
 interface SessionModalProps {
     isOpen: boolean;
@@ -28,10 +27,15 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
     const [uploadError, setUploadError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'details' | 'chat'>('details');
 
+    // Admin Song Management State
+    const [isPickerOpen, setIsPickerOpen] = useState(false);
+    const [isUpdatingSongs, setIsUpdatingSongs] = useState(false);
+
     const userId = sessionData?.user?.id;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const userType = sessionData?.user?.userType;
+    const isAdmin = userType === 'admin';
     const userCommitment = session.commitments?.find((c: SessionCommitment) => c.user_id === userId);
     const isCommitted = !!userCommitment;
 
@@ -130,6 +134,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
     const handleClose = () => {
         setStep('details');
         setSelectedCapabilities([]);
+        setIsPickerOpen(false);
         onClose();
     };
 
@@ -191,6 +196,74 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
         }
     };
 
+    // --- Song Management ---
+    const handleAddSong = async (song: Song) => {
+        setIsUpdatingSongs(true);
+        try {
+            // Construct new songs list
+            const currentSongs = session.songs || [];
+
+            // Avoid duplicates? Or allow? Assuming unique by name for now based on API/Types
+            if (currentSongs.some(s => s.song_name === song.title)) {
+                alert('Song already in session');
+                setIsUpdatingSongs(false);
+                return;
+            }
+
+            const newSongs = [
+                ...currentSongs.map(s => ({ song_name: s.song_name, song_url: s.song_url })),
+                { song_name: song.title, song_url: song.resource_url }
+            ];
+
+            const res = await fetch(`/api/sessions/${session.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ songs: newSongs })
+            });
+
+            if (res.ok) {
+                onUpdate();
+                setIsPickerOpen(false);
+            } else {
+                alert('Failed to add song');
+            }
+        } catch (error) {
+            console.error('Error adding song:', error);
+            alert('Failed to add song');
+        } finally {
+            setIsUpdatingSongs(false);
+        }
+    };
+
+    const handleRemoveSong = async (songName: string) => {
+        if (!confirm(`Remove "${songName}" from session?`)) return;
+
+        setIsUpdatingSongs(true);
+        try {
+            const currentSongs = session.songs || [];
+            const newSongs = currentSongs
+                .filter(s => s.song_name !== songName)
+                .map(s => ({ song_name: s.song_name, song_url: s.song_url }));
+
+            const res = await fetch(`/api/sessions/${session.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ songs: newSongs })
+            });
+
+            if (res.ok) {
+                onUpdate();
+            } else {
+                alert('Failed to remove song');
+            }
+        } catch (error) {
+            console.error('Error removing song:', error);
+            alert('Failed to remove song');
+        } finally {
+            setIsUpdatingSongs(false);
+        }
+    };
+
     return (
         <Modal isOpen={isOpen} onClose={handleClose} title={step === 'details' ? "Session Details" : "Confirm RSVP"} size="xl" className="!p-5 h-[80vh] flex flex-col">
             <div className="flex-1 flex flex-col min-h-0">
@@ -235,11 +308,48 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
 
                                 {/* Songs */}
                                 <div className="flex-1 min-h-[120px]">
-                                    <h4 className="text-base font-bold text-text-primary mb-2 pt-[20px]">Songs</h4>
+                                    <div className="flex items-center justify-between mb-2 pt-[20px]">
+                                        <h4 className="text-base font-bold text-text-primary">Songs</h4>
+                                        {isAdmin && !isPickerOpen && (
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                className="text-xs h-6 px-2 text-primary hover:bg-primary/10"
+                                                onClick={() => setIsPickerOpen(true)}
+                                            >
+                                                + Add Song
+                                            </Button>
+                                        )}
+                                    </div>
+
+                                    {/* Song Picker */}
+                                    {isPickerOpen && (
+                                        <div className="mb-4">
+                                            <SongPicker
+                                                onSelect={handleAddSong}
+                                                onCancel={() => setIsPickerOpen(false)}
+                                            />
+                                        </div>
+                                    )}
+
                                     {session.songs && session.songs.length > 0 ? (
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                             {session.songs.map((song) => (
-                                                <div key={song.id} className="bg-surface/50 rounded-lg p-3 border border-border flex items-center justify-between gap-2 hover:border-primary/50 transition-colors group">
+                                                <div key={song.id || song.song_name} className="bg-surface/50 rounded-lg p-3 border border-border flex items-center justify-between gap-2 hover:border-primary/50 transition-colors group relative">
+
+                                                    {isAdmin && (
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleRemoveSong(song.song_name);
+                                                            }}
+                                                            className="absolute -top-2 -right-2 w-5 h-5 bg-surface border border-border rounded-full text-xs text-text-secondary hover:text-red-500 hover:border-red-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center shadow-md z-10"
+                                                            title="Remove song"
+                                                        >
+                                                            ✕
+                                                        </button>
+                                                    )}
+
                                                     <div className="min-w-0 flex-1">
                                                         <div className="font-medium text-text-primary mb-0.5 truncate text-sm" title={song.song_name}>{song.song_name}</div>
                                                         {song.song_artist && (
@@ -253,8 +363,8 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                                             rel="noopener noreferrer"
                                                             className="shrink-0"
                                                         >
-                                                            <Button size="sm" variant="secondary" className="w-[40px] px-0 text-[10px] h-7 flex items-center justify-center">
-                                                                Play
+                                                            <Button size="sm" variant="secondary" className="w-[40px] px-0 text-[10px] h-7 flex items-center justify-center text-green-400 border-green-500/30 hover:bg-green-500/10">
+                                                                ▶
                                                             </Button>
                                                         </a>
                                                     )}
@@ -262,7 +372,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                             ))}
                                         </div>
                                     ) : (
-                                        <p className="text-text-secondary italic text-xs">Songs TBD</p>
+                                        !isPickerOpen && <p className="text-text-secondary italic text-xs">Songs TBD</p>
                                     )}
                                 </div>
 
@@ -303,7 +413,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                         <h4 className="text-base font-bold text-text-primary">
                                             Recordings ({session.recordings?.length || 0})
                                         </h4>
-                                        {userType === 'admin' && (
+                                        {isAdmin && (
                                             <div className="relative">
                                                 <input
                                                     type="file"
@@ -344,8 +454,8 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                                         rel="noopener noreferrer"
                                                         className="shrink-0"
                                                     >
-                                                        <Button size="sm" variant="secondary" className="w-[40px] px-0 text-[10px] h-7 flex items-center justify-center">
-                                                            Play
+                                                        <Button size="sm" variant="secondary" className="w-[40px] px-0 text-[10px] h-7 flex items-center justify-center text-green-400 border-green-500/30 hover:bg-green-500/10">
+                                                            ▶
                                                         </Button>
                                                     </a>
                                                 </div>
@@ -390,6 +500,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                     </>
                 ) : (
                     <>
+                        {/* RSVP Step Content - Unchanged */}
                         <div className="bg-surface/50 rounded-lg p-4 mb-4">
                             <p className="text-text-primary mb-4">
                                 What will you be playing/doing for this session?

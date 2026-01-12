@@ -18,6 +18,7 @@ const navItems: NavItem[] = [
     { name: 'Recordings', href: '/recordings', icon: '🎙️' },
     { name: 'Chat', href: '/chat', icon: '💬' },
     { name: 'Analytics', href: '/analytics', icon: '📊' },
+    { name: 'Feedback', href: '/feedback', icon: '💡' },
     { name: 'Admin', href: '/admin', icon: '⚙️', adminOnly: true },
 ];
 
