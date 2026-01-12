@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import ChatWindow from '@/components/chat/ChatWindow';
 import { useSession } from 'next-auth/react';
-import Modal from '@/components/ui/Modal';
-import Button from '@/components/ui/Button';
-import { SessionWithDetails, SessionCommitment, Capability, Song } from '@/lib/types';
+import CandidateListModal from './CandidateListModal';
+import AddSongModal from '@/components/songs/AddSongModal';
+import CapabilityIcon from '@/components/ui/CapabilityIcon';
 import { formatDate, formatTime } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import SongPicker from '@/components/ui/SongPicker';
@@ -394,7 +394,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                                                 key={cap.id}
                                                                 className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/20 text-primary text-xs rounded-full"
                                                             >
-                                                                <span>{cap.icon || '🎵'}</span>
+                                                                <CapabilityIcon capability={cap} className="w-3 h-3" />
                                                                 <span className="capitalize">{cap.name}</span>
                                                             </span>
                                                         ))}
@@ -531,7 +531,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                                         </div>
                                                     )}
                                                     <div className="absolute top-2 left-2 text-xl">
-                                                        {cap.icon || '🎵'}
+                                                        <CapabilityIcon capability={cap} className="w-6 h-6" />
                                                     </div>
                                                     <div className="mt-4 font-medium text-text-primary capitalize text-sm">
                                                         {cap.name}

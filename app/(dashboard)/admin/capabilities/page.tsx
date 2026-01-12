@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
+import CapabilityIcon from '@/components/ui/CapabilityIcon';
 
 import CapabilityModal from '@/components/admin/CapabilityModal';
 
@@ -164,39 +165,42 @@ export default function CapabilitiesPage() {
                             No capabilities found. Add your first capability above.
                         </div>
                     ) : (
-                        capabilities.map(capability => (
-                            <div
-                                key={capability.id}
-                                className="px-6 py-4 flex items-center justify-between hover:bg-surface-secondary transition-colors"
-                            >
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center text-2xl">
-                                        {capability.icon || '🎸'}
+                        capabilities.map(capability => {
+                            const capWithOptionalIcon = { ...capability, icon: capability.icon || undefined };
+                            return (
+                                <div
+                                    key={capability.id}
+                                    className="px-6 py-4 flex items-center justify-between hover:bg-surface-secondary transition-colors"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center text-2xl">
+                                            <CapabilityIcon capability={capWithOptionalIcon} className="w-6 h-6" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-medium text-text-primary capitalize">
+                                                <div className="font-medium text-text-primary capitalize">{capability.name}</div>
+                                            </h3>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="font-medium text-text-primary capitalize">
-                                            <div className="font-medium text-text-primary capitalize">{capability.name}</div>
-                                        </h3>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            onClick={() => handleEditClick(capability)}
+                                            variant="ghost"
+                                            className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-text-primary"
+                                        >
+                                            Edit
+                                        </Button>
+                                        <Button
+                                            onClick={() => handleDeleteCapability(capability.id, capability.name)}
+                                            variant="ghost"
+                                            className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-red-400"
+                                        >
+                                            Delete
+                                        </Button>
                                     </div>
                                 </div>
-                                <div className="flex gap-2">
-                                    <Button
-                                        onClick={() => handleEditClick(capability)}
-                                        variant="ghost"
-                                        className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-text-primary"
-                                    >
-                                        Edit
-                                    </Button>
-                                    <Button
-                                        onClick={() => handleDeleteCapability(capability.id, capability.name)}
-                                        variant="ghost"
-                                        className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-red-400"
-                                    >
-                                        Delete
-                                    </Button>
-                                </div>
-                            </div>
-                        ))
+                            );
+                        })
                     )}
                 </div>
             </div>

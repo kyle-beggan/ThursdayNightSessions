@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import CapabilityIcon from '@/components/ui/CapabilityIcon';
 import { Capability } from '@/lib/types';
 
 interface RecommendedSong {
@@ -158,7 +159,7 @@ export default function FindSongModal({ isOpen, onClose, onAddSongs }: FindSongM
                                                 </div>
                                             )}
                                             <div className="absolute top-2 left-2 text-xl">
-                                                {cap.icon || '🎵'}
+                                                <CapabilityIcon capability={cap} className="w-6 h-6" />
                                             </div>
                                             <div className="mt-4 font-medium text-text-primary capitalize text-sm">
                                                 {cap.name}

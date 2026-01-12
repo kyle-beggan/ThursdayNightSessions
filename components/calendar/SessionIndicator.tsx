@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { SessionWithDetails } from '@/lib/types';
 import { format } from 'date-fns';
 import CandidateListModal from './CandidateListModal';
+import CapabilityIcon from '@/components/ui/CapabilityIcon';
 
 interface SessionIndicatorProps {
     session: SessionWithDetails;
@@ -83,18 +84,19 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
                                                     return song.capabilities.map((cap, capIdx) => {
                                                         const isMissing = !presentCapabilityIds.has(cap.id);
                                                         return (
-                                                            <span
+                                                            <div
                                                                 key={cap.id || capIdx}
                                                                 title={isMissing ? `${toProperCase(cap.name)} (Missing) - Click to find candidates` : toProperCase(cap.name)}
                                                                 onClick={(e) => isMissing && handleMissingCapabilityClick(e, cap.id, toProperCase(cap.name))}
                                                                 className={`
-                                                                    text-sm px-1 py-0 rounded-[3px] 
+                                                                    flex items-center justify-center
+                                                                    w-6 h-6 rounded-[3px] 
                                                                     bg-surface-secondary/50 text-text-secondary
                                                                     ${isMissing ? 'border-b-2 border-red-500 shadow-none cursor-pointer hover:bg-red-500/10' : 'border border-border/50'}
                                                                 `}
                                                             >
-                                                                {cap.icon || '🎸'}
-                                                            </span>
+                                                                <CapabilityIcon capability={cap} className="w-4 h-4" />
+                                                            </div>
                                                         );
                                                     });
                                                 })()}
@@ -123,8 +125,8 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
                                     <span className="truncate flex-1">{commitment.user.name}</span>
                                     <div className="flex gap-0.5">
                                         {(commitment.capabilities || []).slice(0, 6).map((cap, idx) => (
-                                            <span key={idx} className="text-sm" title={toProperCase(cap.name)}>
-                                                {cap.icon || '🎵'}
+                                            <span key={idx} title={toProperCase(cap.name)}>
+                                                <CapabilityIcon capability={cap} className="w-3 h-3" />
                                             </span>
                                         ))}
                                     </div>
@@ -160,7 +162,7 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
                                                     key={cap.id}
                                                     className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/20 text-primary text-xs rounded-full"
                                                 >
-                                                    <span>{cap.icon || '🎵'}</span>
+                                                    <CapabilityIcon capability={cap} className="w-3 h-3" />
                                                     <span className="capitalize">{cap.name}</span>
                                                 </span>
                                             ))}

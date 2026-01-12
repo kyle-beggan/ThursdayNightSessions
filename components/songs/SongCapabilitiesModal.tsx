@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import CapabilityIcon from '@/components/ui/CapabilityIcon';
 import { Song } from '@/lib/types';
 
 interface Capability {
@@ -117,8 +118,8 @@ export default function SongCapabilitiesModal({ isOpen, onClose, song, onSave }:
                                             ✓
                                         </div>
                                     )}
-                                    <div className="text-3xl mb-2">
-                                        {cap.icon || '🎵'}
+                                    <div className="text-3xl mb-2 flex justify-center">
+                                        <CapabilityIcon capability={cap} className="w-8 h-8" />
                                     </div>
                                     <h4 className={`font-medium text-sm capitalize ${isSelected ? 'text-primary' : 'text-text-primary'}`}>
                                         {cap.name}
