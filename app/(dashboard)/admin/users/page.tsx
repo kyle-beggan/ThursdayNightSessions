@@ -313,18 +313,20 @@ export default function UsersPage() {
                                                         Make Admin
                                                     </button>
                                                 )}
-                                                <Link
-                                                    href={`/admin/users/${user.id}`}
-                                                    className="px-3 py-1.5 text-xs font-medium bg-surface-tertiary text-text-secondary hover:text-text-primary hover:bg-surface-hover rounded-md transition-colors"
+                                                <Button
+                                                    onClick={() => window.location.href = `/admin/users/${user.id}`}
+                                                    variant="ghost"
+                                                    className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-text-primary"
                                                 >
                                                     Edit
-                                                </Link>
-                                                <button
+                                                </Button>
+                                                <Button
                                                     onClick={() => handleDeleteClick(user)}
-                                                    className="px-3 py-1.5 text-xs font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-md transition-colors"
+                                                    variant="ghost"
+                                                    className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-red-400"
                                                 >
                                                     Delete
-                                                </button>
+                                                </Button>
                                             </div>
                                         </div>
                                     </td>

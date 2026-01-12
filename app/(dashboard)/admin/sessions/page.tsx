@@ -242,18 +242,20 @@ export default function SessionsPage() {
                                             </td>
                                             <td className="px-4 py-3">
                                                 <div className="flex gap-2">
-                                                    <button
+                                                    <Button
                                                         onClick={() => handleEditSession(session)}
-                                                        className="px-3 py-1.5 text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 rounded-md transition-colors"
+                                                        variant="ghost"
+                                                        className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-text-primary"
                                                     >
                                                         Edit
-                                                    </button>
-                                                    <button
+                                                    </Button>
+                                                    <Button
                                                         onClick={() => handleDeleteSession(session.id, session.date)}
-                                                        className="px-3 py-1.5 text-xs font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-md transition-colors"
+                                                        variant="ghost"
+                                                        className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-red-400"
                                                     >
                                                         Delete
-                                                    </button>
+                                                    </Button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -306,18 +308,20 @@ export default function SessionsPage() {
                                         </td>
                                         <td className="px-4 py-3">
                                             <div className="flex gap-2">
-                                                <button
+                                                <Button
                                                     onClick={() => handleEditSession(session)}
-                                                    className="px-3 py-1.5 text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 rounded-md transition-colors"
+                                                    variant="ghost"
+                                                    className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-text-primary"
                                                 >
                                                     Edit
-                                                </button>
-                                                <button
+                                                </Button>
+                                                <Button
                                                     onClick={() => handleDeleteSession(session.id, session.date)}
-                                                    className="px-3 py-1.5 text-xs font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-md transition-colors"
+                                                    variant="ghost"
+                                                    className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-red-400"
                                                 >
                                                     Delete
-                                                </button>
+                                                </Button>
                                             </div>
                                         </td>
                                     </tr>

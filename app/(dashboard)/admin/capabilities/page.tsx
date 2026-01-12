@@ -180,18 +180,20 @@ export default function CapabilitiesPage() {
                                     </div>
                                 </div>
                                 <div className="flex gap-2">
-                                    <button
+                                    <Button
                                         onClick={() => handleEditClick(capability)}
-                                        className="px-4 py-2 text-primary hover:text-primary-light hover:bg-primary/10 rounded-lg transition-colors"
+                                        variant="ghost"
+                                        className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-text-primary"
                                     >
                                         Edit
-                                    </button>
-                                    <button
+                                    </Button>
+                                    <Button
                                         onClick={() => handleDeleteCapability(capability.id, capability.name)}
-                                        className="px-4 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors"
+                                        variant="ghost"
+                                        className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-red-400"
                                     >
                                         Delete
-                                    </button>
+                                    </Button>
                                 </div>
                             </div>
                         ))
