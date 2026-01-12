@@ -112,24 +112,44 @@ export default function ProfilePage() {
         setUploading(true);
 
         try {
+            // 1. Upload the image
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await fetch('/api/profile/upload', {
+            const uploadResponse = await fetch('/api/profile/upload', {
                 method: 'POST',
                 body: formData
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
+            if (!uploadResponse.ok) {
+                const errorData = await uploadResponse.json();
                 throw new Error(errorData.error || 'Upload failed');
             }
 
-            const data = await response.json();
-            setFormData(prev => ({ ...prev, image: data.url }));
+            const data = await uploadResponse.json();
+            const imageUrl = data.url;
+
+            // 2. Immediately update the user profile with the new image URL
+            const updateResponse = await fetch('/api/profile', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: imageUrl })
+            });
+
+            if (!updateResponse.ok) {
+                throw new Error('Failed to update profile with new avatar');
+            }
+
+            // 3. Update local state and reload to refresh session/header
+            setFormData(prev => ({ ...prev, image: imageUrl }));
+            setUser(prev => prev ? { ...prev, image: imageUrl } : null);
+
+            // Force reload to ensure Header and Session update immediately
+            window.location.reload();
+
         } catch (error) {
             console.error('Error uploading image:', error);
-            alert('Error uploading image');
+            alert('Error updating avatar. Please try again.');
         } finally {
             setUploading(false);
         }
@@ -237,7 +257,7 @@ export default function ProfilePage() {
                     {isEditing && (
                         <label className="absolute inset-0 bg-black/50 flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
                             <span className="text-white text-xs font-bold text-center p-1">
-                                {uploading ? '...' : 'Edit'}
+                                {uploading ? 'Uploading...' : 'Click to Upload'}
                             </span>
                             <input
                                 type="file"
