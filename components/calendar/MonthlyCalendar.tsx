@@ -84,8 +84,8 @@ export default function MonthlyCalendar({ sessions, onRefresh }: MonthlyCalendar
                 </button>
             </div>
 
-            {/* Day Labels */}
-            <div className="grid grid-cols-7 gap-2 mb-2">
+            {/* Day Labels - Hidden on mobile, shown on desktop */}
+            <div className="hidden md:grid grid-cols-7 gap-2 mb-2">
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
                     <div key={day} className="text-center text-text-secondary font-semibold py-2">
                         {day}
@@ -93,11 +93,11 @@ export default function MonthlyCalendar({ sessions, onRefresh }: MonthlyCalendar
                 ))}
             </div>
 
-            {/* Calendar Grid */}
-            <div className="grid grid-cols-7 gap-2">
+            {/* Calendar Grid - Vertical stack on mobile, 7-col grid on desktop */}
+            <div className="grid grid-cols-1 md:grid-cols-7 gap-2">
                 {calendarDays.map((day, index) => {
                     if (!day) {
-                        return <div key={`empty-${index}`} className="aspect-square" />;
+                        return <div key={`empty-${index}`} className="hidden md:block aspect-square" />;
                     }
 
                     const daySessions = getSessionsForDay(day);
@@ -107,7 +107,8 @@ export default function MonthlyCalendar({ sessions, onRefresh }: MonthlyCalendar
                         <div
                             key={day.toISOString()}
                             className={`
-                aspect-square border border-border rounded-lg p-2 
+                border border-border rounded-lg p-2 
+                min-h-[100px] md:min-h-0 md:aspect-square
                 ${isToday ? 'bg-primary/10 border-primary' : 'bg-surface'}
                 ${!isSameMonth(day, currentDate) ? 'opacity-50' : ''}
               `}
