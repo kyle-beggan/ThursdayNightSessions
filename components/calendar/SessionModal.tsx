@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import ChatWindow from '@/components/chat/ChatWindow';
 import { useSession } from 'next-auth/react';
+import Modal from '@/components/ui/Modal';
+import Button from '@/components/ui/Button';
+import { SessionWithDetails, SessionCommitment, Capability, Song } from '@/lib/types';
 import CandidateListModal from './CandidateListModal';
 import AddSongModal from '@/components/songs/AddSongModal';
 import CapabilityIcon from '@/components/ui/CapabilityIcon';
