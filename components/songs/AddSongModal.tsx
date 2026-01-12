@@ -1,16 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import { Song } from '@/lib/types';
 
 interface AddSongModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSongAdded: () => void;
+    initialData?: Song | null;
 }
 
-export default function AddSongModal({ isOpen, onClose, onSongAdded }: AddSongModalProps) {
+export default function AddSongModal({ isOpen, onClose, onSongAdded, initialData }: AddSongModalProps) {
     const [formData, setFormData] = useState({
         title: '',
         artist: '',
@@ -20,32 +22,49 @@ export default function AddSongModal({ isOpen, onClose, onSongAdded }: AddSongMo
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    useEffect(() => {
+        if (isOpen && initialData) {
+            setFormData({
+                title: initialData.title,
+                artist: initialData.artist || '',
+                key: initialData.key || '',
+                tempo: initialData.tempo || '',
+                resource_url: initialData.resource_url || ''
+            });
+        } else if (isOpen && !initialData) {
+            setFormData({ title: '', artist: '', key: '', tempo: '', resource_url: '' });
+        }
+    }, [isOpen, initialData]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
 
         try {
-            const res = await fetch('/api/songs', {
-                method: 'POST',
+            const url = initialData ? `/api/songs/${initialData.id}` : '/api/songs';
+            const method = initialData ? 'PATCH' : 'POST';
+
+            const res = await fetch(url, {
+                method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
             });
 
-            if (!res.ok) throw new Error('Failed to add song');
+            if (!res.ok) throw new Error(initialData ? 'Failed to update song' : 'Failed to add song');
 
             setFormData({ title: '', artist: '', key: '', tempo: '', resource_url: '' });
             onSongAdded();
             onClose();
         } catch (error) {
-            console.error('Error adding song:', error);
-            alert('Failed to add song');
+            console.error(initialData ? 'Error updating song:' : 'Error adding song:', error);
+            alert(initialData ? 'Failed to update song' : 'Failed to add song');
         } finally {
             setIsSubmitting(false);
         }
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Add New Song">
+        <Modal isOpen={isOpen} onClose={onClose} title={initialData ? "Edit Song" : "Add New Song"}>
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                     <label className="block text-sm font-medium text-text-secondary mb-1">Title *</label>
@@ -114,7 +133,7 @@ export default function AddSongModal({ isOpen, onClose, onSongAdded }: AddSongMo
                         variant="primary"
                         disabled={isSubmitting}
                     >
-                        {isSubmitting ? 'Adding...' : 'Add Song'}
+                        {isSubmitting ? 'Saving...' : (initialData ? 'Save Changes' : 'Add Song')}
                     </Button>
                 </div>
             </form>

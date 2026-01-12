@@ -107,6 +107,38 @@ export default function SongsPage() {
         return () => clearTimeout(timer);
     }, [searchTerm, fetchSongs]); // Added fetchSongs to dependency array for completeness, though it's stable due to useCallback
 
+    const [editingSong, setEditingSong] = useState<Song | null>(null);
+
+    const handleEditSong = (song: Song) => {
+        setEditingSong(song);
+        setIsAddModalOpen(true);
+    };
+
+    const handleCloseAddModal = () => {
+        setIsAddModalOpen(false);
+        setEditingSong(null);
+    };
+
+    const handleDeleteSong = async (songId: string) => {
+        if (!confirm('Are you sure you want to delete this song?')) return;
+
+        try {
+            const res = await fetch(`/api/songs/${songId}`, {
+                method: 'DELETE',
+            });
+            if (res.ok) {
+                fetchSongs();
+            } else {
+                alert('Failed to delete song');
+            }
+        } catch (error) {
+            console.error('Error deleting song:', error);
+            alert('Error deleting song');
+        }
+    };
+
+    // ... existing handlers ...
+
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -163,7 +195,7 @@ export default function SongsPage() {
                                     Session {sortConfig?.key === 'session_date' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                                 </th>
                                 <th className="p-4 font-medium w-32">Requirements</th>
-                                <th className="p-4 font-medium w-24">Link</th>
+                                <th className="p-4 font-medium w-48 text-right pr-6">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
@@ -201,16 +233,35 @@ export default function SongsPage() {
                                             <span className="hidden group-hover:inline text-[8px] ml-1 text-gray-400">{song.id}</span>
                                         </Button>
                                     </td>
-                                    <td className="p-4">
-                                        {song.resource_url && (
+                                    <td className="p-4 text-right pr-6">
+                                        <div className="flex items-center justify-end gap-2">
+                                            {song.resource_url && (
+                                                <Button
+                                                    variant="secondary"
+                                                    className="text-xs px-3 py-1.5 h-auto text-green-400 hover:text-green-300 border-green-500/30 hover:bg-green-500/10"
+                                                    onClick={() => window.open(song.resource_url, '_blank')}
+                                                    title="Play"
+                                                >
+                                                    ▶ Play
+                                                </Button>
+                                            )}
                                             <Button
-                                                variant="primary"
-                                                className="text-xs px-3 py-1.5 h-auto"
-                                                onClick={() => window.open(song.resource_url, '_blank')}
+                                                variant="ghost"
+                                                className="text-xs px-2 py-1.5 h-auto text-text-secondary hover:text-text-primary"
+                                                onClick={() => handleEditSong(song)}
+                                                title="Edit"
                                             >
-                                                Open
+                                                ✏️
                                             </Button>
-                                        )}
+                                            <Button
+                                                variant="ghost"
+                                                className="text-xs px-2 py-1.5 h-auto text-text-secondary hover:text-red-400"
+                                                onClick={() => handleDeleteSong(song.id)}
+                                                title="Delete"
+                                            >
+                                                🗑️
+                                            </Button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -221,8 +272,9 @@ export default function SongsPage() {
 
             <AddSongModal
                 isOpen={isAddModalOpen}
-                onClose={() => setIsAddModalOpen(false)}
+                onClose={handleCloseAddModal}
                 onSongAdded={fetchSongs}
+                initialData={editingSong}
             />
 
             <FindSongModal
@@ -244,11 +296,6 @@ export default function SongsPage() {
                     onClose={() => setIsSessionModalOpen(false)}
                     session={selectedSession}
                     onUpdate={() => {
-                        // If anything changed in the session (like Rsvp), maybe refresh something?
-                        // For now just re-fetch the session to update view if needed, 
-                        // but handleSessionClick re-fetches on open.
-                        // We might want to refresh the song list if assignment changed, but
-                        // modal is mostly for RSVP/Details.
                         handleSessionClick(selectedSession.id);
                     }}
                 />
