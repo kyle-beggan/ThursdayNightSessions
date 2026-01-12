@@ -53,17 +53,7 @@ jobs:
           username: bitnami
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # Pull new image
-            docker pull ghcr.io/kyle-beggan/thursdaynightsessions:latest
-            
-            # Restart service to pick up new image
             cd sleepyhollows
-            
-            # Ensure we are logged in to pull (might need token on server, or public package)
-            # Assuming public package or manual login performed once
-            
-            docker compose down
+            docker compose pull
             docker compose up -d
-            
-            # Prune old images to save space
             docker image prune -a -f
