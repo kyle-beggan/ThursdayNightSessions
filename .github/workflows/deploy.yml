@@ -54,7 +54,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             # Pull new image
-            docker pull ghcr.io/kyle-beggan/sleepyhollows:latest
+            docker pull ghcr.io/kyle-beggan/thursdaynightsessions:latest
             
             # Restart service to pick up new image
             cd sleepyhollows
