@@ -24,17 +24,17 @@ export default function Header() {
             <header className="w-full bg-surface/50 backdrop-blur-lg border-b border-border sticky top-0 z-40">
                 <div className="w-full flex justify-center py-4">
                     <div className="w-full max-w-7xl px-4 relative flex items-center justify-center">
-                        <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+                        <Link href="/" className="flex items-center space-x-2 md:space-x-3 hover:opacity-80 transition-opacity -ml-[10px] md:ml-0">
                             <Image
                                 src="/logo.png"
                                 alt="Sleepy Hollows Studios"
                                 width={50}
                                 height={50}
-                                className="rounded-lg"
+                                className="rounded-lg w-[35px] h-[35px] md:w-[50px] md:h-[50px]"
                             />
                             <div className="text-center">
-                                <h1 className="text-xl font-bold text-text-primary">Sleepy Hollows Studios</h1>
-                                <p className="text-sm text-text-secondary">Thursday Night Sessions</p>
+                                <h1 className="text-lg md:text-xl font-bold text-text-primary">Sleepy Hollows Studios</h1>
+                                <p className="text-xs md:text-sm text-text-secondary">Thursday Night Sessions</p>
                             </div>
                         </Link>
 
@@ -56,7 +56,7 @@ export default function Header() {
                                                 </div>
                                             )}
                                         </div>
-                                        <span>{getFirstName(session.user.name)}</span>
+                                        <span className="hidden md:block">{getFirstName(session.user.name)}</span>
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 opacity-70">
                                             <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
                                         </svg>
