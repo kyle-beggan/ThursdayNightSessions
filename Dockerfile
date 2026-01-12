@@ -28,8 +28,8 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Set build-time arguments (used by Next.js during `npm run build`)
-ARG NEXT_PUBLIC_SUPABASE_URL=http://placeholder
-ARG NEXT_PUBLIC_SUPABASE_ANON_KEY=placeholder
+ARG NEXT_PUBLIC_SUPABASE_URL=https://nmobyroblodtycyjwmfd.supabase.co
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_cCtMmN3C38pQs2ttuMxR5A_pv9XU4hy
 ARG SUPABASE_SERVICE_ROLE_KEY=placeholder
 ARG RESEND_API_KEY=re_123456789
 ARG OPENAI_API_KEY=sk-placeholder
