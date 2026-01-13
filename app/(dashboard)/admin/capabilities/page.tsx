@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 import CapabilityIcon from '@/components/ui/CapabilityIcon';
 
 import CapabilityModal from '@/components/admin/CapabilityModal';
 import { useToast } from '@/hooks/useToast';
+import { useConfirm } from '@/providers/ConfirmProvider';
 
 type Capability = {
     id: string;
@@ -15,8 +17,9 @@ type Capability = {
     created_at: string;
 };
 
-export default function CapabilitiesPage() {
+export default function AdminCapabilitiesPage() {
     const toast = useToast();
+    const { confirm } = useConfirm();
     const [capabilities, setCapabilities] = useState<Capability[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -102,8 +105,13 @@ export default function CapabilitiesPage() {
         }
     };
 
-    const handleDeleteCapability = async (id: string, name: string) => {
-        if (!confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
+    const handleDelete = async (id: string, name: string) => {
+        if (!await confirm({
+            title: 'Delete Capability',
+            message: `Are you sure you want to delete "${name}"? This action cannot be undone.`,
+            confirmLabel: 'Delete',
+            variant: 'danger'
+        })) {
             return;
         }
 

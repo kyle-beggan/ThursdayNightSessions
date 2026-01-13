@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import { useSortableData } from '@/hooks/useSortableData';
 import { useToast } from '@/hooks/useToast';
+import { useConfirm } from '@/providers/ConfirmProvider';
 
 // Checking imports, I don't see toaster in the file list but I can check if it exists.
 // Actually, I'll stick to 'alert' fallback if toast doesn't exist, but wait, the plan said "toast/notification".
@@ -26,8 +27,9 @@ type User = {
     created_at: string;
 };
 
-export default function UsersPage() {
+export default function AdminUsersPage() {
     const toast = useToast();
+    const { confirm } = useConfirm();
     const [users, setUsers] = useState<User[]>([]);
     const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
     const { items: sortedUsers, requestSort, sortConfig } = useSortableData(filteredUsers);
@@ -93,7 +95,13 @@ export default function UsersPage() {
             } else if (action === 'reject') {
                 updates.status = 'rejected';
             } else if (action === 'make-admin') {
-                if (!confirm('Are you sure you want to make this user an admin?')) {
+                // If changing to admin, double check
+                if (!await confirm({
+                    title: 'Make Admin',
+                    message: 'Are you sure you want to make this user an admin? They will have full access to the system.',
+                    confirmLabel: 'Make Admin',
+                    variant: 'primary'
+                })) {
                     return;
                 }
                 updates.user_type = 'admin';

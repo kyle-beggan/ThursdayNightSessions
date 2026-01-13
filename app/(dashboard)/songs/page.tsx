@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import { useConfirm } from '@/providers/ConfirmProvider';
 import Button from '@/components/ui/Button';
 import AddSongModal from '@/components/songs/AddSongModal';
 import FindSongModal from '@/components/songs/FindSongModal';
@@ -15,6 +16,7 @@ import { useToast } from '@/hooks/useToast';
 
 export default function SongsPage() {
     const toast = useToast();
+    const { confirm } = useConfirm();
     const [songs, setSongs] = useState<Song[]>([]);
     const { items: sortedSongs, requestSort, sortConfig } = useSortableData(songs);
     const [loading, setLoading] = useState(true);
@@ -123,7 +125,12 @@ export default function SongsPage() {
     };
 
     const handleDeleteSong = async (songId: string) => {
-        if (!confirm('Are you sure you want to delete this song?')) return;
+        if (!await confirm({
+            title: 'Delete Song',
+            message: 'Are you sure you want to delete this song? This action cannot be undone.',
+            confirmLabel: 'Delete',
+            variant: 'danger'
+        })) return;
 
         try {
             const res = await fetch(`/api/songs/${songId}`, {

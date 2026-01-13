@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import { useToast } from '@/hooks/useToast';
+import { useConfirm } from '@/providers/ConfirmProvider';
 
 interface BackupRestoreModalProps {
     isOpen: boolean;
@@ -10,7 +11,8 @@ interface BackupRestoreModalProps {
 
 export default function BackupRestoreModal({ isOpen, onClose }: BackupRestoreModalProps) {
     const toast = useToast();
-    const [isRestoring, setIsRestoring] = useState(false);
+    const { confirm } = useConfirm();
+    const [uploading, setUploading] = useState(false);
     const [file, setFile] = useState<File | null>(null);
     const [restoreResult, setRestoreResult] = useState<{ success: boolean; details?: unknown; error?: string } | null>(null);
 
@@ -26,17 +28,25 @@ export default function BackupRestoreModal({ isOpen, onClose }: BackupRestoreMod
         }
     };
 
-    const handleRestore = async () => {
-        if (!file) return;
+    const handleRestore = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = e.target.files?.[0];
+        if (!selectedFile) return;
 
-        if (!confirm('WARNING: This will overwrite existing data with the data from the backup file. Are you sure you want to proceed?')) {
+        if (!await confirm({
+            title: 'Restore Database',
+            message: 'WARNING: This will overwrite existing data with the data from the backup file. Are you sure you want to proceed?',
+            confirmLabel: 'Overwrite & Restore',
+            variant: 'danger'
+        })) {
+            e.target.value = ''; // Reset input
+            setFile(null); // Clear the selected file from state
             return;
         }
 
-        setIsRestoring(true);
+        setUploading(true);
         try {
             const formData = new FormData();
-            formData.append('file', file);
+            formData.append('file', selectedFile);
 
             const res = await fetch('/api/admin/restore', {
                 method: 'POST',

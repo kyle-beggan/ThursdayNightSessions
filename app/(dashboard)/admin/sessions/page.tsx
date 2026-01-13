@@ -4,27 +4,19 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import CreateSessionModal from '@/components/admin/CreateSessionModal';
-import { Song } from '@/lib/types';
+import { Song, SessionWithDetails } from '@/lib/types';
 import { useSortableData } from '@/hooks/useSortableData';
 import { useToast } from '@/hooks/useToast';
+import { useConfirm } from '@/providers/ConfirmProvider';
 
-type Session = {
-    id: string;
-    date: string;
-    start_time: string;
-    end_time: string;
-    created_at: string;
-    commitments_count?: number;
-    songs?: { id: string; song_name: string; song_url?: string }[];
-};
-
-type FormSession = Omit<Session, 'songs'> & {
+type FormSession = Omit<SessionWithDetails, 'songs'> & {
     songs?: Song[];
 };
 
-export default function SessionsPage() {
+export default function AdminSessionsPage() {
     const toast = useToast();
-    const [sessions, setSessions] = useState<Session[]>([]);
+    const { confirm } = useConfirm();
+    const [sessions, setSessions] = useState<SessionWithDetails[]>([]);
     const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
@@ -84,7 +76,12 @@ export default function SessionsPage() {
     };
 
     const handleDeleteSession = async (id: string, date: string) => {
-        if (!confirm(`Are you sure you want to delete the session on ${new Date(date).toLocaleDateString()}?`)) {
+        if (!await confirm({
+            title: 'Delete Session',
+            message: `Are you sure you want to delete the session on ${new Date(date).toLocaleDateString()}?`,
+            confirmLabel: 'Delete',
+            variant: 'danger'
+        })) {
             return;
         }
 

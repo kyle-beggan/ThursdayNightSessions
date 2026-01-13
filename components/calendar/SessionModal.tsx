@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import ChatWindow from '@/components/chat/ChatWindow';
 import { useSession } from 'next-auth/react';
+import { useConfirm } from '@/providers/ConfirmProvider';
 import { useToast } from '@/hooks/useToast';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
@@ -19,6 +20,7 @@ interface SessionModalProps {
 
 export default function SessionModal({ isOpen, onClose, session, onUpdate }: SessionModalProps) {
     const toast = useToast();
+    const { confirm } = useConfirm();
     const { data: sessionData } = useSession();
     const [isCommitting, setIsCommitting] = useState(false);
 
@@ -235,7 +237,12 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
     };
 
     const handleRemoveSong = async (songName: string) => {
-        if (!confirm(`Remove "${songName}" from session?`)) return;
+        if (!await confirm({
+            title: 'Remove Song',
+            message: `Are you sure you want to remove "${songName}" from this session?`,
+            confirmLabel: 'Remove',
+            variant: 'danger'
+        })) return;
 
         try {
             const currentSongs = session.songs || [];
@@ -262,7 +269,12 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
     };
 
     const handleDeleteRecording = async (recordingId: string, title: string) => {
-        if (!confirm(`Are you sure you want to delete recording "${title}"?`)) return;
+        if (!await confirm({
+            title: 'Delete Recording',
+            message: `Are you sure you want to delete recording "${title}"? This action cannot be undone.`,
+            confirmLabel: 'Delete',
+            variant: 'danger'
+        })) return;
 
         try {
             const res = await fetch(`/api/recordings/${recordingId}`, {

@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import StatusBadge from '@/components/admin/StatusBadge';
 import { useToast } from '@/hooks/useToast';
+import { useConfirm } from '@/providers/ConfirmProvider';
 import Button from '@/components/ui/Button';
 import { useSortableData } from '@/hooks/useSortableData';
 
@@ -26,6 +27,7 @@ type Capability = {
 
 export default function ApprovalsPage() {
     const toast = useToast();
+    const { confirm } = useConfirm();
     const [users, setUsers] = useState<User[]>([]);
     const { items: sortedUsers, requestSort, sortConfig } = useSortableData(users);
     const [capabilities, setCapabilities] = useState<Capability[]>([]);
@@ -90,11 +92,17 @@ export default function ApprovalsPage() {
         }
 
         if (action === 'approve' && selectedCapabilities.length === 0) {
-            if (!confirm('No capabilities selected. Continue with approval?')) {
+            // If checking caps is needed based on the previous code which did `if (!confirm(...))`
+            if (!await confirm({
+                title: 'No Capabilities Selected',
+                message: 'No capabilities selected. Continue with approval?',
+                confirmLabel: 'Approve Anyway',
+                variant: 'primary'
+            })) {
+                setActionLoading(false);
                 return;
             }
         }
-
         setActionLoading(true);
         try {
             const response = await fetch('/api/admin/approvals', {
