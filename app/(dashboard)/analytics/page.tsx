@@ -216,9 +216,21 @@ export default function AnalyticsPage() {
                                     outerRadius={60}
                                     fill="#8884d8"
                                     dataKey="count"
-                                    label={({ name, percent }) => {
-                                        if (!name || percent === undefined) return '';
-                                        return `${name.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} ${(percent * 100).toFixed(0)}%`;
+                                    label={(props: any) => {
+                                        const { x, y, cx, name, percent } = props;
+                                        if (!name || percent === undefined) return null;
+                                        return (
+                                            <text
+                                                x={x}
+                                                y={y}
+                                                fill="#9CA3AF"
+                                                textAnchor={x > cx ? 'start' : 'end'}
+                                                dominantBaseline="central"
+                                                className="text-[10px] md:text-xs"
+                                            >
+                                                {`${name.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} ${(percent * 100).toFixed(0)}%`}
+                                            </text>
+                                        );
                                     }}
                                     animationDuration={500}
                                 >
