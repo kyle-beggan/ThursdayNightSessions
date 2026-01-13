@@ -58,7 +58,7 @@ export default function ChatWindow({ sessionId = null, className = '' }: ChatWin
             {/* Header (Optional, maybe for Title) */}
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 bg-background">
+            <div className="flex-1 overflow-y-auto p-2 md:p-4 bg-background">
                 {loading ? (
                     <div className="flex items-center justify-center h-full text-text-secondary">
                         Loading messages...
@@ -83,21 +83,21 @@ export default function ChatWindow({ sessionId = null, className = '' }: ChatWin
             </div>
 
             {/* Input Area */}
-            <div className="p-4 bg-surface border-t border-border">
+            <div className="p-2 md:p-4 bg-surface border-t border-border">
                 <form onSubmit={handleSend} className="flex gap-2">
                     <input
                         type="text"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder="Type a message..."
-                        className="flex-1 px-4 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder-text-secondary"
+                        className="flex-1 min-w-0 px-3 py-2 bg-background border border-border rounded-lg text-text-primary text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-primary placeholder-text-secondary"
                         disabled={isSending}
                     />
                     <Button
                         type="submit"
                         variant="primary"
                         disabled={!newMessage.trim() || isSending}
-                        className="px-6"
+                        className="px-3 md:px-6 hover:scale-100 flex-shrink-0"
                     >
                         {isSending ? '...' : 'Send'}
                     </Button>

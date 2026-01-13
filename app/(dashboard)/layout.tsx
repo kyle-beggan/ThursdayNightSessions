@@ -15,8 +15,8 @@ export default function DashboardLayout({
             <MobileNav />
             <div className="flex">
                 <Sidebar />
-                <main className="flex-1 w-full py-8 flex justify-center">
-                    <div className="w-full max-w-7xl px-4">
+                <main className="flex-1 w-full py-4 md:py-8 flex justify-center">
+                    <div className="w-full max-w-7xl px-0 md:px-4">
                         {children}
                     </div>
                 </main>
