@@ -220,82 +220,84 @@ export default function SongsPage() {
                             {sortedSongs.map((song) => (
                                 <div key={song.id} className="bg-surface-secondary rounded-lg p-4 border border-border shadow-sm">
                                     <div className="flex justify-between items-start mb-3">
-                                        <div>
-                                            <h3 className="font-bold text-text-primary text-lg leading-tight">{song.title}</h3>
-                                            <p className="text-text-secondary text-sm">{song.artist || 'Unknown Artist'}</p>
+                                        <div className="flex-1 min-w-0 pr-2">
+                                            <h3 className="font-bold text-text-primary text-lg leading-tight truncate">{song.title}</h3>
+                                            <p className="text-text-secondary text-sm truncate">{song.artist || 'Unknown Artist'}</p>
                                         </div>
                                         {/* Play Button */}
                                         {song.resource_url && (
                                             <Button
                                                 variant="secondary"
-                                                className="w-10 h-10 p-0 flex items-center justify-center text-green-400 hover:text-green-300 border-green-500/30 bg-green-500/10 rounded-full flex-shrink-0"
+                                                className="w-8 h-8 p-0 flex items-center justify-center text-green-400 hover:text-green-300 border-green-500/30 bg-green-500/10 rounded-full flex-shrink-0"
                                                 onClick={() => window.open(song.resource_url, '_blank')}
                                                 title="Play"
                                             >
-                                                ▶
+                                                <span className="text-xs">▶</span>
                                             </Button>
                                         )}
                                     </div>
 
-                                    <div className="flex items-center gap-3 mb-4 text-sm text-text-secondary">
-                                        <div className="bg-surface-tertiary px-2 py-1 rounded">
-                                            <span className="font-medium text-text-primary">{song.key || '?'}</span>
-                                            <span className="text-xs ml-1 opacity-70">Key</span>
-                                        </div>
-                                        <div className="bg-surface-tertiary px-2 py-1 rounded">
-                                            <span className="font-medium text-text-primary">{song.tempo || '?'}</span>
-                                            <span className="text-xs ml-1 opacity-70">BPM</span>
+                                    <div className="flex gap-2 mb-4 text-sm text-text-secondary">
+                                        <div className="flex flex-col gap-1">
+                                            <div className="bg-surface-tertiary px-2 py-1 rounded inline-flex items-center">
+                                                <span className="font-medium text-text-primary min-w-[20px] text-center">{song.key || '?'}</span>
+                                                <span className="text-[10px] ml-1 opacity-70 uppercase tracking-wide">Key</span>
+                                            </div>
+                                            <div className="bg-surface-tertiary px-2 py-1 rounded inline-flex items-center">
+                                                <span className="font-medium text-text-primary min-w-[20px] text-center">{song.tempo || '?'}</span>
+                                                <span className="text-[10px] ml-1 opacity-70 uppercase tracking-wide">BPM</span>
+                                            </div>
                                         </div>
                                     </div>
 
                                     <div className="flex items-center justify-between pt-3 border-t border-border/50">
                                         {/* Left: Added By */}
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-2 max-w-[40%]">
                                             {song.creator ? (
                                                 <>
-                                                    <div className="w-6 h-6 rounded-full overflow-hidden relative border border-border">
+                                                    <div className="w-5 h-5 rounded-full overflow-hidden relative border border-border flex-shrink-0">
                                                         {song.creator.image ? (
                                                             <Image
                                                                 src={song.creator.image}
                                                                 alt={song.creator.name}
                                                                 fill
                                                                 className="object-cover"
-                                                                sizes="24px"
+                                                                sizes="20px"
                                                             />
                                                         ) : (
-                                                            <div className="w-full h-full bg-surface-tertiary flex items-center justify-center text-[10px]">
+                                                            <div className="w-full h-full bg-surface-tertiary flex items-center justify-center text-[8px]">
                                                                 {song.creator.name.charAt(0)}
                                                             </div>
                                                         )}
                                                     </div>
-                                                    <span className="text-xs text-text-secondary truncate max-w-[80px]">
+                                                    <span className="text-[10px] text-text-secondary truncate">
                                                         {song.creator.name.split(' ')[0]}
                                                     </span>
                                                 </>
                                             ) : (
-                                                <span className="text-xs text-text-secondary">Added by: -</span>
+                                                <span className="text-[10px] text-text-secondary">Added by: -</span>
                                             )}
                                         </div>
 
                                         {/* Right: Voting */}
-                                        <div className="flex items-center bg-surface rounded-full px-1 py-0.5 border border-border">
+                                        <div className="flex items-center bg-surface rounded-full px-1 py-0.5 border border-border flex-shrink-0 ml-2">
                                             <button
                                                 onClick={() => !song.user_has_voted && handleVote(song)}
-                                                className={`p-1.5 rounded-full ${song.user_has_voted ? 'text-green-500' : 'text-text-secondary'}`}
+                                                className={`p-1 rounded-full ${song.user_has_voted ? 'text-green-500' : 'text-text-secondary'}`}
                                             >
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
                                                     <path d="M1 8.25a1.25 1.25 0 112.5 0v7.5a1.25 1.25 0 11-2.5 0v-7.5zM11 3V1.7c0-.268.14-.526.395-.607A2 2 0 0114 3c0 .995-.182 1.948-.514 2.826-.204.54.166 1.174.744 1.174h2.52c1.243 0 2.261 1.01 2.146 2.247a23.864 23.864 0 01-1.341 5.974C17.153 16.323 16.072 17 14.9 17h-3.192a3 3 0 01-1.341-.317l-2.734-1.366A3 3 0 006.292 15H5V8h.963c.685 0 1.258-.483 1.612-1.068a4.011 4.011 0 012.16-1.779A10.55 10.55 0 0011 3z" />
                                                 </svg>
                                             </button>
-                                            <span className={`text-sm font-medium mx-1 ${song.user_has_voted ? 'text-green-500' : 'text-text-secondary'}`}>
+                                            <span className={`text-xs font-medium mx-1 min-w-[12px] text-center ${song.user_has_voted ? 'text-green-500' : 'text-text-secondary'}`}>
                                                 {song.vote_count || 0}
                                             </span>
                                             <button
                                                 onClick={() => song.user_has_voted && handleVote(song)}
                                                 disabled={!song.user_has_voted}
-                                                className={`p-1.5 rounded-full ${!song.user_has_voted ? 'text-text-secondary/30' : 'text-text-secondary hover:text-red-400'}`}
+                                                className={`p-1 rounded-full ${!song.user_has_voted ? 'text-text-secondary/30' : 'text-text-secondary hover:text-red-400'}`}
                                             >
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
                                                     <path d="M18.905 12.75a1.25 1.25 0 01-2.5 0v-7.5a1.25 1.25 0 112.5 0v7.5zM8.905 17v1.3c0 .268-.14.526-.395.607A2 2 0 015.905 17c0-.995.182-1.948.514-2.826.204-.54-.166-1.174-.744-1.174h-2.52c-1.243 0-2.261-1.01-2.146-2.247.193-2.08.652-4.082 1.341-5.974C2.752 3.677 3.833 3 5.005 3h3.192a3 3 0 011.341.317l2.734 1.366A3 3 0 0013.613 5h1.292v7h-.963c-.685 0-1.258.483-1.612 1.068a4.011 4.011 0 01-2.16 1.779 10.55 10.55 0 00-1.265 2.153z" />
                                                 </svg>
                                             </button>
