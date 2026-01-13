@@ -214,15 +214,6 @@ export default function SongsPage() {
                         {searchTerm ? 'No songs found matching your search.' : 'No songs in the library yet.'}
                     </div>
                 ) : (
-                    {/* Song List */ }
-                    < div className="bg-surface border border-border rounded-lg overflow-hidden">
-                {loading ? (
-                    <div className="p-8 text-center text-text-secondary">Loading songs...</div>
-                ) : songs.length === 0 ? (
-                    <div className="p-8 text-center text-text-secondary">
-                        {searchTerm ? 'No songs found matching your search.' : 'No songs in the library yet.'}
-                    </div>
-                ) : (
                     <>
                         {/* Mobile Card View */}
                         <div className="grid grid-cols-1 gap-4 p-4 md:hidden">
