@@ -77,7 +77,7 @@ export default function ProfilePage() {
 
     const fetchCapabilities = async () => {
         try {
-            const response = await fetch('/api/admin/capabilities');
+            const response = await fetch('/api/capabilities');
             if (response.ok) {
                 const data = await response.json();
                 setAllCapabilities(data);
