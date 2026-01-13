@@ -5,8 +5,6 @@ import { useToast } from '@/hooks/useToast';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import { SessionWithDetails, SessionCommitment, Capability, Song } from '@/lib/types';
-import CandidateListModal from './CandidateListModal';
-import AddSongModal from '@/components/songs/AddSongModal';
 import CapabilityIcon from '@/components/ui/CapabilityIcon';
 import { formatDate, formatTime, generateGoogleCalendarLink, downloadICSFile } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
@@ -34,7 +32,6 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
 
     // Admin Song Management State
     const [isPickerOpen, setIsPickerOpen] = useState(false);
-    const [isUpdatingSongs, setIsUpdatingSongs] = useState(false);
 
     const userId = sessionData?.user?.id;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -203,7 +200,6 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
 
     // --- Song Management ---
     const handleAddSong = async (song: Song) => {
-        setIsUpdatingSongs(true);
         try {
             // Construct new songs list
             const currentSongs = session.songs || [];
@@ -211,7 +207,6 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
             // Avoid duplicates? Or allow? Assuming unique by name for now based on API/Types
             if (currentSongs.find(s => s.id === song.id)) {
                 toast.error('Song already in session');
-                setIsUpdatingSongs(false);
                 return;
             }
 
@@ -236,15 +231,12 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
         } catch (error) {
             console.error('Error adding song to session:', error);
             toast.error('Failed to add song');
-        } finally {
-            setIsUpdatingSongs(false);
         }
     };
 
     const handleRemoveSong = async (songName: string) => {
         if (!confirm(`Remove "${songName}" from session?`)) return;
 
-        setIsUpdatingSongs(true);
         try {
             const currentSongs = session.songs || [];
             const newSongs = currentSongs
@@ -266,8 +258,6 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
         } catch (error) {
             console.error('Error removing song from session:', error);
             toast.error('Failed to remove song');
-        } finally {
-            setIsUpdatingSongs(false);
         }
     };
 

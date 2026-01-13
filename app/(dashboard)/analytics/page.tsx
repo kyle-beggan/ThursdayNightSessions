@@ -216,7 +216,7 @@ export default function AnalyticsPage() {
                                     outerRadius={60}
                                     fill="#8884d8"
                                     dataKey="count"
-                                    label={(props: any) => {
+                                    label={(props: { x: number; y: number; cx: number; name?: string; percent?: number }) => {
                                         const { x, y, cx, name, percent } = props;
                                         if (!name || percent === undefined) return null;
                                         return (

@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import Link from 'next/link';
 import { useToast } from '@/hooks/useToast';
-import CapabilityIcon from '@/components/ui/CapabilityIcon';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import StatusBadge from '@/components/admin/StatusBadge';
@@ -54,7 +52,6 @@ export default function ProfilePage() {
             fetchProfile();
             fetchCapabilities();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [session]);
 
     const fetchProfile = async () => {

@@ -119,7 +119,7 @@ export const authOptions: NextAuthOptions = {
                 return false;
             }
         },
-        async jwt({ token, user, trigger, session }) {
+        async jwt({ token, user, trigger }) {
             // Initial sign in or update
             if (user) {
                 token.id = user.id;

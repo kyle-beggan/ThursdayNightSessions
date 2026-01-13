@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Song } from '@/lib/types';
-import Button from './Button';
 
 interface SongPickerProps {
     onSelect: (song: Song) => void;
@@ -13,7 +12,6 @@ export default function SongPicker({ onSelect, onCancel }: SongPickerProps) {
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<Song[]>([]);
     const [loading, setLoading] = useState(false);
-    const [isOpen, setIsOpen] = useState(false);
 
     // Debounce search
     useEffect(() => {
@@ -57,7 +55,6 @@ export default function SongPicker({ onSelect, onCancel }: SongPickerProps) {
                     value={query}
                     onChange={(e) => {
                         setQuery(e.target.value);
-                        setIsOpen(true);
                     }}
                 />
 
