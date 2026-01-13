@@ -178,11 +178,11 @@ export default function SongsPage() {
     // ... existing handlers ...
 
     return (
-        <div className="p-6 max-w-7xl mx-auto space-y-6">
+        <div className="p-0 md:p-6 max-w-7xl mx-auto space-y-4 md:space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-text-primary">Song Library</h1>
-                    <p className="text-text-secondary">Manage the band&apos;s backlog of songs to record</p>
+                    <h1 className="text-xl md:text-3xl font-bold text-text-primary">Song Library</h1>
+                    <p className="text-text-secondary hidden md:block">Manage the band&apos;s backlog of songs to record</p>
                 </div>
                 <div className="flex gap-3">
                     <Button onClick={() => setIsFindModalOpen(true)} variant="secondary">

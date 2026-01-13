@@ -133,37 +133,37 @@ export default function AnalyticsPage() {
     if (!data) return <div className="text-text-secondary">Failed to load analytics data.</div>;
 
     return (
-        <div className={`space-y-8 p-6 ${loading ? 'opacity-50 pointer-events-none' : ''} transition-opacity duration-200`}>
+        <div className={`space-y-6 p-0 md:p-6 ${loading ? 'opacity-50 pointer-events-none' : ''} transition-opacity duration-200`}>
             <div className="flex flex-col xl:flex-row justify-end items-start xl:items-center gap-4">
 
-                <div className="flex flex-col sm:flex-row items-center gap-4">
-                    <div className="flex items-center gap-2 bg-surface p-1 rounded-lg border border-border text-sm">
-                        <button type="button" onClick={() => setRange('last_month')} className="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded transition-colors">Last Month</button>
-                        <div className="w-[1px] h-4 bg-border"></div>
-                        <button type="button" onClick={() => setRange('this_month')} className="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded transition-colors">This Month</button>
-                        <div className="w-[1px] h-4 bg-border"></div>
-                        <button type="button" onClick={() => setRange('next_month')} className="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded transition-colors">Next Month</button>
-                        <div className="w-[1px] h-4 bg-border"></div>
-                        <button type="button" onClick={() => setRange('last_6_months')} className="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded transition-colors">Last 6M</button>
-                        <div className="w-[1px] h-4 bg-border"></div>
-                        <button type="button" onClick={() => setRange('last_year')} className="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded transition-colors">Last Year</button>
-                        <div className="w-[1px] h-4 bg-border"></div>
-                        <button type="button" onClick={() => setRange('all_time')} className="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded transition-colors">All Time</button>
+                <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+                    <div className="flex flex-wrap items-center justify-center gap-2 bg-surface p-1 rounded-lg border border-border text-xs md:text-sm w-full md:w-auto">
+                        <button type="button" onClick={() => setRange('last_month')} className="px-2 md:px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded transition-colors whitespace-nowrap">Last Month</button>
+                        <div className="hidden md:block w-[1px] h-4 bg-border"></div>
+                        <button type="button" onClick={() => setRange('this_month')} className="px-2 md:px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded transition-colors whitespace-nowrap">This Month</button>
+                        <div className="hidden md:block w-[1px] h-4 bg-border"></div>
+                        <button type="button" onClick={() => setRange('next_month')} className="px-2 md:px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded transition-colors whitespace-nowrap">Next Month</button>
+                        <div className="hidden md:block w-[1px] h-4 bg-border"></div>
+                        <button type="button" onClick={() => setRange('last_6_months')} className="px-2 md:px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded transition-colors whitespace-nowrap">Last 6M</button>
+                        <div className="hidden md:block w-[1px] h-4 bg-border"></div>
+                        <button type="button" onClick={() => setRange('last_year')} className="px-2 md:px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded transition-colors whitespace-nowrap">Last Year</button>
+                        <div className="hidden md:block w-[1px] h-4 bg-border"></div>
+                        <button type="button" onClick={() => setRange('all_time')} className="px-2 md:px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded transition-colors whitespace-nowrap">All Time</button>
                     </div>
 
-                    <div className="flex items-center gap-2 bg-surface p-2 rounded-lg border border-border">
+                    <div className="flex flex-wrap items-center justify-center gap-2 bg-surface p-2 rounded-lg border border-border w-full md:w-auto">
                         <input
                             type="date"
                             value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
-                            className="bg-background text-text-primary px-3 py-1 rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert"
+                            className="bg-background text-text-primary px-3 py-1 rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary text-sm w-full sm:w-auto"
                         />
-                        <span className="text-text-secondary">-</span>
+                        <span className="text-text-secondary hidden sm:inline">-</span>
                         <input
                             type="date"
                             value={endDate}
                             onChange={(e) => setEndDate(e.target.value)}
-                            className="bg-background text-text-primary px-3 py-1 rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert"
+                            className="bg-background text-text-primary px-3 py-1 rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary text-sm w-full sm:w-auto"
                         />
                     </div>
                 </div>

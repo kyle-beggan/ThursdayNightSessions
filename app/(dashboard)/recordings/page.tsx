@@ -65,10 +65,10 @@ export default function RecordingsPage() {
     }
 
     return (
-        <div className="p-6 max-w-7xl mx-auto space-y-6">
+        <div className="p-0 md:p-6 max-w-7xl mx-auto space-y-4 md:space-y-6">
             <div>
-                <h1 className="text-3xl font-bold text-text-primary">Recording Library</h1>
-                <p className="text-text-secondary">Archive of all session recordings</p>
+                <h1 className="text-xl md:text-3xl font-bold text-text-primary">Recording Library</h1>
+                <p className="text-text-secondary hidden md:block">Archive of all session recordings</p>
             </div>
 
             <div className="bg-surface rounded-xl border border-border overflow-hidden">
