@@ -148,7 +148,7 @@ export default function FeedbackPage() {
 
     const handleStatusUpdate = async (item: FeedbackItem, e: React.MouseEvent) => {
         e.stopPropagation();
-        if (session?.user?.user_type !== 'admin') return;
+        if (session?.user?.userType !== 'admin') return;
 
         const statusCycle = ['pending', 'rejected', 'in_progress', 'completed'];
         const currentIndex = statusCycle.indexOf(item.status);
@@ -288,9 +288,9 @@ export default function FeedbackPage() {
                                             </div>
                                             <button
                                                 onClick={(e) => handleStatusUpdate(item, e)}
-                                                disabled={session?.user?.user_type !== 'admin'}
+                                                disabled={session?.user?.userType !== 'admin'}
                                                 className={`text-[10px] px-2 py-0.5 rounded-full capitalize w-fit border transition-all ${getStatusColor(item.status)
-                                                    } ${session?.user?.user_type === 'admin'
+                                                    } ${session?.user?.userType === 'admin'
                                                         ? 'cursor-pointer hover:opacity-80 active:scale-95'
                                                         : 'cursor-default'
                                                     }`}
@@ -367,9 +367,9 @@ export default function FeedbackPage() {
                                             </div>
                                             <button
                                                 onClick={(e) => handleStatusUpdate(item, e)}
-                                                disabled={session?.user?.user_type !== 'admin'}
+                                                disabled={session?.user?.userType !== 'admin'}
                                                 className={`text-xs px-2.5 py-1 rounded-full capitalize border transition-all ${getStatusColor(item.status)
-                                                    } ${session?.user?.user_type === 'admin'
+                                                    } ${session?.user?.userType === 'admin'
                                                         ? 'cursor-pointer hover:opacity-80 active:scale-95'
                                                         : 'cursor-default'
                                                     }`}
