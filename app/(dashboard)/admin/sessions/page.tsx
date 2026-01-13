@@ -164,7 +164,7 @@ export default function SessionsPage() {
 
             {/* Filters */}
             <div className="flex justify-end mb-4">
-                <div className="flex items-center gap-2 bg-surface border border-border p-1 rounded-lg w-fit">
+                <div className="grid grid-cols-3 md:flex items-center gap-2 bg-surface border border-border p-1 rounded-lg w-full md:w-fit">
                     <button
                         onClick={() => setFilter('all')}
                         className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${filter === 'all'

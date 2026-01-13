@@ -213,7 +213,7 @@ export default function AnalyticsPage() {
                                     data={data.charts.instrumentDistribution}
                                     cx="50%"
                                     cy="50%"
-                                    outerRadius={100}
+                                    outerRadius={80}
                                     fill="#8884d8"
                                     dataKey="count"
                                     label={({ name, percent }) => {

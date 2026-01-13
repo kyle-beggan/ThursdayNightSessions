@@ -179,7 +179,7 @@ export default function UsersPage() {
                             className="w-full px-4 py-2 bg-background border border-border rounded-lg text-text-primary placeholder-text-secondary focus:outline-none focus:ring-2 focus:ring-primary"
                         />
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                         {['all', 'pending', 'approved', 'rejected', 'admin'].map(status => (
                             <button
                                 key={status}

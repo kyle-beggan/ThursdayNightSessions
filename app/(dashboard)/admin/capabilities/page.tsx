@@ -186,16 +186,20 @@ export default function CapabilitiesPage() {
                                         <Button
                                             onClick={() => handleEditClick(capability)}
                                             variant="ghost"
-                                            className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-text-primary"
+                                            className="text-xs px-2 md:px-3 py-1.5 h-auto text-text-secondary hover:text-text-primary"
+                                            title="Edit"
                                         >
-                                            Edit
+                                            <span className="md:hidden">✏️</span>
+                                            <span className="hidden md:inline">Edit</span>
                                         </Button>
                                         <Button
                                             onClick={() => handleDeleteCapability(capability.id, capability.name)}
                                             variant="ghost"
-                                            className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-red-400"
+                                            className="text-xs px-2 md:px-3 py-1.5 h-auto text-text-secondary hover:text-red-400"
+                                            title="Delete"
                                         >
-                                            Delete
+                                            <span className="md:hidden">🗑️</span>
+                                            <span className="hidden md:inline">Delete</span>
                                         </Button>
                                     </div>
                                 </div>
