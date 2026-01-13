@@ -261,6 +261,26 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
         }
     };
 
+    const handleDeleteRecording = async (recordingId: string, title: string) => {
+        if (!confirm(`Are you sure you want to delete recording "${title}"?`)) return;
+
+        try {
+            const res = await fetch(`/api/recordings/${recordingId}`, {
+                method: 'DELETE',
+            });
+
+            if (res.ok) {
+                toast.success('Recording deleted');
+                onUpdate();
+            } else {
+                toast.error('Failed to delete recording');
+            }
+        } catch (error) {
+            console.error('Error deleting recording:', error);
+            toast.error('Failed to delete recording');
+        }
+    };
+
     return (
         <Modal isOpen={isOpen} onClose={handleClose} title={step === 'details' ? "Session Details" : "Confirm RSVP"} size="xl" className="!p-5 h-[90dvh] md:h-[80vh] flex flex-col">
             <div className="flex-1 flex flex-col min-h-0">
@@ -461,7 +481,19 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         {session.recordings && session.recordings.length > 0 ? (
                                             session.recordings.map((rec) => (
-                                                <div key={rec.id} className="bg-surface/50 rounded-lg p-3 border border-border flex items-center justify-between gap-2 hover:border-primary/50 transition-colors group">
+                                                <div key={rec.id} className="bg-surface/50 rounded-lg p-3 border border-border flex items-center justify-between gap-2 hover:border-primary/50 transition-colors group relative">
+                                                    {isAdmin && (
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDeleteRecording(rec.id, rec.title);
+                                                            }}
+                                                            className="absolute -top-2 -right-2 w-5 h-5 bg-surface border border-border rounded-full text-xs text-text-secondary hover:text-red-500 hover:border-red-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center shadow-md z-10"
+                                                            title="Delete recording"
+                                                        >
+                                                            ✕
+                                                        </button>
+                                                    )}
                                                     <div className="font-medium text-text-primary truncate mb-0 text-xs min-w-0 flex-1" title={rec.title}>
                                                         {rec.title}
                                                     </div>
