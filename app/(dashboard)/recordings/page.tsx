@@ -131,7 +131,7 @@ export default function RecordingsPage() {
                                     Session Date {sortConfig?.key === 'session_date' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                                 </th>
                                 <th className="p-4 text-sm font-semibold text-text-secondary">Players</th>
-                                <th className="p-4 text-sm font-semibold text-text-secondary text-right">Actions</th>
+                                <th className="p-4 text-sm font-semibold text-text-secondary text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
@@ -167,7 +167,7 @@ export default function RecordingsPage() {
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="p-4 text-right">
+                                        <td className="p-4 text-center">
                                             <Button
                                                 variant="primary"
                                                 className="text-xs px-3 py-1.5 h-auto opacity-0 group-hover:opacity-100 transition-opacity"

@@ -245,7 +245,7 @@ export default function UsersPage() {
                             <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
                                 Capabilities
                             </th>
-                            <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
+                            <th className="px-4 py-3 text-center text-sm font-semibold text-text-primary">
                                 Actions
                             </th>
                         </tr>
@@ -290,7 +290,7 @@ export default function UsersPage() {
                                         </div>
                                     </td>
                                     <td className="px-4 py-3">
-                                        <div className="flex gap-2">
+                                        <div className="flex gap-2 justify-end">
                                             <div className="flex gap-2">
                                                 {user.status === 'pending' && (
                                                     <>

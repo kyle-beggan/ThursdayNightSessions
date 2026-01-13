@@ -220,7 +220,7 @@ export default function SessionsPage() {
                                         <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => sortUpcoming('commitments_count')}>
                                             Commitments {upcomingConfig?.key === 'commitments_count' && (upcomingConfig.direction === 'ascending' ? '↑' : '↓')}
                                         </th>
-                                        <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
+                                        <th className="px-4 py-3 text-center text-sm font-semibold text-text-primary">
                                             Actions
                                         </th>
                                     </tr>
@@ -243,7 +243,7 @@ export default function SessionsPage() {
                                                 {session.commitments_count || 0} committed
                                             </td>
                                             <td className="px-4 py-3">
-                                                <div className="flex gap-2">
+                                                <div className="flex gap-2 justify-center">
                                                     <Button
                                                         onClick={() => handleEditSession(session)}
                                                         variant="ghost"
@@ -286,7 +286,7 @@ export default function SessionsPage() {
                                     <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => sortPast('commitments_count')}>
                                         Commitments {pastConfig?.key === 'commitments_count' && (pastConfig.direction === 'ascending' ? '↑' : '↓')}
                                     </th>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
+                                    <th className="px-4 py-3 text-center text-sm font-semibold text-text-primary">
                                         Actions
                                     </th>
                                 </tr>
@@ -309,7 +309,7 @@ export default function SessionsPage() {
                                             {session.commitments_count || 0} attended
                                         </td>
                                         <td className="px-4 py-3">
-                                            <div className="flex gap-2">
+                                            <div className="flex gap-2 justify-center">
                                                 <Button
                                                     onClick={() => handleEditSession(session)}
                                                     variant="ghost"

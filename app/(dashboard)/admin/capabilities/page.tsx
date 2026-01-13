@@ -161,9 +161,12 @@ export default function CapabilitiesPage() {
 
             {/* Capabilities List */}
             <div className="bg-surface border border-border rounded-lg overflow-hidden">
-                <div className="px-6 py-4 bg-surface-secondary border-b border-border">
+                <div className="px-6 py-4 bg-surface-secondary border-b border-border grid grid-cols-[1fr_200px] gap-4">
                     <h2 className="text-lg font-semibold text-text-primary">
                         All Capabilities ({capabilities.length})
+                    </h2>
+                    <h2 className="text-lg font-semibold text-text-primary text-center">
+                        Actions
                     </h2>
                 </div>
                 <div className="divide-y divide-border">
@@ -177,7 +180,7 @@ export default function CapabilitiesPage() {
                             return (
                                 <div
                                     key={capability.id}
-                                    className="px-6 py-4 flex items-center justify-between hover:bg-surface-secondary transition-colors"
+                                    className="px-6 py-4 grid grid-cols-[1fr_200px] gap-4 items-center hover:bg-surface-secondary transition-colors"
                                 >
                                     <div className="flex items-center gap-3 md:gap-4">
                                         <div className="w-8 h-8 md:w-12 md:h-12 bg-primary/20 rounded-lg flex items-center justify-center text-sm md:text-2xl">
@@ -189,7 +192,7 @@ export default function CapabilitiesPage() {
                                             </h3>
                                         </div>
                                     </div>
-                                    <div className="flex gap-1 md:gap-2">
+                                    <div className="flex gap-1 md:gap-2 justify-center">
                                         <Button
                                             onClick={() => handleEditClick(capability)}
                                             variant="ghost"
