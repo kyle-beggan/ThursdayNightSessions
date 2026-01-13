@@ -136,7 +136,6 @@ export default function CapabilitiesPage() {
                     <span>Back to Admin</span>
                 </Link>
                 <h1 className="text-3xl font-bold text-text-primary mb-2">Manage Capabilities</h1>
-                <p className="text-text-secondary">Add, edit, and remove user capabilities</p>
             </div>
 
             {/* Add New Capability */}

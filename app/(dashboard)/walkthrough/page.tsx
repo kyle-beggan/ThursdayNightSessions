@@ -165,9 +165,6 @@ export default function WalkthroughPage() {
         <div className="max-w-5xl mx-auto">
             <div className="mb-4 md:mb-8 px-2 md:px-0">
                 <h1 className="text-xl md:text-3xl font-bold text-text-primary mb-2">App Walkthrough</h1>
-                <p className="text-text-secondary hidden md:block">
-                    Get to know the features of Thursday Night Sessions.
-                </p>
             </div>
 
             <div className="flex flex-col md:flex-row gap-6">

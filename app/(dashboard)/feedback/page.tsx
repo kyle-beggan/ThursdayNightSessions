@@ -150,9 +150,6 @@ export default function FeedbackPage() {
             <div className="lg:col-span-1 space-y-6">
                 <div>
                     <h1 className="text-xl md:text-3xl font-bold text-text-primary mb-2">Feedback</h1>
-                    <p className="text-text-secondary text-sm hidden md:block">
-                        Help us improve the band app!
-                    </p>
                 </div>
 
                 <div className="bg-surface border border-border rounded-xl p-6 shadow-sm sticky top-24">

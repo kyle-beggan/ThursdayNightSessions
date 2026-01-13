@@ -46,9 +46,6 @@ export default function DashboardPage() {
                     <h2 className="text-2xl md:text-4xl font-bold text-text-primary mb-2">
                         Thursday Night Sessions
                     </h2>
-                    <p className="text-text-secondary hidden md:block">
-                        View and commit to upcoming rehearsal sessions
-                    </p>
                 </div>
                 {session?.user?.userType === 'admin' && (
                     <Button onClick={() => setIsCreateModalOpen(true)} variant="primary">

@@ -139,7 +139,6 @@ export default function SessionsPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold text-text-primary mb-2">Manage Sessions</h1>
-                    <p className="text-text-secondary">Create, edit, and delete studio sessions</p>
                 </div>
                 <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}>Create New Session</Button>
             </div>

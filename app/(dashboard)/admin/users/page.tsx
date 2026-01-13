@@ -164,7 +164,6 @@ export default function UsersPage() {
                     <span>Back to Admin</span>
                 </Link>
                 <h1 className="text-3xl font-bold text-text-primary mb-2">Manage Users</h1>
-                <p className="text-text-secondary">View and manage all user accounts</p>
             </div>
 
             {/* Filters */}

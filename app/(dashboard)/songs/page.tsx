@@ -182,7 +182,6 @@ export default function SongsPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-xl md:text-3xl font-bold text-text-primary">Song Library</h1>
-                    <p className="text-text-secondary hidden md:block">Manage the band&apos;s backlog of songs to record</p>
                 </div>
                 <div className="flex gap-3 w-full md:w-auto">
                     <Button onClick={() => setIsFindModalOpen(true)} variant="secondary" className="flex-1 md:flex-none justify-center">
