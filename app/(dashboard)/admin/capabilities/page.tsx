@@ -209,7 +209,7 @@ export default function AdminCapabilitiesPage() {
                                             Edit
                                         </Button>
                                         <Button
-                                            onClick={() => handleDeleteCapability(capability.id, capability.name)}
+                                            onClick={() => handleDelete(capability.id, capability.name)}
                                             variant="ghost"
                                             className="text-[10px] md:text-xs px-2 md:px-3 py-1 h-auto text-text-secondary hover:text-red-400"
                                         >
