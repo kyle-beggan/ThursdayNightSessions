@@ -465,39 +465,40 @@ export default function SongsPage() {
                                 ))}
                             </tbody>
                         </table>
-                )}
-                    </div>
-
-                <AddSongModal
-                    isOpen={isAddModalOpen}
-                    onClose={handleCloseAddModal}
-                    onSongAdded={fetchSongs}
-                    initialData={editingSong}
-                />
-
-                <FindSongModal
-                    isOpen={isFindModalOpen}
-                    onClose={() => setIsFindModalOpen(false)}
-                    onAddSongs={handleAddRecommendedSongs}
-                />
-
-                <SongCapabilitiesModal
-                    isOpen={isCapsModalOpen}
-                    onClose={() => setIsCapsModalOpen(false)}
-                    song={selectedSongForCaps}
-                    onSave={fetchSongs}
-                />
-
-                {selectedSession && (
-                    <SessionModal
-                        isOpen={isSessionModalOpen}
-                        onClose={() => setIsSessionModalOpen(false)}
-                        session={selectedSession}
-                        onUpdate={() => {
-                            handleSessionClick(selectedSession.id);
-                        }}
-                    />
+                    </>
                 )}
             </div>
-            );
+
+            <AddSongModal
+                isOpen={isAddModalOpen}
+                onClose={handleCloseAddModal}
+                onSongAdded={fetchSongs}
+                initialData={editingSong}
+            />
+
+            <FindSongModal
+                isOpen={isFindModalOpen}
+                onClose={() => setIsFindModalOpen(false)}
+                onAddSongs={handleAddRecommendedSongs}
+            />
+
+            <SongCapabilitiesModal
+                isOpen={isCapsModalOpen}
+                onClose={() => setIsCapsModalOpen(false)}
+                song={selectedSongForCaps}
+                onSave={fetchSongs}
+            />
+
+            {selectedSession && (
+                <SessionModal
+                    isOpen={isSessionModalOpen}
+                    onClose={() => setIsSessionModalOpen(false)}
+                    session={selectedSession}
+                    onUpdate={() => {
+                        handleSessionClick(selectedSession.id);
+                    }}
+                />
+            )}
+        </div>
+    );
 }
