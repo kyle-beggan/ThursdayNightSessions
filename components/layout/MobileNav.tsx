@@ -28,7 +28,7 @@ export default function MobileNav() {
 
     return (
         <nav className="md:hidden sticky top-[73px] z-40 bg-surface/95 backdrop-blur-md border-b border-border overflow-x-auto no-scrollbar">
-            <div className="flex items-center px-4 h-14 min-w-max gap-2">
+            <div className="flex items-center justify-between px-4 h-14 min-w-full gap-2">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
 
@@ -41,13 +41,13 @@ export default function MobileNav() {
                         <Link
                             key={item.href}
                             href={item.href}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${isActive
+                            aria-label={item.name}
+                            className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors flex-shrink-0 ${isActive
                                     ? 'bg-primary/20 text-primary border border-primary/50'
                                     : 'text-text-secondary hover:text-text-primary hover:bg-surface-secondary'
                                 }`}
                         >
-                            <span>{item.icon}</span>
-                            <span>{item.name}</span>
+                            <span className="text-xl">{item.icon}</span>
                         </Link>
                     );
                 })}
