@@ -6,6 +6,7 @@ import Button from '@/components/ui/Button';
 import CapabilityIcon from '@/components/ui/CapabilityIcon';
 
 import CapabilityModal from '@/components/admin/CapabilityModal';
+import { useToast } from '@/hooks/useToast';
 
 type Capability = {
     id: string;
@@ -15,6 +16,7 @@ type Capability = {
 };
 
 export default function CapabilitiesPage() {
+    const toast = useToast();
     const [capabilities, setCapabilities] = useState<Capability[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -63,13 +65,15 @@ export default function CapabilitiesPage() {
 
                 if (response.ok) {
                     await fetchCapabilities();
+                    setIsModalOpen(false);
+                    toast.success('Capability created successfully');
                 } else {
                     const error = await response.json();
-                    alert(error.error || 'Failed to create capability');
+                    toast.error(error.error || 'Failed to create capability');
                 }
             } catch (error) {
                 console.error('Error creating capability:', error);
-                alert('Failed to create capability');
+                toast.error('Failed to create capability');
             }
         } else {
             // Edit existing capability
@@ -84,13 +88,16 @@ export default function CapabilitiesPage() {
 
                 if (response.ok) {
                     await fetchCapabilities();
+                    setEditingCapability(null);
+                    setIsModalOpen(false);
+                    toast.success('Capability updated successfully');
                 } else {
                     const error = await response.json();
-                    alert(error.error || 'Failed to update capability');
+                    toast.error(error.error || 'Failed to update capability');
                 }
             } catch (error) {
                 console.error('Error updating capability:', error);
-                alert('Failed to update capability');
+                toast.error('Failed to update capability');
             }
         }
     };
@@ -107,13 +114,14 @@ export default function CapabilitiesPage() {
 
             if (response.ok) {
                 await fetchCapabilities();
+                toast.success('Capability deleted successfully');
             } else {
                 const error = await response.json();
-                alert(error.error || 'Failed to delete capability');
+                toast.error(error.error || 'Failed to delete capability');
             }
         } catch (error) {
             console.error('Error deleting capability:', error);
-            alert('Failed to delete capability');
+            toast.error('Failed to delete capability');
         }
     };
 

@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 
 import Link from 'next/link';
 import StatusBadge from '@/components/admin/StatusBadge';
+import { useToast } from '@/hooks/useToast';
+import { formatDate } from '@/lib/utils';
 import Button from '@/components/ui/Button';
 import { useSortableData } from '@/hooks/useSortableData';
 
@@ -24,7 +26,7 @@ type Capability = {
 };
 
 export default function ApprovalsPage() {
-
+    const toast = useToast();
     const [users, setUsers] = useState<User[]>([]);
     const { items: sortedUsers, requestSort, sortConfig } = useSortableData(users);
     const [capabilities, setCapabilities] = useState<Capability[]>([]);
@@ -34,11 +36,11 @@ export default function ApprovalsPage() {
     const [actionLoading, setActionLoading] = useState(false);
 
     useEffect(() => {
-        fetchPendingUsers();
+        fetchUsers();
         fetchCapabilities();
     }, []);
 
-    const fetchPendingUsers = async () => {
+    const fetchUsers = async () => {
         try {
             const response = await fetch('/api/admin/users?status=pending');
             if (response.ok) {
@@ -82,9 +84,9 @@ export default function ApprovalsPage() {
         }
     };
 
-    const handleAction = async (action: 'approve' | 'reject') => {
+    const handleBulkAction = async (action: 'approve' | 'reject') => {
         if (selectedUsers.size === 0) {
-            alert('Please select at least one user');
+            toast.error('Please select at least one user');
             return;
         }
 
@@ -107,17 +109,21 @@ export default function ApprovalsPage() {
             });
 
             if (response.ok) {
-                await fetchPendingUsers();
+                const result = await response.json();
+                if (result.errors && result.errors.length > 0) {
+                    toast.info(`Processed with some errors: ${result.errors.join(', ')}`);
+                } else {
+                    toast.success(`Successfully ${action}d ${selectedUsers.size} user(s)`);
+                }
+                await fetchUsers();
                 setSelectedUsers(new Set());
-                setSelectedCapabilities([]);
-                alert(`Successfully ${action}d ${selectedUsers.size} user(s)`);
             } else {
                 const error = await response.json();
-                alert(`Error: ${error.error || 'Failed to process request'}`);
+                toast.error(`Error: ${error.error || 'Failed to process request'}`);
             }
         } catch (error) {
-            console.error(`Error ${action}ing users:`, error);
-            alert(`Failed to ${action} users`);
+            console.error('Error processing bulk action:', error);
+            toast.error(`Failed to ${action} users`);
         } finally {
             setActionLoading(false);
         }

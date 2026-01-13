@@ -1,3 +1,4 @@
+```javascript
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -6,6 +7,7 @@ import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { Capability } from '@/lib/types';
+import { useToast } from '@/hooks/useToast'; // Added useToast import
 
 interface User {
     id: string;
@@ -21,6 +23,7 @@ export default function EditUserPage() {
     const params = useParams();
     const router = useRouter();
     const userId = params?.userId as string;
+    const toast = useToast(); // Initialized useToast
 
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
@@ -51,7 +54,7 @@ export default function EditUserPage() {
             }
 
             // Fetch user details
-            const userRes = await fetch(`/api/admin/users`);
+            const userRes = await fetch(`/ api / admin / users`);
             // Note: The list endpoint returns all users. Ideally we'd have a specific GET /id, 
             // but the list endpoint is filterable or we can just find it. 
             // Better: Update the GET endpoint to handle a single ID or use the list and find.
@@ -78,17 +81,17 @@ export default function EditUserPage() {
                     setSelectedCapabilities(foundUser.capabilities.map((c: Capability) => c.id));
                 } else {
                     // Handle user not found
-                    alert('User not found');
+                    toast.error('User not found'); // Replaced alert
                     router.push('/admin/users');
                 }
             }
         } catch (error) {
             console.error('Error fetching data:', error);
-            alert('Error loading user data');
+            toast.error('Error loading user data'); // Replaced alert
         } finally {
             setLoading(false);
         }
-    }, [userId, router]);
+    }, [userId, router, toast]); // Added toast to dependency array
 
     useEffect(() => {
         if (userId) {
@@ -114,13 +117,15 @@ export default function EditUserPage() {
                 body: JSON.stringify({ userId, updates })
             });
 
-            if (!res.ok) throw new Error('Failed to update user info');
+            if (!res.ok) {
+                throw new Error('Failed to update user info');
+            }
 
-            alert('User updated successfully');
+            toast.success('User updated successfully'); // Replaced alert
             router.push('/admin/users');
         } catch (error) {
             console.error('Error updating user:', error);
-            alert('Failed to update user');
+            toast.error('Failed to update user'); // Replaced alert
         } finally {
             setSaving(false);
         }
@@ -220,10 +225,11 @@ export default function EditUserPage() {
                         {allCapabilities.map(cap => (
                             <label
                                 key={cap.id}
-                                className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-colors ${selectedCapabilities.includes(cap.id)
-                                    ? 'bg-primary/10 border-primary'
-                                    : 'bg-surface-secondary border-transparent hover:bg-surface-tertiary'
-                                    }`}
+                                className={`flex items - center gap - 2 p - 3 rounded - lg border cursor - pointer transition - colors ${
+    selectedCapabilities.includes(cap.id)
+    ? 'bg-primary/10 border-primary'
+    : 'bg-surface-secondary border-transparent hover:bg-surface-tertiary'
+} `}
                             >
                                 <input
                                     type="checkbox"

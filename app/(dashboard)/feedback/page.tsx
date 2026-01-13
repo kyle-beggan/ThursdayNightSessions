@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Button from '@/components/ui/Button';
+import { useToast } from '@/hooks/useToast';
 import { formatDate } from '@/lib/utils';
 import { useSession } from 'next-auth/react';
 
@@ -25,6 +26,7 @@ interface FeedbackItem {
 
 export default function FeedbackPage() {
     const { data: session } = useSession();
+    const toast = useToast();
     const [category, setCategory] = useState('feature_request');
     const [message, setMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -68,13 +70,13 @@ export default function FeedbackPage() {
                 setMessage('');
                 setCategory('feature_request');
                 fetchFeedback(); // Refresh list
-                alert('Feedback submitted successfully!');
+                toast.success('Feedback submitted successfully!');
             } else {
-                alert('Failed to submit feedback.');
+                toast.error('Failed to submit feedback.');
             }
         } catch (err) {
             console.error('Feedback submission error:', err);
-            alert('An error occurred.');
+            toast.error('An error occurred.');
         } finally {
             setIsSubmitting(false);
         }

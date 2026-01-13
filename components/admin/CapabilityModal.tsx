@@ -45,7 +45,7 @@ export default function CapabilityModal({
     initialIcon = '🎸',
     title
 }: CapabilityModalProps) {
-    const { toast } = useToast();
+    const toast = useToast();
     const [name, setName] = useState(initialName);
     const [selectedIcon, setSelectedIcon] = useState(initialIcon);
 

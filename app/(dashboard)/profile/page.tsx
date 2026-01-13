@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
+import { useToast } from '@/hooks/useToast';
+import CapabilityIcon from '@/components/ui/CapabilityIcon';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import StatusBadge from '@/components/admin/StatusBadge';
@@ -26,7 +29,8 @@ type Capability = {
 };
 
 export default function ProfilePage() {
-    const { data: session } = useSession();
+    const toast = useToast();
+    const { data: session, update: updateSession } = useSession();
     const [user, setUser] = useState<User | null>(null);
     const [allCapabilities, setAllCapabilities] = useState<Capability[]>([]);
     const [loading, setLoading] = useState(true);
@@ -148,8 +152,8 @@ export default function ProfilePage() {
             window.location.reload();
 
         } catch (error) {
-            console.error('Error uploading image:', error);
-            alert('Error updating avatar. Please try again.');
+            console.error('Error uploading avatar:', error);
+            toast.error('Error updating avatar. Please try again.');
         } finally {
             setUploading(false);
         }
@@ -171,16 +175,15 @@ export default function ProfilePage() {
             });
 
             if (response.ok) {
-                await fetchProfile();
+                await updateSession();
                 setIsEditing(false);
-                // Force reload to update session/header avatar if needed
-                window.location.reload();
+                toast.success('Profile updated successfully');
             } else {
-                alert('Failed to update profile');
+                toast.error('Failed to update profile');
             }
         } catch (error) {
             console.error('Error updating profile:', error);
-            alert('Failed to update profile');
+            toast.error('Failed to update profile');
         } finally {
             setIsSaving(false);
         }
