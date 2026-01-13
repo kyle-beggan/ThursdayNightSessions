@@ -67,7 +67,7 @@ export default function Sidebar() {
 
     return (
         <aside
-            className={`sticky left-0 top-[73px] h-[calc(100vh-73px)] bg-surface/50 backdrop-blur-lg border-r border-border transition-all duration-300 flex-shrink-0 ${isCollapsed ? 'w-16' : 'w-64'
+            className={`hidden md:block sticky left-0 top-[73px] h-[calc(100vh-73px)] bg-surface/50 backdrop-blur-lg border-r border-border transition-all duration-300 flex-shrink-0 ${isCollapsed ? 'w-16' : 'w-64'
                 }`}
         >
             {/* Toggle Button */}

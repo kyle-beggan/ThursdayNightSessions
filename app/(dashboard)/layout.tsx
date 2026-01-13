@@ -1,6 +1,8 @@
 import Header from '@/components/layout/Header';
 import Sidebar from '@/components/layout/Sidebar';
 
+import MobileNav from '@/components/layout/MobileNav';
+
 export default function DashboardLayout({
     children,
 }: {
@@ -10,6 +12,7 @@ export default function DashboardLayout({
     return (
         <div className="min-h-screen bg-background">
             <Header />
+            <MobileNav />
             <div className="flex">
                 <Sidebar />
                 <main className="flex-1 w-full py-8 flex justify-center">
