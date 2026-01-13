@@ -172,34 +172,30 @@ export default function CapabilitiesPage() {
                                     key={capability.id}
                                     className="px-6 py-4 flex items-center justify-between hover:bg-surface-secondary transition-colors"
                                 >
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center text-2xl">
-                                            <CapabilityIcon capability={capWithOptionalIcon} className="w-6 h-6" />
+                                    <div className="flex items-center gap-3 md:gap-4">
+                                        <div className="w-8 h-8 md:w-12 md:h-12 bg-primary/20 rounded-lg flex items-center justify-center text-sm md:text-2xl">
+                                            <CapabilityIcon capability={capWithOptionalIcon} className="w-4 h-4 md:w-6 md:h-6" />
                                         </div>
                                         <div>
-                                            <h3 className="font-medium text-text-primary capitalize">
+                                            <h3 className="font-medium text-sm md:text-base text-text-primary capitalize">
                                                 <div className="font-medium text-text-primary capitalize">{capability.name}</div>
                                             </h3>
                                         </div>
                                     </div>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-1 md:gap-2">
                                         <Button
                                             onClick={() => handleEditClick(capability)}
                                             variant="ghost"
-                                            className="text-xs px-2 md:px-3 py-1.5 h-auto text-text-secondary hover:text-text-primary"
-                                            title="Edit"
+                                            className="text-[10px] md:text-xs px-2 md:px-3 py-1 h-auto text-text-secondary hover:text-text-primary"
                                         >
-                                            <span className="md:hidden">✏️</span>
-                                            <span className="hidden md:inline">Edit</span>
+                                            Edit
                                         </Button>
                                         <Button
                                             onClick={() => handleDeleteCapability(capability.id, capability.name)}
                                             variant="ghost"
-                                            className="text-xs px-2 md:px-3 py-1.5 h-auto text-text-secondary hover:text-red-400"
-                                            title="Delete"
+                                            className="text-[10px] md:text-xs px-2 md:px-3 py-1 h-auto text-text-secondary hover:text-red-400"
                                         >
-                                            <span className="md:hidden">🗑️</span>
-                                            <span className="hidden md:inline">Delete</span>
+                                            Delete
                                         </Button>
                                     </div>
                                 </div>
