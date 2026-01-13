@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 import { ToastContext } from '@/providers/ToastProvider';
 
 export function useToast() {
@@ -8,9 +8,11 @@ export function useToast() {
         throw new Error('useToast must be used within a ToastProvider');
     }
 
-    return {
-        success: (message: string) => context.addToast(message, 'success'),
-        error: (message: string) => context.addToast(message, 'error'),
-        info: (message: string) => context.addToast(message, 'info'),
-    };
+    const { addToast } = context;
+
+    return useMemo(() => ({
+        success: (message: string) => addToast(message, 'success'),
+        error: (message: string) => addToast(message, 'error'),
+        info: (message: string) => addToast(message, 'info'),
+    }), [addToast]);
 }
