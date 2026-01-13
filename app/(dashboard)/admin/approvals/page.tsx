@@ -146,127 +146,57 @@ export default function ApprovalsPage() {
     }
 
     return (
-        <div className="space-y-6">
-            <div>
-                <Link
-                    href="/admin"
-                    className="inline-flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors mb-4"
-                >
-                    <span className="text-xl">←</span>
-                    <span>Back to Admin</span>
-                </Link>
-                <h1 className="text-3xl font-bold text-text-primary mb-2">User Approvals</h1>
-                <p className="text-text-secondary">Review and approve pending user registrations</p>
-            </div>
-
-            {users.length === 0 ? (
-                <div className="bg-surface border border-border rounded-lg p-12 text-center">
-                    <div className="text-6xl mb-4">✅</div>
-                    <h3 className="text-xl font-semibold text-text-primary mb-2">
-                        No Pending Approvals
-                    </h3>
-                    <p className="text-text-secondary">
-                        All users have been reviewed. Check back later for new registrations.
-                    </p>
-                </div>
-            ) : (
-                <>
-                    {/* Bulk Actions */}
-                    <div className="bg-surface border border-border rounded-lg p-4">
-                        <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-                            <div>
-                                <p className="text-sm text-text-secondary mb-2">
-                                    {selectedUsers.size} of {users.length} selected
-                                </p>
-                                <div className="flex flex-wrap gap-2">
-                                    {capabilities.map(cap => (
-                                        <button
-                                            key={cap.id}
-                                            onClick={() => toggleCapability(cap.id)}
-                                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedCapabilities.includes(cap.id)
-                                                ? 'bg-primary text-white'
-                                                : 'bg-surface-secondary text-text-secondary hover:bg-surface-tertiary'
-                                                }`}
-                                        >
-                                            <span className="capitalize">{cap.name}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="flex gap-2">
-                                <Button
-                                    onClick={() => handleAction('approve')}
-                                    disabled={selectedUsers.size === 0 || actionLoading}
-                                    variant="primary"
-                                >
-                                    Approve Selected
-                                </Button>
-                                <Button
-                                    onClick={() => handleAction('reject')}
-                                    disabled={selectedUsers.size === 0 || actionLoading}
-                                    variant="ghost"
-                                >
-                                    Reject Selected
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Users Table */}
-                    <div className="bg-surface border border-border rounded-lg overflow-hidden">
-                        <table className="w-full">
-                            <thead className="bg-surface-secondary">
-                                <tr>
-                                    <th className="px-4 py-3 text-left">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedUsers.size === users.length}
-                                            onChange={handleSelectAll}
-                                            className="rounded"
-                                        />
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('name')}>
-                                        Name {sortConfig?.key === 'name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('email')}>
-                                        Email {sortConfig?.key === 'email' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('status')}>
-                                        Status {sortConfig?.key === 'status' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('created_at')}>
-                                        Registered {sortConfig?.key === 'created_at' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-border">
-                                {sortedUsers.map(user => (
-                                    <tr key={user.id} className="hover:bg-surface-secondary transition-colors">
-                                        <td className="px-4 py-3">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedUsers.has(user.id)}
-                                                onChange={() => handleSelectUser(user.id)}
-                                                className="rounded"
-                                            />
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <div className="font-medium text-text-primary">{user.name}</div>
-                                        </td>
-                                        <td className="px-4 py-3 text-text-secondary">{user.email}</td>
-                                        <td className="px-4 py-3">
-                                            <StatusBadge status={user.status} />
-                                        </td>
-                                        <td className="px-4 py-3 text-text-secondary text-sm">
-                                            {new Date(user.created_at).toLocaleDateString()}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </>
-            )}
-        </div>
-    );
+                                <th className="px-4 py-3 text-left">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedUsers.size === users.length}
+                                        onChange={handleSelectAll}
+                                        className="rounded"
+                                    />
+                                </th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('name')}>
+                                    Name {sortConfig?.key === 'name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                </th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('email')}>
+                                    Email {sortConfig?.key === 'email' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                </th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('status')}>
+                                    Status {sortConfig?.key === 'status' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                </th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('created_at')}>
+                                    Registered {sortConfig?.key === 'created_at' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                </th>
+                            </tr >
+                        </thead >
+        <tbody className="divide-y divide-border">
+            {sortedUsers.map(user => (
+                <tr key={user.id} className="hover:bg-surface-secondary transition-colors">
+                    <td className="px-4 py-3">
+                        <input
+                            type="checkbox"
+                            checked={selectedUsers.has(user.id)}
+                            onChange={() => handleSelectUser(user.id)}
+                            className="rounded"
+                        />
+                    </td>
+                    <td className="px-4 py-3">
+                        <div className="font-medium text-text-primary">{user.name}</div>
+                    </td>
+                    <td className="px-4 py-3 text-text-secondary">{user.email}</td>
+                    <td className="px-4 py-3">
+                        <StatusBadge status={user.status} />
+                    </td>
+                    <td className="px-4 py-3 text-text-secondary text-sm">
+                        {new Date(user.created_at).toLocaleDateString()}
+                    </td>
+                </tr>
+            ))}
+        </tbody>
+                    </table >
+                </div >
+            </>
+        )
+}
+    </div >
+);
 }
