@@ -35,7 +35,7 @@ export default function SongCapabilitiesModal({ isOpen, onClose, song, onSave }:
     const fetchCapabilities = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/admin/capabilities');
+            const res = await fetch('/api/capabilities');
             if (res.ok) {
                 const data = await res.json();
                 setAllCapabilities(data);
