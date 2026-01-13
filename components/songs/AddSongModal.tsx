@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import { useToast } from '@/hooks/useToast';
 import { Song } from '@/lib/types';
 
 interface AddSongModalProps {
@@ -13,6 +14,7 @@ interface AddSongModalProps {
 }
 
 export default function AddSongModal({ isOpen, onClose, onSongAdded, initialData }: AddSongModalProps) {
+    const toast = useToast();
     const [formData, setFormData] = useState({
         title: '',
         artist: '',
@@ -50,14 +52,17 @@ export default function AddSongModal({ isOpen, onClose, onSongAdded, initialData
                 body: JSON.stringify(formData)
             });
 
-            if (!res.ok) throw new Error(initialData ? 'Failed to update song' : 'Failed to add song');
-
-            setFormData({ title: '', artist: '', key: '', tempo: '', resource_url: '' });
-            onSongAdded();
-            onClose();
+            if (res.ok) {
+                toast.success(initialData ? 'Song updated successfully' : 'Song added successfully');
+                setFormData({ title: '', artist: '', key: '', tempo: '', resource_url: '' });
+                onSongAdded();
+                onClose();
+            } else {
+                toast.error(initialData ? 'Failed to update song' : 'Failed to add song');
+            }
         } catch (error) {
             console.error(initialData ? 'Error updating song:' : 'Error adding song:', error);
-            alert(initialData ? 'Failed to update song' : 'Failed to add song');
+            toast.error(initialData ? 'Failed to update song' : 'Failed to add song');
         } finally {
             setIsSubmitting(false);
         }

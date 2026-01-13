@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import { useToast } from '@/hooks/useToast';
 import { Song } from '@/lib/types';
 
 interface CreateSessionModalProps {
@@ -17,6 +18,7 @@ interface CreateSessionModalProps {
 }
 
 export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, initialData }: CreateSessionModalProps) {
+    const toast = useToast();
     const [formData, setFormData] = useState({
         date: '',
         start_time: '19:30',
@@ -101,23 +103,25 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
                 })
             });
 
-            if (!res.ok) throw new Error(`Failed to ${initialData ? 'update' : 'create'} session`);
-
-            if (!initialData) {
-                setFormData({
-                    date: '',
-                    start_time: '19:30',
-                    end_time: '23:30',
-                });
-                setSelectedSongs([]);
+            if (res.ok) {
+                toast.success(initialData ? 'Session updated successfully' : 'Session created successfully');
+                if (!initialData) {
+                    setFormData({
+                        date: '',
+                        start_time: '19:30',
+                        end_time: '23:30',
+                    });
+                    setSelectedSongs([]);
+                }
+                setSongSearch('');
+                onSessionCreated();
+                onClose();
+            } else {
+                toast.error('Failed to save session');
             }
-
-            setSongSearch('');
-            onSessionCreated();
-            onClose();
         } catch (error) {
             console.error('Error saving session:', error);
-            alert('Failed to save session');
+            toast.error('Failed to save session');
         } finally {
             setIsSubmitting(false);
         }

@@ -6,6 +6,7 @@ import Button from '@/components/ui/Button';
 import CreateSessionModal from '@/components/admin/CreateSessionModal';
 import { Song } from '@/lib/types';
 import { useSortableData } from '@/hooks/useSortableData';
+import { useToast } from '@/hooks/useToast';
 
 type Session = {
     id: string;
@@ -22,6 +23,7 @@ type FormSession = Omit<Session, 'songs'> & {
 };
 
 export default function SessionsPage() {
+    const toast = useToast();
     const [sessions, setSessions] = useState<Session[]>([]);
     const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -92,13 +94,14 @@ export default function SessionsPage() {
             });
 
             if (response.ok) {
+                toast.success('Session deleted successfully');
                 await fetchSessions();
             } else {
-                alert('Failed to delete session');
+                toast.error('Failed to delete session');
             }
         } catch (error) {
             console.error('Error deleting session:', error);
-            alert('Failed to delete session');
+            toast.error('Failed to delete session');
         }
     };
 

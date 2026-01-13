@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Button from '@/components/ui/Button';
+import { useToast } from '@/hooks/useToast';
 import Input from '@/components/ui/Input';
 import CapabilityIcon from '@/components/ui/CapabilityIcon';
 
@@ -44,6 +45,7 @@ export default function CapabilityModal({
     initialIcon = '🎸',
     title
 }: CapabilityModalProps) {
+    const { toast } = useToast();
     const [name, setName] = useState(initialName);
     const [selectedIcon, setSelectedIcon] = useState(initialIcon);
 
@@ -58,7 +60,7 @@ export default function CapabilityModal({
 
     const handleSave = () => {
         if (!name.trim()) {
-            alert('Please enter a capability name');
+            toast.error('Please enter a capability name');
             return;
         }
         onSave(name.trim(), selectedIcon);

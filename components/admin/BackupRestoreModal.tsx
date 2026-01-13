@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import { useToast } from '@/hooks/useToast';
 
 interface BackupRestoreModalProps {
     isOpen: boolean;
@@ -8,6 +9,7 @@ interface BackupRestoreModalProps {
 }
 
 export default function BackupRestoreModal({ isOpen, onClose }: BackupRestoreModalProps) {
+    const toast = useToast();
     const [isRestoring, setIsRestoring] = useState(false);
     const [file, setFile] = useState<File | null>(null);
     const [restoreResult, setRestoreResult] = useState<{ success: boolean; details?: unknown; error?: string } | null>(null);
@@ -44,15 +46,16 @@ export default function BackupRestoreModal({ isOpen, onClose }: BackupRestoreMod
             const data = await res.json();
             if (res.ok) {
                 setRestoreResult({ success: true, details: data.results });
-                alert('Restore completed successfully!');
+                toast.success('Restore completed successfully!');
+                onClose();
             } else {
                 setRestoreResult({ success: false, error: data.error });
-                alert(`Restore failed: ${data.error}`);
+                toast.error(`Restore failed: ${data.error}`);
             }
         } catch (error) {
             console.error('Restore error:', error);
             setRestoreResult({ success: false, error: 'Network or server error' });
-            alert('Restore failed due to an error.');
+            toast.error('Restore failed due to an error.');
         } finally {
             setIsRestoring(false);
         }

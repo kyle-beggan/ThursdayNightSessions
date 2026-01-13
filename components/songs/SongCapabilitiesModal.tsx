@@ -3,6 +3,7 @@ import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import CapabilityIcon from '@/components/ui/CapabilityIcon';
 import { Song } from '@/lib/types';
+import { useToast } from '@/hooks/useToast';
 
 interface Capability {
     id: string;
@@ -18,6 +19,7 @@ interface SongCapabilitiesModalProps {
 }
 
 export default function SongCapabilitiesModal({ isOpen, onClose, song, onSave }: SongCapabilitiesModalProps) {
+    const toast = useToast();
     const [allCapabilities, setAllCapabilities] = useState<Capability[]>([]);
     const [selectedCapabilities, setSelectedCapabilities] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
@@ -57,9 +59,9 @@ export default function SongCapabilitiesModal({ isOpen, onClose, song, onSave }:
         console.log('Modal handleSave, song:', song);
         if (!song) return;
 
-        if (!song.id || String(song.id) === 'undefined' || String(song.id) === 'null') {
-            console.error('Song object missing ID:', song);
-            alert(`Error: Invalid Song ID. Value: "${song.id}", Type: ${typeof song.id}. Please refresh and try again.`);
+        if (!song || !song.id) {
+            console.error('Invalid song object:', song);
+            toast.error(`Error: Invalid Song ID. Value: "${song?.id}". Please refresh.`);
             return;
         }
 
@@ -76,13 +78,14 @@ export default function SongCapabilitiesModal({ isOpen, onClose, song, onSave }:
             if (res.ok) {
                 onSave();
                 onClose();
+                toast.success('Capabilities saved successfully');
             } else {
                 const data = await res.json();
-                alert(data.error || 'Failed to save capabilities');
+                toast.error(data.error || 'Failed to save capabilities');
             }
         } catch (error) {
             console.error('Error saving capabilities:', error);
-            alert('Failed to save capabilities');
+            toast.error('Failed to save capabilities');
         } finally {
             setSaving(false);
         }

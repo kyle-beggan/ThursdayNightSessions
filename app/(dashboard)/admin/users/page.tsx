@@ -6,6 +6,7 @@ import StatusBadge from '@/components/admin/StatusBadge';
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import { useSortableData } from '@/hooks/useSortableData';
+import { useToast } from '@/hooks/useToast';
 
 // Checking imports, I don't see toaster in the file list but I can check if it exists.
 // Actually, I'll stick to 'alert' fallback if toast doesn't exist, but wait, the plan said "toast/notification".
@@ -26,6 +27,7 @@ type User = {
 };
 
 export default function UsersPage() {
+    const toast = useToast();
     const [users, setUsers] = useState<User[]>([]);
     const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
     const { items: sortedUsers, requestSort, sortConfig } = useSortableData(filteredUsers);
@@ -104,13 +106,14 @@ export default function UsersPage() {
             });
 
             if (response.ok) {
+                toast.success('User updated successfully');
                 await fetchUsers();
             } else {
-                alert('Failed to update user');
+                toast.error('Failed to update user');
             }
         } catch (error) {
             console.error('Error updating user:', error);
-            alert('Failed to update user');
+            toast.error('Failed to update user');
         }
     };
 
@@ -133,13 +136,14 @@ export default function UsersPage() {
                 setUsers(prev => prev.filter(u => u.id !== userToDelete.id));
                 setIsDeleteModalOpen(false);
                 setUserToDelete(null);
+                toast.success('User deleted successfully');
             } else {
                 const data = await response.json();
-                alert(data.error || 'Failed to delete user');
+                toast.error(data.error || 'Failed to delete user');
             }
         } catch (error) {
             console.error('Error deleting user:', error);
-            alert('An unexpected error occurred');
+            toast.error('An unexpected error occurred');
         } finally {
             setIsDeleting(false);
         }

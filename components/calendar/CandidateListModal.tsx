@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Modal from '@/components/ui/Modal';
 import { User } from '@/lib/types';
 import Button from '@/components/ui/Button';
+import { useToast } from '@/hooks/useToast';
 
 interface CandidateListModalProps {
     isOpen: boolean;
@@ -24,6 +25,7 @@ export default function CandidateListModal({
     capabilityName,
     sessionDetails,
 }: CandidateListModalProps) {
+    const toast = useToast();
     const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
     const [sending, setSending] = useState(false);
     const [candidates, setCandidates] = useState<User[]>([]);
@@ -71,7 +73,7 @@ export default function CandidateListModal({
         if (selectedUserIds.length === 0) return;
         setSending(true);
         try {
-            await fetch('/api/notifications/invite', {
+            const res = await fetch('/api/notifications/invite', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -85,11 +87,15 @@ export default function CandidateListModal({
             });
             // Show success via alert for now, or toast
             // Ideally we'd have a toast notification
-            onClose();
-            alert(`Invites sent to ${selectedUserIds.length} users!`);
+            if (res.ok) {
+                toast.success(`Invites sent to ${selectedUserIds.length} users!`);
+                onClose();
+            } else {
+                toast.error('Failed to send invites.');
+            }
         } catch (error) {
             console.error('Error sending invites:', error);
-            alert('Failed to send invites.');
+            toast.error('Failed to send invites.');
         } finally {
             setSending(false);
         }

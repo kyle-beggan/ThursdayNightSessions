@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import ChatWindow from '@/components/chat/ChatWindow';
 import { useSession } from 'next-auth/react';
+import { useToast } from '@/hooks/useToast';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import { SessionWithDetails, SessionCommitment, Capability, Song } from '@/lib/types';
@@ -19,6 +20,7 @@ interface SessionModalProps {
 }
 
 export default function SessionModal({ isOpen, onClose, session, onUpdate }: SessionModalProps) {
+    const toast = useToast();
     const { data: sessionData } = useSession();
     const [isCommitting, setIsCommitting] = useState(false);
 
@@ -207,8 +209,8 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
             const currentSongs = session.songs || [];
 
             // Avoid duplicates? Or allow? Assuming unique by name for now based on API/Types
-            if (currentSongs.some(s => s.song_name === song.title)) {
-                alert('Song already in session');
+            if (currentSongs.find(s => s.id === song.id)) {
+                toast.error('Song already in session');
                 setIsUpdatingSongs(false);
                 return;
             }
@@ -225,14 +227,15 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
             });
 
             if (res.ok) {
+                toast.success('Song added to session');
                 onUpdate();
                 setIsPickerOpen(false);
             } else {
-                alert('Failed to add song');
+                toast.error('Failed to add song');
             }
         } catch (error) {
-            console.error('Error adding song:', error);
-            alert('Failed to add song');
+            console.error('Error adding song to session:', error);
+            toast.error('Failed to add song');
         } finally {
             setIsUpdatingSongs(false);
         }
@@ -255,13 +258,14 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
             });
 
             if (res.ok) {
+                toast.success('Song removed from session');
                 onUpdate();
             } else {
-                alert('Failed to remove song');
+                toast.error('Failed to remove song');
             }
         } catch (error) {
-            console.error('Error removing song:', error);
-            alert('Failed to remove song');
+            console.error('Error removing song from session:', error);
+            toast.error('Failed to remove song');
         } finally {
             setIsUpdatingSongs(false);
         }

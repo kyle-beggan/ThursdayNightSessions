@@ -11,8 +11,10 @@ import { formatDate } from '@/lib/utils';
 import SessionModal from '@/components/calendar/SessionModal';
 import { SessionWithDetails } from '@/lib/types';
 import { useSortableData } from '@/hooks/useSortableData';
+import { useToast } from '@/hooks/useToast';
 
 export default function SongsPage() {
+    const toast = useToast();
     const [songs, setSongs] = useState<Song[]>([]);
     const { items: sortedSongs, requestSort, sortConfig } = useSortableData(songs);
     const [loading, setLoading] = useState(true);
@@ -44,7 +46,7 @@ export default function SongsPage() {
             await fetchSongs();
         } catch (error) {
             console.error('Error adding recommended songs:', error);
-            alert('Some songs may not have been added.');
+            toast.error('Some songs may not have been added.');
         } finally {
             setLoading(false);
         }
@@ -68,11 +70,11 @@ export default function SongsPage() {
                 setSelectedSession(sessionData);
                 setIsSessionModalOpen(true);
             } else {
-                alert('Failed to load session details');
+                toast.error('Failed to load session details');
             }
         } catch (error) {
             console.error('Error fetching session:', error);
-            alert('Error loading session details');
+            toast.error('Error loading session details');
         } finally {
             setIsLoadingSession(false);
         }
@@ -128,13 +130,14 @@ export default function SongsPage() {
                 method: 'DELETE',
             });
             if (res.ok) {
+                toast.success('Song deleted successfully');
                 fetchSongs();
             } else {
-                alert('Failed to delete song');
+                toast.error('Failed to delete song');
             }
         } catch (error) {
             console.error('Error deleting song:', error);
-            alert('Error deleting song');
+            toast.error('Error deleting song');
         }
     };
 
