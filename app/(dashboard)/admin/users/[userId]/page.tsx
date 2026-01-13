@@ -54,7 +54,7 @@ export default function EditUserPage() {
             }
 
             // Fetch user details
-            const userRes = await fetch(`/ api / admin / users`);
+            const userRes = await fetch('/api/admin/users');
             // Note: The list endpoint returns all users. Ideally we'd have a specific GET /id, 
             // but the list endpoint is filterable or we can just find it. 
             // Better: Update the GET endpoint to handle a single ID or use the list and find.
@@ -226,8 +226,8 @@ export default function EditUserPage() {
                             <label
                                 key={cap.id}
                                 className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-colors ${selectedCapabilities.includes(cap.id)
-                                        ? 'bg-primary/10 border-primary'
-                                        : 'bg-surface-secondary border-transparent hover:bg-surface-tertiary'
+                                    ? 'bg-primary/10 border-primary'
+                                    : 'bg-surface-secondary border-transparent hover:bg-surface-tertiary'
                                     }`}
                             >
                                 <input
