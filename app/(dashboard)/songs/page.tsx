@@ -184,11 +184,11 @@ export default function SongsPage() {
                     <h1 className="text-xl md:text-3xl font-bold text-text-primary">Song Library</h1>
                     <p className="text-text-secondary hidden md:block">Manage the band&apos;s backlog of songs to record</p>
                 </div>
-                <div className="flex gap-3">
-                    <Button onClick={() => setIsFindModalOpen(true)} variant="secondary">
+                <div className="flex gap-3 w-full md:w-auto">
+                    <Button onClick={() => setIsFindModalOpen(true)} variant="secondary" className="flex-1 md:flex-none justify-center">
                         Find Songs
                     </Button>
-                    <Button onClick={() => setIsAddModalOpen(true)} variant="primary">
+                    <Button onClick={() => setIsAddModalOpen(true)} variant="primary" className="flex-1 md:flex-none justify-center">
                         + Add Song
                     </Button>
                 </div>

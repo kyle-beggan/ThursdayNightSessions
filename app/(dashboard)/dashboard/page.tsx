@@ -43,10 +43,10 @@ export default function DashboardPage() {
         <div className="pt-6">
             <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-4xl font-bold text-text-primary mb-2">
+                    <h2 className="text-2xl md:text-4xl font-bold text-text-primary mb-2">
                         Thursday Night Sessions
                     </h2>
-                    <p className="text-text-secondary">
+                    <p className="text-text-secondary hidden md:block">
                         View and commit to upcoming rehearsal sessions
                     </p>
                 </div>
