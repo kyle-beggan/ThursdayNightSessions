@@ -27,8 +27,8 @@ export default function MobileNav() {
     const { data: session } = useSession();
 
     return (
-        <nav className="md:hidden sticky top-[73px] z-40 bg-surface/95 backdrop-blur-md border-b border-border overflow-x-auto no-scrollbar">
-            <div className="flex items-center justify-between px-4 h-14 min-w-full gap-2">
+        <nav className="md:hidden sticky top-[73px] z-40 bg-surface/95 backdrop-blur-md border-b border-border w-full">
+            <div className="flex items-center justify-between px-3 h-14 w-full">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
 
@@ -42,12 +42,12 @@ export default function MobileNav() {
                             key={item.href}
                             href={item.href}
                             aria-label={item.name}
-                            className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors flex-shrink-0 ${isActive
+                            className={`flex items-center justify-center w-9 h-9 rounded-full transition-colors flex-shrink-0 ${isActive
                                     ? 'bg-primary/20 text-primary border border-primary/50'
                                     : 'text-text-secondary hover:text-text-primary hover:bg-surface-secondary'
                                 }`}
                         >
-                            <span className="text-xl">{item.icon}</span>
+                            <span className="text-lg">{item.icon}</span>
                         </Link>
                     );
                 })}
