@@ -73,7 +73,55 @@ export default function RecordingsPage() {
 
             <div className="bg-surface rounded-xl border border-border overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                    {/* Mobile Card View */}
+                    <div className="grid grid-cols-1 gap-4 p-4 md:hidden">
+                        {sortedRecordings.map((rec) => (
+                            <div key={rec.id} className="bg-surface-secondary rounded-lg p-4 border border-border shadow-sm">
+                                <div className="mb-3">
+                                    <div className="w-full">
+                                        <h3 className="font-bold text-text-primary text-base leading-tight break-words">{rec.title}</h3>
+                                        <p className="text-text-secondary text-sm mb-2">{formatDate(rec.session_date)}</p>
+
+                                        <Button
+                                            variant="primary"
+                                            className="w-8 h-8 p-0 flex items-center justify-center rounded-full flex-shrink-0"
+                                            onClick={() => handlePlay(rec.url)}
+                                            title="Play"
+                                        >
+                                            <span className="text-xs">▶</span>
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                <div className="pt-3 border-t border-border/50">
+                                    <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2">Players</h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {rec.players.map((player, idx) => (
+                                            <div key={idx} className="flex items-center gap-1 bg-surface-tertiary rounded-full px-2 py-1 border border-border text-xs">
+                                                <span className="font-medium text-text-primary">{player.name}</span>
+                                                <div className="flex">
+                                                    {player.capabilities.map((cap, cIdx) => (
+                                                        <span key={cIdx} title={cap.name}>{cap.icon}</span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {rec.players.length === 0 && (
+                                            <span className="text-text-secondary text-xs italic">No player data</span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                        {sortedRecordings.length === 0 && (
+                            <div className="p-8 text-center text-text-secondary">
+                                No recordings found.
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Desktop Table View */}
+                    <table className="hidden md:table w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-surface-secondary border-b border-border">
 
