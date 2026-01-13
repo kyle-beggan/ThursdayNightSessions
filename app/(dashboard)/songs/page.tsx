@@ -219,22 +219,26 @@ export default function SongsPage() {
                         <div className="grid grid-cols-1 gap-4 p-4 md:hidden">
                             {sortedSongs.map((song) => (
                                 <div key={song.id} className="bg-surface-secondary rounded-lg p-4 border border-border shadow-sm">
-                                    <div className="flex justify-between items-start mb-3">
-                                        <div className="flex-1 min-w-0 pr-2">
-                                            <h3 className="font-bold text-text-primary text-lg leading-tight truncate">{song.title}</h3>
-                                            <p className="text-text-secondary text-sm truncate">{song.artist || 'Unknown Artist'}</p>
+                                    <div className="mb-3">
+                                        <div className="w-full">
+                                            <h3 className="font-bold text-text-primary text-base leading-tight break-words">{song.title}</h3>
+                                            <p className="text-text-secondary text-sm break-words mb-2">{song.artist || 'Unknown Artist'}</p>
+
+                                            {/* Play Button */}
+                                            {song.resource_url && (
+                                                <Button
+                                                    variant="secondary"
+                                                    className="w-8 h-8 p-0 flex items-center justify-center text-green-400 hover:text-green-300 border-green-500/30 bg-green-500/10 rounded-full flex-shrink-0"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        window.open(song.resource_url, '_blank');
+                                                    }}
+                                                    title="Play"
+                                                >
+                                                    <span className="text-xs">▶</span>
+                                                </Button>
+                                            )}
                                         </div>
-                                        {/* Play Button */}
-                                        {song.resource_url && (
-                                            <Button
-                                                variant="secondary"
-                                                className="w-8 h-8 p-0 flex items-center justify-center text-green-400 hover:text-green-300 border-green-500/30 bg-green-500/10 rounded-full flex-shrink-0"
-                                                onClick={() => window.open(song.resource_url, '_blank')}
-                                                title="Play"
-                                            >
-                                                <span className="text-xs">▶</span>
-                                            </Button>
-                                        )}
                                     </div>
 
                                     <div className="flex gap-2 mb-4 text-sm text-text-secondary">
