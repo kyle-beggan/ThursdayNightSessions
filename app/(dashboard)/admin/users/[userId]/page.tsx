@@ -1,4 +1,4 @@
-```javascript
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -225,11 +225,10 @@ export default function EditUserPage() {
                         {allCapabilities.map(cap => (
                             <label
                                 key={cap.id}
-                                className={`flex items - center gap - 2 p - 3 rounded - lg border cursor - pointer transition - colors ${
-    selectedCapabilities.includes(cap.id)
-    ? 'bg-primary/10 border-primary'
-    : 'bg-surface-secondary border-transparent hover:bg-surface-tertiary'
-} `}
+                                className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-colors ${selectedCapabilities.includes(cap.id)
+                                        ? 'bg-primary/10 border-primary'
+                                        : 'bg-surface-secondary border-transparent hover:bg-surface-tertiary'
+                                    }`}
                             >
                                 <input
                                     type="checkbox"
