@@ -146,6 +146,56 @@ export default function FeedbackPage() {
         }
     };
 
+    const handleStatusUpdate = async (item: FeedbackItem, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (session?.user?.user_type !== 'admin') return;
+
+        const statusCycle = ['pending', 'rejected', 'in_progress', 'completed'];
+        const currentIndex = statusCycle.indexOf(item.status);
+        const nextStatus = statusCycle[(currentIndex + 1) % statusCycle.length];
+
+        // Optimistic update
+        setFeedbackList(prev => prev.map(f =>
+            f.id === item.id ? { ...f, status: nextStatus } : f
+        ));
+
+        try {
+            const res = await fetch('/api/feedback/status', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ feedbackId: item.id, status: nextStatus })
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed to update status');
+            }
+            toast.success(`Status updated to ${nextStatus.replace('_', ' ')}`);
+        } catch (error) {
+            console.error('Error updating status:', error);
+            toast.error('Failed to update status');
+            // Revert on error
+            setFeedbackList(prev => prev.map(f =>
+                f.id === item.id ? { ...f, status: item.status } : f
+            ));
+        }
+    };
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'completed': return 'bg-green-500/20 text-green-400 border-green-500/30';
+            case 'in_progress': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+            case 'rejected': return 'bg-red-500/20 text-red-400 border-red-500/30';
+            default: return 'bg-surface-tertiary text-text-secondary border-border';
+        }
+    };
+
+    const getStatusLabel = (status: string) => {
+        switch (status) {
+            case 'in_progress': return 'In Progress';
+            default: return status.charAt(0).toUpperCase() + status.slice(1);
+        }
+    };
+
     return (
         <div className="p-0 md:p-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
             {/* Left Column: Submit Form */}
@@ -236,14 +286,17 @@ export default function FeedbackPage() {
                                             <div className="text-xs text-text-secondary">
                                                 by <span className="font-medium text-text-primary">{item.user_name}</span>
                                             </div>
-                                            {item.status !== 'pending' && (
-                                                <span className={`text-[10px] px-1.5 py-0.5 rounded capitalize w-fit ${item.status === 'implemented' ? 'bg-green-500/20 text-green-400' :
-                                                    item.status === 'closed' ? 'bg-gray-500/20 text-gray-400' :
-                                                        'bg-blue-500/20 text-blue-400'
-                                                    }`}>
-                                                    {item.status}
-                                                </span>
-                                            )}
+                                            <button
+                                                onClick={(e) => handleStatusUpdate(item, e)}
+                                                disabled={session?.user?.user_type !== 'admin'}
+                                                className={`text-[10px] px-2 py-0.5 rounded-full capitalize w-fit border transition-all ${getStatusColor(item.status)
+                                                    } ${session?.user?.user_type === 'admin'
+                                                        ? 'cursor-pointer hover:opacity-80 active:scale-95'
+                                                        : 'cursor-default'
+                                                    }`}
+                                            >
+                                                {getStatusLabel(item.status)}
+                                            </button>
                                         </div>
 
                                         {/* Mobile Voting (Song Card Style) */}
@@ -312,14 +365,17 @@ export default function FeedbackPage() {
                                             <div className="text-xs text-text-secondary">
                                                 by <span className="font-medium text-text-primary">{item.user_name}</span>
                                             </div>
-                                            {item.status !== 'pending' && (
-                                                <span className={`text-xs px-2 py-0.5 rounded capitalize ${item.status === 'implemented' ? 'bg-green-500/20 text-green-400' :
-                                                    item.status === 'closed' ? 'bg-gray-500/20 text-gray-400' :
-                                                        'bg-blue-500/20 text-blue-400'
-                                                    }`}>
-                                                    {item.status}
-                                                </span>
-                                            )}
+                                            <button
+                                                onClick={(e) => handleStatusUpdate(item, e)}
+                                                disabled={session?.user?.user_type !== 'admin'}
+                                                className={`text-xs px-2.5 py-1 rounded-full capitalize border transition-all ${getStatusColor(item.status)
+                                                    } ${session?.user?.user_type === 'admin'
+                                                        ? 'cursor-pointer hover:opacity-80 active:scale-95'
+                                                        : 'cursor-default'
+                                                    }`}
+                                            >
+                                                {getStatusLabel(item.status)}
+                                            </button>
                                         </div>
 
                                         {/* Replies Section */}
