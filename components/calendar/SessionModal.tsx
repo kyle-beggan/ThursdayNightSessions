@@ -565,7 +565,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                             <Button
                                 onClick={handleClose}
                                 variant="ghost"
-                                className="w-[150px] bg-gray-500 hover:bg-black text-white hover:text-white border-transparent"
+                                className="w-[150px] bg-surface-secondary hover:bg-surface-hover text-text-primary border border-border"
                             >
                                 Close
                             </Button>

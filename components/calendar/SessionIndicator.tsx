@@ -49,19 +49,13 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
                     onClick={onClick}
                     className="w-full h-full text-left p-3 bg-primary/20 border border-primary/20 hover:bg-primary/30 hover:border-primary/50 rounded-lg transition-all duration-200 flex flex-col group"
                 >
-                    <div className="text-xl font-bold text-text-primary mb-2">
-                        {format(new Date(session.date + 'T00:00:00'), 'MMMM d')} <span className="text-sm font-normal text-text-secondary">({format(new Date(session.date + 'T00:00:00'), 'EEE')})</span>
-                    </div>
-
-                    {/* New Message Badge */}
-                    {session.newMessageCount && session.newMessageCount > 0 ? (
-                        <div className="absolute top-2 right-2 flex items-center justify-center w-6 h-6 bg-primary text-white text-xs font-bold rounded-full shadow-lg border-2 border-surface animate-bounce-in">
-                            {session.newMessageCount > 9 ? '9+' : session.newMessageCount}
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="text-xl font-bold text-text-primary">
+                            {format(new Date(session.date + 'T00:00:00'), 'MMMM d')} <span className="text-sm font-normal text-text-secondary">({format(new Date(session.date + 'T00:00:00'), 'EEE')})</span>
                         </div>
-                    ) : null}
-
-                    <div className="text-lg font-bold text-primary mb-2">
-                        {format(new Date(`2000-01-01T${session.start_time}`), 'h:mm a')}
+                        <div className="text-lg font-bold text-primary">
+                            {format(new Date(`2000-01-01T${session.start_time}`), 'h:mm a')}
+                        </div>
                     </div>
 
                     <div className="mb-3">
