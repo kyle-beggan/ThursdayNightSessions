@@ -109,7 +109,7 @@ export default function MonthlyCalendar({ sessions, onRefresh }: MonthlyCalendar
                             className={`
                 border border-border rounded-lg p-2 
                 min-h-[100px] md:min-h-0 md:aspect-square
-                ${isToday ? 'bg-primary/10 border-primary' : 'bg-surface'}
+                ${isToday ? 'bg-primary/10 border-primary' : 'bg-surface-secondary'}
                 ${!isSameMonth(day, currentDate) ? 'opacity-50' : ''}
               `}
                         >
