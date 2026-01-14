@@ -269,12 +269,18 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
     };
 
     const handleDeleteRecording = async (recordingId: string, title: string) => {
-        if (!await confirm({
+        console.log('SessionModal: handleDeleteRecording called', recordingId, title);
+        const confirmed = await confirm({
             title: 'Delete Recording',
             message: `Are you sure you want to delete recording "${title}"? This action cannot be undone.`,
             confirmLabel: 'Delete',
             variant: 'danger'
-        })) return;
+        });
+
+        console.log('SessionModal: confirm result:', confirmed);
+        if (!confirmed) return;
+
+        console.log('SessionModal: proceeding to delete');
 
         try {
             const res = await fetch(`/api/recordings/${recordingId}`, {
@@ -285,7 +291,9 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                 toast.success('Recording deleted');
                 onUpdate();
             } else {
-                toast.error('Failed to delete recording');
+                const data = await res.json();
+                console.error('Delete failed response:', data);
+                toast.error(data.error || 'Failed to delete recording');
             }
         } catch (error) {
             console.error('Error deleting recording:', error);

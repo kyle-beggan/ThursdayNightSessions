@@ -23,19 +23,26 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
     const [resolver, setResolver] = useState<((value: boolean) => void) | null>(null);
 
     const confirm = useCallback((options: ConfirmOptions) => {
+        console.log('ConfirmProvider: confirm called', options);
         setDialogConfig(options);
         setIsOpen(true);
         return new Promise<boolean>((resolve) => {
+            console.log('ConfirmProvider: setting resolver');
             setResolver(() => resolve);
         });
     }, []);
 
     const handleConfirm = () => {
-        if (resolver) resolver(true);
+        console.log('ConfirmProvider: handleConfirm called, resolver exists?', !!resolver);
+        if (resolver) {
+            resolver(true);
+            console.log('ConfirmProvider: resolved true');
+        }
         setIsOpen(false);
     };
 
     const handleCancel = () => {
+        console.log('ConfirmProvider: handleCancel called');
         if (resolver) resolver(false);
         setIsOpen(false);
     };

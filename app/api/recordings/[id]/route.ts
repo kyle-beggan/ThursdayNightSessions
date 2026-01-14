@@ -9,6 +9,8 @@ export async function DELETE(
 ) {
     try {
         const session = await getServerSession(authOptions);
+        console.log('API DELETE /recordings/[id]: Session:', session?.user?.id, session?.user?.userType);
+
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
@@ -16,10 +18,12 @@ export async function DELETE(
         // IMPORTANT: Verify admin status (as per user request: "edit and delete buttons should only be visible to admins")
         // We enforce this on the server side as well.
         if (session.user.userType !== 'admin') {
+            console.log('API DELETE /recordings/[id]: Forbidden - not admin', session.user.userType);
             return NextResponse.json({ error: 'Forbidden: Admins only' }, { status: 403 });
         }
 
         const recordingId = params.id;
+        console.log('API DELETE /recordings/[id]: ID:', recordingId);
 
         if (!recordingId) {
             return NextResponse.json({ error: 'Missing recording ID' }, { status: 400 });
@@ -42,12 +46,15 @@ export async function DELETE(
             return NextResponse.json({ error: 'Recording not found' }, { status: 404 });
         }
 
+        console.log('API DELETE /recordings/[id]: Found recording URL:', recording.url);
+
         // 2. Delete from Storage
         // Extract path from URL. URL format: .../storage/v1/object/public/recordings/session_id/filename.ext
         // We need 'session_id/filename.ext'
         const urlParts = recording.url.split('/recordings/');
         if (urlParts.length > 1) {
             const storagePath = urlParts[1];
+            console.log('API DELETE /recordings/[id]: Storage path:', storagePath);
             const { error: storageError } = await supabaseAdmin.storage
                 .from('recordings')
                 .remove([storagePath]);
@@ -55,6 +62,8 @@ export async function DELETE(
             if (storageError) {
                 console.warn('Failed to delete file from storage, but proceeding to delete DB record:', storageError);
             }
+        } else {
+            console.warn('API DELETE /recordings/[id]: Could not parse storage path from URL');
         }
 
         // 3. Delete from Database
