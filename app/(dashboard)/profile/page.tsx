@@ -382,15 +382,6 @@ export default function ProfilePage() {
 
                                 const content = (
                                     <>
-                                        {isEditing && (
-                                            <input
-                                                type="checkbox"
-                                                className="hidden"
-                                                checked={isSelected}
-                                                onChange={() => { }} // Handled by div click
-                                                readOnly
-                                            />
-                                        )}
                                         <div className="w-5 h-5 flex items-center justify-center">
                                             <CapabilityIcon capability={cap} className="w-5 h-5" />
                                         </div>
@@ -410,20 +401,12 @@ export default function ProfilePage() {
                                         ? 'bg-surface-secondary border-transparent hover:bg-surface-tertiary opacity-60 hover:opacity-100'
                                         : 'bg-surface-secondary border-border'; // Fallback / View Mode
 
-                                if (isEditing) {
-                                    return (
-                                        <label
-                                            key={cap.id}
-                                            onClick={() => toggleCapability(cap.id)}
-                                            className={`${baseClasses} cursor-pointer ${selectedClasses}`}
-                                        >
-                                            {content}
-                                        </label>
-                                    );
-                                }
-
                                 return (
-                                    <div key={cap.id} className={`${baseClasses} ${selectedClasses}`}>
+                                    <div
+                                        key={cap.id}
+                                        onClick={() => isEditing && toggleCapability(cap.id)}
+                                        className={`${baseClasses} ${selectedClasses} ${isEditing ? 'cursor-pointer' : ''}`}
+                                    >
                                         {content}
                                     </div>
                                 );
