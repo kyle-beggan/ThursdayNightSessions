@@ -24,7 +24,18 @@ const CapabilityIcon: React.FC<CapabilityIconProps> = ({ capability, className =
         return <span className={className}>{dbIcon}</span>;
     }
 
-    // --- Guitars ---
+    // --- Guitars / Strings ---
+
+    // Ukulele: Smaller body, 4 strings (implied size)
+    if (name.includes('ukulele') || name.includes('uke')) {
+        return (
+            <svg {...svgProps}>
+                {/* Smaller body, shorter neck */}
+                <path d="M10 5L11 5L11 9C11 9 10 10 10 11C10 12 11 13 11 13L12 13C13 13 14 12 14 11L14 5L15 5L15 11C15 12 16 13 17 13C18 13 19 12 19 11C19 10 18 9 18 9L18 5L19 5L19 9C19 11 20 13 20 15C20 18 18 20 15 20C12 20 10 18 10 15C10 13 11 11 11 9L11 5L10 5Z" />
+                <circle cx="15" cy="16" r="1.5" className="fill-background stroke-current stroke-1" />
+            </svg>
+        );
+    }
 
     // Acoustic Guitar: Rounded body, sound hole
     if (name.includes('acoustic')) {
