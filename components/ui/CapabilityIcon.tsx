@@ -140,6 +140,29 @@ const CapabilityIcon: React.FC<CapabilityIconProps> = ({ capability, className =
 
     // --- Others / Fallback ---
 
+    // Tambourine / Percussion
+    if (name.includes('tambourine') || name.includes('percussion')) {
+        return (
+            <svg {...svgProps}>
+                {/* Main ring */}
+                <circle cx="12" cy="12" r="8" className="stroke-current stroke-2" fill="none" />
+                {/* Jingles (small circles) */}
+                <circle cx="12" cy="4" r="1.5" className="fill-current" />
+                <circle cx="16" cy="5" r="1.5" className="fill-current" />
+                <circle cx="19" cy="8" r="1.5" className="fill-current" />
+                <circle cx="20" cy="12" r="1.5" className="fill-current" />
+                <circle cx="19" cy="16" r="1.5" className="fill-current" />
+                <circle cx="16" cy="19" r="1.5" className="fill-current" />
+                <circle cx="12" cy="20" r="1.5" className="fill-current" />
+                <circle cx="8" cy="19" r="1.5" className="fill-current" />
+                <circle cx="5" cy="16" r="1.5" className="fill-current" />
+                <circle cx="4" cy="12" r="1.5" className="fill-current" />
+                <circle cx="5" cy="8" r="1.5" className="fill-current" />
+                <circle cx="8" cy="5" r="1.5" className="fill-current" />
+            </svg>
+        );
+    }
+
     // Drums
     if (name.includes('drum')) {
         return <span className={className}>🥁</span>;
