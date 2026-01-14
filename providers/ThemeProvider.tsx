@@ -12,18 +12,19 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-    const [theme, setTheme] = useState<Theme>('dark');
+    const [theme, setTheme] = useState<Theme>(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('theme') as Theme;
+            if (saved) return saved;
+        }
+        return 'dark';
+    });
 
     useEffect(() => {
-        // Retrieve theme from localStorage or default to dark
-        const savedTheme = localStorage.getItem('theme') as Theme;
-        if (savedTheme && savedTheme !== theme) {
-            setTheme(savedTheme);
-            document.documentElement.setAttribute('data-theme', savedTheme);
-        } else if (!savedTheme) {
-            // Default is dark
-            document.documentElement.setAttribute('data-theme', 'dark');
-        }
+        // Sync the HTML attribute with current theme
+        document.documentElement.setAttribute('data-theme', theme);
+        // Also persist to localStorage (though toggleTheme handles this, ensuring on mount is good)
+        localStorage.setItem('theme', theme);
     }, [theme]);
 
     const toggleTheme = () => {
