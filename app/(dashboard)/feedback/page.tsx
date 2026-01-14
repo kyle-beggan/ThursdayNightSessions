@@ -266,7 +266,7 @@ export default function FeedbackPage() {
                         {feedbackList.map((item) => (
                             <div key={item.id}>
                                 {/* Mobile Card View */}
-                                <div className="bg-surface border border-border rounded-xl p-4 md:hidden">
+                                <div className="bg-primary/20 border border-border rounded-xl p-4 md:hidden hover:bg-primary/30 transition-colors">
                                     <div className="flex items-center justify-between mb-3">
                                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-secondary text-xs font-medium text-text-secondary border border-border">
                                             <span>{getCategoryIcon(item.category)}</span>
@@ -325,7 +325,7 @@ export default function FeedbackPage() {
                                 </div>
 
                                 {/* Desktop View */}
-                                <div className="hidden md:flex bg-surface border border-border rounded-xl p-5 gap-4 transition-all hover:border-primary/30">
+                                <div className="hidden md:flex bg-primary/20 border border-border rounded-xl p-5 gap-4 transition-all hover:bg-primary/30 hover:border-primary/50">
                                     {/* Vote Controls */}
                                     <div className="flex flex-col items-center gap-1 shrink-0 pt-1">
                                         <button

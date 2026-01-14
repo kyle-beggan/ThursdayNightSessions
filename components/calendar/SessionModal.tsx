@@ -386,7 +386,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                     {session.songs && session.songs.length > 0 ? (
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                             {session.songs.map((song) => (
-                                                <div key={song.id || song.song_name} className="bg-surface/50 rounded-lg p-3 border border-border flex items-center justify-between gap-2 hover:border-primary/50 transition-colors group relative">
+                                                <div key={song.id || song.song_name} className="bg-primary/20 rounded-lg p-3 border border-border flex items-center justify-between gap-2 hover:bg-primary/30 hover:border-primary/50 transition-colors group relative">
 
                                                     {isAdmin && (
                                                         <button
@@ -435,7 +435,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                     {session.commitments && session.commitments.length > 0 ? (
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                             {session.commitments.map((commitment) => (
-                                                <div key={commitment.id} className="bg-primary/5 border border-primary/20 hover:bg-primary/10 hover:border-primary/50 hover:shadow-[0_0_15px_rgba(139,92,246,0.5)] rounded-lg p-2 transition-all duration-200 group flex flex-col items-center text-center">
+                                                <div key={commitment.id} className="bg-primary/20 border border-primary/20 hover:bg-primary/30 hover:border-primary/50 hover:shadow-[0_0_15px_rgba(139,92,246,0.5)] rounded-lg p-2 transition-all duration-200 group flex flex-col items-center text-center">
                                                     <div className="font-medium text-text-primary mb-1 w-full truncate text-sm">
                                                         {commitment.user?.name}
                                                     </div>
@@ -505,7 +505,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         {session.recordings && session.recordings.length > 0 ? (
                                             session.recordings.map((rec) => (
-                                                <div key={rec.id} className="bg-surface/50 rounded-lg p-3 border border-border flex items-center justify-between gap-2 hover:border-primary/50 transition-colors group relative">
+                                                <div key={rec.id} className="bg-primary/20 rounded-lg p-3 border border-border flex items-center justify-between gap-2 hover:bg-primary/30 hover:border-primary/50 transition-colors group relative">
                                                     {isAdmin && (
                                                         <button
                                                             onClick={(e) => {

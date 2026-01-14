@@ -75,7 +75,7 @@ export default function RecordingsPage() {
                     {/* Mobile Card View */}
                     <div className="grid grid-cols-1 gap-4 p-4 md:hidden">
                         {sortedRecordings.map((rec) => (
-                            <div key={rec.id} className="bg-surface-secondary rounded-lg p-4 border border-border shadow-sm">
+                            <div key={rec.id} className="bg-primary/20 rounded-lg p-4 border border-border shadow-sm hover:bg-primary/30 transition-colors">
                                 <div className="mb-3">
                                     <div className="w-full">
                                         <h3 className="font-bold text-text-primary text-base leading-tight break-words">{rec.title}</h3>
