@@ -269,18 +269,12 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
     };
 
     const handleDeleteRecording = async (recordingId: string, title: string) => {
-        console.log('SessionModal: handleDeleteRecording called', recordingId, title);
-        const confirmed = await confirm({
+        if (!await confirm({
             title: 'Delete Recording',
             message: `Are you sure you want to delete recording "${title}"? This action cannot be undone.`,
             confirmLabel: 'Delete',
             variant: 'danger'
-        });
-
-        console.log('SessionModal: confirm result:', confirmed);
-        if (!confirmed) return;
-
-        console.log('SessionModal: proceeding to delete');
+        })) return;
 
         try {
             const res = await fetch(`/api/recordings/${recordingId}`, {
