@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
+
 import CapabilityIcon from '@/components/ui/CapabilityIcon';
 
 import CapabilityModal from '@/components/admin/CapabilityModal';

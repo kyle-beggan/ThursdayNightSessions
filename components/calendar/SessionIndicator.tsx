@@ -47,7 +47,7 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
             >
                 <button
                     onClick={onClick}
-                    className="w-full h-full text-left p-3 bg-primary/5 border border-primary/20 hover:bg-primary/10 hover:border-primary/50 hover:shadow-[0_0_15px_rgba(139,92,246,0.5)] rounded-lg transition-all duration-200 flex flex-col group"
+                    className="w-full h-full text-left p-3 bg-primary/10 border border-primary/20 hover:bg-primary/20 hover:border-primary/50 hover:shadow-[0_0_15px_rgba(139,92,246,0.5)] rounded-lg transition-all duration-200 flex flex-col group"
                 >
                     <div className="text-xl font-bold text-text-primary mb-2">
                         {format(new Date(session.date + 'T00:00:00'), 'MMMM d')} <span className="text-sm font-normal text-text-secondary">({format(new Date(session.date + 'T00:00:00'), 'EEE')})</span>

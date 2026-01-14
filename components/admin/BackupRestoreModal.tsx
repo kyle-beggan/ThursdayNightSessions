@@ -12,7 +12,7 @@ interface BackupRestoreModalProps {
 export default function BackupRestoreModal({ isOpen, onClose }: BackupRestoreModalProps) {
     const toast = useToast();
     const { confirm } = useConfirm();
-    const [uploading, setUploading] = useState(false);
+    const [isRestoring, setIsRestoring] = useState(false);
     const [file, setFile] = useState<File | null>(null);
     const [restoreResult, setRestoreResult] = useState<{ success: boolean; details?: unknown; error?: string } | null>(null);
 
@@ -28,9 +28,8 @@ export default function BackupRestoreModal({ isOpen, onClose }: BackupRestoreMod
         }
     };
 
-    const handleRestore = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFile = e.target.files?.[0];
-        if (!selectedFile) return;
+    const handleRestore = async (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (!file) return;
 
         if (!await confirm({
             title: 'Restore Database',
@@ -38,15 +37,13 @@ export default function BackupRestoreModal({ isOpen, onClose }: BackupRestoreMod
             confirmLabel: 'Overwrite & Restore',
             variant: 'danger'
         })) {
-            e.target.value = ''; // Reset input
-            setFile(null); // Clear the selected file from state
             return;
         }
 
-        setUploading(true);
+        setIsRestoring(true);
         try {
             const formData = new FormData();
-            formData.append('file', selectedFile);
+            formData.append('file', file);
 
             const res = await fetch('/api/admin/restore', {
                 method: 'POST',
