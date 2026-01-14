@@ -28,7 +28,7 @@ export default function BackupRestoreModal({ isOpen, onClose }: BackupRestoreMod
         }
     };
 
-    const handleRestore = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleRestore = async () => {
         if (!file) return;
 
         if (!await confirm({
