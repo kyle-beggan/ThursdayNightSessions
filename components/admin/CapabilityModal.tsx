@@ -16,7 +16,6 @@ type CapabilityModalProps = {
 };
 
 const MUSICAL_ICONS = [
-    // Standard Instruments
     { emoji: '🎸', label: 'Guitar' },
     { emoji: '🎹', label: 'Keyboard' },
     { emoji: '🥁', label: 'Drums' },
@@ -29,22 +28,6 @@ const MUSICAL_ICONS = [
     { emoji: '🪗', label: 'Accordion' },
     { emoji: '🪇', label: 'Maracas' },
     { emoji: '🪈', label: 'Flute' },
-
-    // Vocal / Studio Specific
-    { emoji: '�️', label: 'Studio Mic' },
-    { emoji: '�️', label: 'Beatbox/Voice' },
-
-    // Abstract / Other Sound Makers
-    { emoji: '🔔', label: 'Bell' },
-    { emoji: '🔕', label: 'Muted Bell' },
-    { emoji: '�', label: 'Megaphone' },
-    { emoji: '�', label: 'Conch Shell' },
-    { emoji: '�', label: 'Wind Chime' },
-
-    // Keys / Piano specific
-    { emoji: '🎵', label: 'Music Note' },
-    { emoji: '🎶', label: 'Musical Notes' },
-    { emoji: '🎼', label: 'Score' },
 ];
 
 export default function CapabilityModal({
