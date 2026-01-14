@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
         // OR better: query the user status quickly.
 
         const body = await request.json();
-        const { title, artist, key, tempo, resource_url } = body;
+        const { title, artist, key, tempo, resource_url, capabilities } = body;
 
         if (!title) {
             return NextResponse.json({ error: 'Title is required' }, { status: 400 });
@@ -218,6 +218,24 @@ export async function POST(request: NextRequest) {
         if (error) {
             console.error('Error creating song:', error);
             return NextResponse.json({ error: 'Failed to create song' }, { status: 500 });
+        }
+
+        // Insert capabilities if provided
+        if (capabilities && capabilities.length > 0) {
+            const capsToInsert = capabilities.map((capId: string) => ({
+                song_id: data.id,
+                capability_id: capId
+            }));
+
+            const { error: insertError } = await supabaseAdmin
+                .from('song_capabilities')
+                .insert(capsToInsert);
+
+            if (insertError) {
+                console.error('Error inserting song capabilities:', insertError);
+                // Note: We don't rollback the song creation here, just log the error.
+                // Could ideally be a transaction but Supabase generic client restricts those
+            }
         }
 
         return NextResponse.json(data);
