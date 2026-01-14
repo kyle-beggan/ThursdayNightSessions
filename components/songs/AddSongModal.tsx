@@ -72,6 +72,22 @@ export default function AddSongModal({ isOpen, onClose, onSongAdded, initialData
         }
     }, [isOpen, initialData]);
 
+    // Set default capabilities for new songs
+    useEffect(() => {
+        if (isOpen && !initialData && availableCapabilities.length > 0) {
+            const engineerCap = availableCapabilities.find(c => c.name.toLowerCase() === 'engineer');
+            if (engineerCap) {
+                setFormData(prev => {
+                    // Only apply default if capabilities list is empty (fresh form)
+                    if (prev.capabilities.length === 0) {
+                        return { ...prev, capabilities: [engineerCap.id] };
+                    }
+                    return prev;
+                });
+            }
+        }
+    }, [availableCapabilities, isOpen, initialData]);
+
     const handleCapabilityToggle = (capId: string) => {
         setFormData(prev => {
             const current = prev.capabilities;
