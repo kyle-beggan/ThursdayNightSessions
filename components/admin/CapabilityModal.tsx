@@ -16,78 +16,35 @@ type CapabilityModalProps = {
 };
 
 const MUSICAL_ICONS = [
-    // Instruments
+    // Standard Instruments
     { emoji: '🎸', label: 'Guitar' },
     { emoji: '🎹', label: 'Keyboard' },
     { emoji: '🥁', label: 'Drums' },
-    { emoji: '🎤', label: 'Microphone' },
+    { emoji: '🎤', label: 'Vocals' },
     { emoji: '🎷', label: 'Saxophone' },
     { emoji: '🎺', label: 'Trumpet' },
     { emoji: '🎻', label: 'Violin' },
     { emoji: '🪕', label: 'Banjo' },
-    { emoji: '🪘', label: 'Long Drum' },
+    { emoji: '🪘', label: 'Conga/Djembe' },
     { emoji: '🪗', label: 'Accordion' },
     { emoji: '🪇', label: 'Maracas' },
     { emoji: '🪈', label: 'Flute' },
+
+    // Vocal / Studio Specific
     { emoji: '�️', label: 'Studio Mic' },
-    // Studio / Tech
-    { emoji: '🎧', label: 'Headphones' },
-    { emoji: '🎛️', label: 'Control Knobs' },
-    { emoji: '🎚️', label: 'Fader' },
-    { emoji: '🔈', label: 'Speaker Low' },
-    { emoji: '🔊', label: 'Speaker Loud' },
-    { emoji: '📻', label: 'Radio' },
-    { emoji: '💻', label: 'Laptop' },
-    { emoji: '🖥️', label: 'Desktop' },
-    { emoji: '🔌', label: 'Plug' },
-    { emoji: '🔋', label: 'Battery' },
-    { emoji: '�', label: 'Save' },
-    { emoji: '💿', label: 'CD' },
-    { emoji: '📀', label: 'DVD' },
-    { emoji: '📼', label: 'Cassette' },
-    // Media / Camera
-    { emoji: '📹', label: 'Camcorder' },
-    { emoji: '📷', label: 'Camera' },
-    { emoji: '�', label: 'Flash Camera' },
-    { emoji: '🎬', label: 'Clapper' },
-    { emoji: '📺', label: 'TV' },
-    // Music Symbols
+    { emoji: '�️', label: 'Beatbox/Voice' },
+
+    // Abstract / Other Sound Makers
+    { emoji: '🔔', label: 'Bell' },
+    { emoji: '🔕', label: 'Muted Bell' },
+    { emoji: '�', label: 'Megaphone' },
+    { emoji: '�', label: 'Conch Shell' },
+    { emoji: '�', label: 'Wind Chime' },
+
+    // Keys / Piano specific
+    { emoji: '🎵', label: 'Music Note' },
+    { emoji: '🎶', label: 'Musical Notes' },
     { emoji: '🎼', label: 'Score' },
-    { emoji: '🎵', label: 'Note' },
-    { emoji: '🎶', label: 'Notes' },
-    { emoji: '🎹', label: 'Piano Keys' },
-    // Controls
-    { emoji: '�', label: 'Record' },
-    { emoji: '⏺️', label: 'Record Btn' },
-    { emoji: '▶️', label: 'Play' },
-    { emoji: '⏸️', label: 'Pause' },
-    { emoji: '⏹️', label: 'Stop' },
-    { emoji: '⏪', label: 'Rewind' },
-    { emoji: '⏩', label: 'Fast Fwd' },
-    // Performance / Vibe
-    { emoji: '👨‍🎤', label: 'Singer (M)' },
-    { emoji: '👩‍🎤', label: 'Singer (F)' },
-    { emoji: '🗣️', label: 'Speaking' },
-    { emoji: '🤘', label: 'Rock On' },
-    { emoji: '👋', label: 'Wave' },
-    { emoji: '👏', label: 'Clap' },
-    { emoji: '🙌', label: 'Hands Up' },
-    { emoji: '🔥', label: 'Fire' },
-    { emoji: '✨', label: 'Sparkles' },
-    { emoji: '🌟', label: 'Star' },
-    { emoji: '�', label: 'Dizzy' },
-    { emoji: '💤', label: 'Sleepy' },
-    { emoji: '🌙', label: 'Moon' },
-    // Writing / Admin
-    { emoji: '📝', label: 'Memo' },
-    { emoji: '✏️', label: 'Pencil' },
-    { emoji: '✒️', label: 'Pen' },
-    { emoji: '📅', label: 'Calendar' },
-    { emoji: '📋', label: 'Clipboard' },
-    { emoji: '📁', label: 'Folder' },
-    { emoji: '�🛋️', label: 'Couch' },
-    { emoji: '🍺', label: 'Beer' },
-    { emoji: '☕', label: 'Coffee' },
 ];
 
 export default function CapabilityModal({
