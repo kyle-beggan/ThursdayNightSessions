@@ -21,7 +21,7 @@ export default function Header() {
 
     return (
         <>
-            <header className="w-full bg-surface/50 backdrop-blur-lg border-b border-border sticky top-0 z-40">
+            <header className="w-full bg-surface/50 backdrop-blur-lg border-b border-border sticky top-0 z-50">
                 <div className="w-full flex justify-center py-4">
                     <div className="w-full max-w-7xl px-4 relative flex items-center justify-center">
                         <Link href="/" className="flex items-center space-x-2 md:space-x-3 hover:opacity-80 transition-opacity -ml-[10px] md:ml-0">
