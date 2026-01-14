@@ -7,7 +7,8 @@ import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { Capability } from '@/lib/types';
-import { useToast } from '@/hooks/useToast'; // Added useToast import
+import { useToast } from '@/hooks/useToast';
+import CapabilityIcon from '@/components/ui/CapabilityIcon';
 
 interface User {
     id: string;
@@ -236,7 +237,9 @@ export default function EditUserPage() {
                                     checked={selectedCapabilities.includes(cap.id)}
                                     onChange={() => toggleCapability(cap.id)}
                                 />
-                                <span className="text-xl">{cap.icon || '🎵'}</span>
+                                <div className="w-5 h-5 flex items-center justify-center">
+                                    <CapabilityIcon capability={cap} className="w-5 h-5" />
+                                </div>
                                 <span className="text-sm font-medium text-text-primary capitalize">{cap.name}</span>
                             </label>
                         ))}

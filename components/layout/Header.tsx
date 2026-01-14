@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { Menu, Transition } from '@headlessui/react';
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import CreateSessionModal from '@/components/admin/CreateSessionModal';
 import { useTheme } from '@/providers/ThemeProvider';
 
@@ -21,6 +21,12 @@ export default function Header() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const onOpenCreateSession = () => setIsCreateModalOpen(true);
 
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setMounted(true);
+    }, []);
+
     return (
         <>
             <header className="w-full bg-surface/50 backdrop-blur-lg border-b border-border sticky top-0 z-50">
@@ -32,7 +38,10 @@ export default function Header() {
                             className="p-2 rounded-lg hover:bg-surface-hover text-text-secondary hover:text-text-primary transition-colors"
                             aria-label="Toggle Theme"
                         >
-                            {theme === 'dark' ? (
+                            {!mounted ? (
+                                // Render a default/placeholder or empty to avoid mismatch
+                                <div className="w-5 h-5" />
+                            ) : theme === 'dark' ? (
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
                                 </svg>

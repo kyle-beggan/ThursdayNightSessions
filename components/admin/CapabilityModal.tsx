@@ -45,18 +45,68 @@ export default function CapabilityModal({
         if (isOpen) fetchCustomIcons();
     }, [isOpen]);
 
-    // ... existing initial value useEffect ...
+    // Update state when modal opens with new initial values
+    useEffect(() => {
+        if (isOpen) {
+            if (initialName !== name) setName(initialName);
+            if (initialIcon !== selectedIcon) setSelectedIcon(initialIcon);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, initialName, initialIcon]);
 
-    // ... save/close handlers ...
+    const handleSave = () => {
+        if (!name.trim()) {
+            toast.error('Please enter a capability name');
+            return;
+        }
+        onSave(name.trim(), selectedIcon);
+        onClose();
+    };
+
+    const handleClose = () => {
+        setName(initialName);
+        setSelectedIcon(initialIcon);
+        onClose();
+    };
+
+    if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-            {/* ... backdrop ... */}
+        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+            {/* Backdrop */}
+            <div
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                onClick={handleClose}
+            />
 
             <div className="relative bg-surface border border-border rounded-lg shadow-2xl w-full max-w-md mx-4 p-6 max-h-[90vh] overflow-y-auto">
-                <h2 className="text-2xl font-bold text-text-primary mb-6">{title}</h2>
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-text-primary">{title}</h2>
+                    <button
+                        onClick={handleClose}
+                        className="text-text-secondary hover:text-text-primary transition-colors p-1"
+                        aria-label="Close"
+                        type="button"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
 
-                {/* Name Input ... */}
+                {/* Name Input */}
+                <div className="mb-6">
+                    <label className="block text-sm font-medium text-text-secondary mb-2">
+                        Capability Name
+                    </label>
+                    <Input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="e.g., bass guitar, keyboards, vocals"
+                        autoFocus
+                    />
+                </div>
 
                 {/* Icon Picker */}
                 <div className="mb-6">
@@ -66,6 +116,7 @@ export default function CapabilityModal({
                     <div className="grid grid-cols-6 gap-2">
                         {/* Auto/Default Option */}
                         <button
+                            type="button"
                             onClick={() => setSelectedIcon('')}
                             className={`p-3 text-xs flex items-center justify-center rounded-lg transition-all border border-dashed border-text-secondary/30 ${!selectedIcon
                                 ? 'bg-primary text-white ring-2 ring-primary'
@@ -79,6 +130,7 @@ export default function CapabilityModal({
                         {/* Custom Icons (Uploaded) */}
                         {customIcons.map((icon) => (
                             <button
+                                type="button"
                                 key={icon.path}
                                 onClick={() => setSelectedIcon(icon.path)}
                                 className={`p-2 rounded-lg transition-all flex items-center justify-center ${selectedIcon === icon.path
@@ -95,6 +147,7 @@ export default function CapabilityModal({
                         {/* Standard GameIcons */}
                         {INSTRUMENT_ICONS.map((inst) => (
                             <button
+                                type="button"
                                 key={inst.id}
                                 onClick={() => setSelectedIcon(inst.id)}
                                 className={`p-3 text-2xl rounded-lg transition-all flex items-center justify-center ${selectedIcon === inst.id
@@ -140,7 +193,7 @@ export default function CapabilityModal({
 
                 {/* Actions */}
                 <div className="flex gap-3 justify-end">
-                    <Button onClick={handleClose} variant="ghost">
+                    <Button type="button" onClick={handleClose} variant="ghost">
                         Cancel
                     </Button>
                     <Button onClick={handleSave} variant="primary">

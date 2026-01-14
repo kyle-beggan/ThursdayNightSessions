@@ -60,7 +60,7 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
                         </div>
                     ) : null}
 
-                    <div className="text-xs font-medium text-primary mb-2">
+                    <div className="text-lg font-bold text-primary mb-2">
                         {format(new Date(`2000-01-01T${session.start_time}`), 'h:mm a')}
                     </div>
 
@@ -69,13 +69,22 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
                             <div className="space-y-0.5">
                                 {session.songs.slice(0, 3).map((song, i) => (
                                     <div key={song.id || i} className="flex flex-col gap-0.5">
-                                        <div className="text-sm text-text-secondary truncate flex items-center gap-1.5">
-                                            <span className="text-[10px] bg-white text-black rounded px-1 py-0.5">🎵</span>
-                                            {song.song_name}
+                                        <div className="flex gap-1.5 items-start min-w-0">
+                                            <span className="text-[10px] bg-white text-black rounded px-1 py-0.5 mt-0.5 shrink-0">🎵</span>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="text-sm text-text-primary font-medium truncate leading-tight">
+                                                    {song.song_name}
+                                                </div>
+                                                {song.song_artist && (
+                                                    <div className="text-xs text-text-secondary truncate leading-tight mt-0.5">
+                                                        {song.song_artist}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                         {/* Song Capabilities */}
                                         {song.capabilities && song.capabilities.length > 0 && (
-                                            <div className="flex flex-wrap gap-0.5 ml-5 mb-[10px]">
+                                            <div className="flex flex-wrap gap-0.5 ml-0 mt-1 mb-[10px]">
                                                 {(() => {
                                                     const presentCapabilityIds = new Set(
                                                         session.commitments?.flatMap(c => c.capabilities?.map(cap => cap.id)) || []
@@ -120,21 +129,21 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
                     {/* Player list with capability icons */}
                     {committedCount > 0 ? (
                         <div className="space-y-1">
-                            {session.commitments.slice(0, 5).map((commitment) => (
+                            {session.commitments.slice(0, 10).map((commitment) => (
                                 <div key={commitment.user_id} className="flex items-center gap-1 text-xs text-text-primary">
                                     <span className="truncate flex-1">{commitment.user.name}</span>
                                     <div className="flex gap-0.5">
                                         {(commitment.capabilities || []).slice(0, 6).map((cap, idx) => (
                                             <span key={idx} title={toProperCase(cap.name)}>
-                                                <CapabilityIcon capability={cap} className="w-3 h-3" />
+                                                <CapabilityIcon capability={cap} className="w-4 h-4" />
                                             </span>
                                         ))}
                                     </div>
                                 </div>
                             ))}
-                            {committedCount > 5 && (
+                            {committedCount > 10 && (
                                 <div className="text-xs text-text-secondary">
-                                    +{committedCount - 5} more
+                                    +{committedCount - 10} more
                                 </div>
                             )}
                         </div>

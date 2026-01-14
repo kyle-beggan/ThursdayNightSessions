@@ -25,6 +25,8 @@ export default function AdminCapabilitiesPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCapability, setEditingCapability] = useState<Capability | null>(null);
     const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
+    // State for sync operation
+    const [syncing, setSyncing] = useState(false);
 
     useEffect(() => {
         fetchCapabilities();
@@ -105,6 +107,26 @@ export default function AdminCapabilitiesPage() {
         }
     };
 
+    const handleSync = async () => {
+        if (syncing) return;
+        setSyncing(true);
+        try {
+            const response = await fetch('/api/admin/capabilities/sync', { method: 'POST' });
+            const data = await response.json();
+            if (response.ok) {
+                toast.success(data.message);
+                fetchCapabilities();
+            } else {
+                toast.error('Sync failed');
+            }
+        } catch (error) {
+            console.error('Sync error:', error);
+            toast.error('Sync failed');
+        } finally {
+            setSyncing(false);
+        }
+    };
+
     const handleDelete = async (id: string, name: string) => {
         if (!await confirm({
             title: 'Delete Capability',
@@ -161,9 +183,14 @@ export default function AdminCapabilitiesPage() {
                         <h2 className="text-lg font-semibold text-text-primary mb-2">Add New Capability</h2>
                         <p className="text-sm text-text-secondary">Create a new capability with a custom name and icon</p>
                     </div>
-                    <Button onClick={handleAddClick} variant="primary">
-                        Add Capability
-                    </Button>
+                    <div className="flex gap-3">
+                        <Button onClick={handleSync} variant="secondary" disabled={syncing}>
+                            {syncing ? 'Syncing...' : 'Sync from Icons'}
+                        </Button>
+                        <Button onClick={handleAddClick} variant="primary">
+                            Add Capability
+                        </Button>
+                    </div>
                 </div>
             </div>
 
