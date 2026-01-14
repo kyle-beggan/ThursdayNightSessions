@@ -28,57 +28,35 @@ export default function CapabilityModal({
     const [name, setName] = useState(initialName);
     const [selectedIcon, setSelectedIcon] = useState(initialIcon);
 
-    // Update state when modal opens with new initial values
+    const [customIcons, setCustomIcons] = useState<{ name: string; path: string }[]>([]);
+
     useEffect(() => {
-        if (isOpen) {
-            if (initialName !== name) setName(initialName);
-            if (initialIcon !== selectedIcon) setSelectedIcon(initialIcon);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isOpen, initialName, initialIcon]);
+        const fetchCustomIcons = async () => {
+            try {
+                const res = await fetch('/api/admin/icons');
+                if (res.ok) {
+                    const data = await res.json();
+                    setCustomIcons(data);
+                }
+            } catch (e) {
+                console.error("Failed to load custom icons", e);
+            }
+        };
+        if (isOpen) fetchCustomIcons();
+    }, [isOpen]);
 
-    const handleSave = () => {
-        if (!name.trim()) {
-            toast.error('Please enter a capability name');
-            return;
-        }
-        onSave(name.trim(), selectedIcon);
-        onClose();
-    };
+    // ... existing initial value useEffect ...
 
-    const handleClose = () => {
-        setName(initialName);
-        setSelectedIcon(initialIcon);
-        onClose();
-    };
-
-    if (!isOpen) return null;
+    // ... save/close handlers ...
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-            {/* Backdrop */}
-            <div
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                onClick={handleClose}
-            />
+            {/* ... backdrop ... */}
 
-            {/* Modal */}
-            <div className="relative bg-surface border border-border rounded-lg shadow-2xl w-full max-w-md mx-4 p-6">
+            <div className="relative bg-surface border border-border rounded-lg shadow-2xl w-full max-w-md mx-4 p-6 max-h-[90vh] overflow-y-auto">
                 <h2 className="text-2xl font-bold text-text-primary mb-6">{title}</h2>
 
-                {/* Name Input */}
-                <div className="mb-6">
-                    <label className="block text-sm font-medium text-text-secondary mb-2">
-                        Capability Name
-                    </label>
-                    <Input
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="e.g., bass guitar, keyboards, vocals"
-                        autoFocus
-                    />
-                </div>
+                {/* Name Input ... */}
 
                 {/* Icon Picker */}
                 <div className="mb-6">
@@ -98,6 +76,23 @@ export default function CapabilityModal({
                             Auto
                         </button>
 
+                        {/* Custom Icons (Uploaded) */}
+                        {customIcons.map((icon) => (
+                            <button
+                                key={icon.path}
+                                onClick={() => setSelectedIcon(icon.path)}
+                                className={`p-2 rounded-lg transition-all flex items-center justify-center ${selectedIcon === icon.path
+                                    ? 'bg-primary/20 ring-2 ring-primary'
+                                    : 'bg-surface-secondary hover:bg-surface-tertiary'
+                                    }`}
+                                title={icon.name}
+                            >
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={icon.path} alt={icon.name} className="w-6 h-6 object-contain" />
+                            </button>
+                        ))}
+
+                        {/* Standard GameIcons */}
                         {INSTRUMENT_ICONS.map((inst) => (
                             <button
                                 key={inst.id}
@@ -112,6 +107,11 @@ export default function CapabilityModal({
                             </button>
                         ))}
                     </div>
+                    {customIcons.length > 0 && (
+                        <p className="text-xs text-text-secondary mt-2">
+                            * Custom icons loaded from /public/icons
+                        </p>
+                    )}
                 </div>
 
                 {/* Preview */}

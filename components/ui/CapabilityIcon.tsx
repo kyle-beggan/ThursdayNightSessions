@@ -19,8 +19,14 @@ const CapabilityIcon: React.FC<CapabilityIconProps> = ({ capability, className =
         xmlns: "http://www.w3.org/2000/svg"
     };
 
-    // If a specific icon is set in the DB, check if it's a React Icon key or just a character
+    // If a specific icon is set in the DB
     if (dbIcon) {
+        // If it looks like a path (starts with /), render as Image
+        if (dbIcon.startsWith('/')) {
+            // eslint-disable-next-line @next/next/no-img-element
+            return <img src={dbIcon} alt={name} className={`${className} object-contain`} />;
+        }
+
         // Check if it matches our new icon usage
         const IconComponent = ICON_MAP[dbIcon];
         if (IconComponent) {
