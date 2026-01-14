@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  /* Dark Theme Colors */
+  /* Dark Theme Colors (Default) */
   --background: #0a0a0a;
   --surface: #1a1a1a;
   --surface-hover: #2a2a2a;
@@ -16,6 +16,24 @@
   --success: #10b981;
   --danger: #ef4444;
   --warning: #f59e0b;
+}
+
+[data-theme='light'] {
+  --background: #ffffff;
+  --surface: #f3f4f6;
+  /* gray-100 */
+  --surface-hover: #e5e7eb;
+  /* gray-200 */
+  --surface-secondary: #ffffff;
+  --surface-tertiary: #f9fafb;
+  /* gray-50 */
+  --text-primary: #111827;
+  /* gray-900 */
+  --text-secondary: #4b5563;
+  /* gray-600 */
+  --border: #e5e7eb;
+  /* gray-200 */
+  /* Primary colors can stay roughly the same or be slightly darkened for contrast if needed */
 }
 
 @theme inline {
