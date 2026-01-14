@@ -125,6 +125,19 @@ const CapabilityIcon: React.FC<CapabilityIconProps> = ({ capability, className =
         );
     }
 
+    // --- Strings / Orchestral ---
+
+    // Upright Bass / Double Bass: Large body with f-holes (simplified)
+    if (name.includes('upright')) {
+        return (
+            <svg {...svgProps}>
+                <path d="M12 2C12 2 13 3 13 4V8C15 9 17 11 17 14C17 18 15 22 12 22C9 22 7 18 7 14C7 11 9 9 11 8V4C11 3 12 2 12 2Z" />
+                <path d="M11 9L11 20" className="stroke-background stroke-1" fill="none" />
+                <path d="M13 9L13 20" className="stroke-background stroke-1" fill="none" />
+            </svg>
+        );
+    }
+
     // --- Others / Fallback ---
 
     // Drums
