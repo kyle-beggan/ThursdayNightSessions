@@ -374,48 +374,60 @@ export default function ProfilePage() {
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                             {(isEditing ? allCapabilities : user.capabilities).map(cap => {
                                 const isSelected = isEditing
                                     ? formData.selectedCapabilities.includes(cap.id)
                                     : true; // In view mode, we iterate over user.capabilities which are all selected by definition
 
-                                return (
-                                    <div
-                                        key={cap.id}
-                                        onClick={() => toggleCapability(cap.id)}
-                                        className={`
-                                            p-4 rounded-xl border transition-all duration-200 flex flex-col items-center justify-center text-center h-[120px] relative group
-                                            ${isEditing ? 'cursor-pointer' : ''}
-                                            ${isSelected
-                                                ? 'bg-primary/10 border-primary shadow-[0_0_15px_rgba(139,92,246,0.3)]'
-                                                : isEditing
-                                                    ? 'bg-surface border-border hover:border-primary/50 opacity-60 hover:opacity-100' // Unselected in edit mode
-                                                    : 'bg-surface border-border' // View mode only sees selected
-                                            }
-                                        `}
-                                    >
+                                const content = (
+                                    <>
+                                        {isEditing && (
+                                            <input
+                                                type="checkbox"
+                                                className="hidden"
+                                                checked={isSelected}
+                                                onChange={() => { }} // Handled by div click
+                                                readOnly
+                                            />
+                                        )}
+                                        <div className="w-5 h-5 flex items-center justify-center">
+                                            <CapabilityIcon capability={cap} className="w-5 h-5" />
+                                        </div>
+                                        <span className="text-sm font-medium text-text-primary capitalize">{cap.name}</span>
                                         {isSelected && isEditing && (
-                                            <div className="absolute top-2 right-2 flex items-center justify-center w-5 h-5 bg-primary text-white rounded-full text-xs font-bold">
+                                            <div className="ml-auto flex items-center justify-center w-5 h-5 text-primary text-xs font-bold">
                                                 ✓
                                             </div>
                                         )}
-                                        <div className="mb-2">
-                                            <CapabilityIcon capability={cap} className="w-8 h-8 md:w-10 md:h-10" />
-                                        </div>
-                                        <h4 className={`font-medium text-sm capitalize ${isSelected ? 'text-primary' : 'text-text-primary'}`}>
-                                            {cap.name}
-                                        </h4>
+                                    </>
+                                );
+
+                                const baseClasses = `flex items-center gap-2 p-3 rounded-lg border transition-colors relative group min-h-[48px]`;
+                                const selectedClasses = isSelected
+                                    ? 'bg-primary/10 border-primary'
+                                    : isEditing
+                                        ? 'bg-surface-secondary border-transparent hover:bg-surface-tertiary opacity-60 hover:opacity-100'
+                                        : 'bg-surface-secondary border-border'; // Fallback / View Mode
+
+                                if (isEditing) {
+                                    return (
+                                        <label
+                                            key={cap.id}
+                                            onClick={() => toggleCapability(cap.id)}
+                                            className={`${baseClasses} cursor-pointer ${selectedClasses}`}
+                                        >
+                                            {content}
+                                        </label>
+                                    );
+                                }
+
+                                return (
+                                    <div key={cap.id} className={`${baseClasses} ${selectedClasses}`}>
+                                        {content}
                                     </div>
                                 );
                             })}
-
-                            {/* Empty State for View Mode */}
-                            {!isEditing && user.capabilities.length === 0 && (
-                                <div className="col-span-full text-center py-8 text-text-secondary italic bg-surface-secondary rounded-lg border border-border border-dashed">
-                                    No capabilities assigned yet. Click Edit to add some!
-                                </div>
-                            )}
                         </div>
                     </div>
                 )}

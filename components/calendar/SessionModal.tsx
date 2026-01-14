@@ -583,7 +583,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                 {isLoadingCapabilities ? (
                                     <div className="text-center py-4 text-text-secondary">Loading capabilities...</div>
                                 ) : (
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         {userCapabilities.map(cap => {
                                             const isSelected = selectedCapabilities.includes(cap.id);
                                             return (
@@ -591,30 +591,28 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                                     key={cap.id}
                                                     onClick={() => handleCapabilityToggle(cap.id)}
                                                     className={`
-                                                cursor-pointer p-3 rounded-xl border transition-all duration-200 flex flex-col items-center justify-center text-center h-[100px] relative group
+                                                cursor-pointer flex items-center gap-2 p-3 rounded-lg border transition-colors relative group min-h-[48px]
                                                 ${isSelected
-                                                            ? 'bg-primary/10 border-primary shadow-[0_0_15px_rgba(139,92,246,0.3)]'
-                                                            : 'bg-surface border-border hover:border-primary/50 hover:bg-surface-hover hover:shadow-lg'
+                                                            ? 'bg-primary/10 border-primary'
+                                                            : 'bg-surface-secondary border-transparent hover:bg-surface-tertiary'
                                                         }
                                             `}
                                                 >
+                                                    <div className="w-5 h-5 flex items-center justify-center">
+                                                        <CapabilityIcon capability={cap} className="w-5 h-5" />
+                                                    </div>
+                                                    <span className="text-sm font-medium text-text-primary capitalize">{cap.name}</span>
                                                     {isSelected && (
-                                                        <div className="absolute top-2 right-2 flex items-center justify-center w-5 h-5 bg-primary text-white rounded-full text-xs font-bold">
+                                                        <div className="ml-auto flex items-center justify-center w-5 h-5 text-primary text-xs font-bold">
                                                             ✓
                                                         </div>
                                                     )}
-                                                    <div className="absolute top-2 left-2 text-xl">
-                                                        <CapabilityIcon capability={cap} className="w-6 h-6" />
-                                                    </div>
-                                                    <div className="mt-4 font-medium text-text-primary capitalize text-sm">
-                                                        {cap.name}
-                                                    </div>
                                                 </div>
                                             );
                                         })}
 
                                         {userCapabilities.length === 0 && (
-                                            <p className="text-text-secondary text-sm col-span-full text-center">
+                                            <p className="text-text-secondary text-sm col-span-full text-center py-4 italic">
                                                 No capabilities found.
                                             </p>
                                         )}

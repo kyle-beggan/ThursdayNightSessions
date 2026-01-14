@@ -180,7 +180,7 @@ export default function AddSongModal({ isOpen, onClose, onSongAdded, initialData
                             {isLoadingCaps ? (
                                 <div className="text-center py-8 text-text-secondary text-sm">Loading...</div>
                             ) : (
-                                <div className="grid grid-cols-2 gap-2">
+                                <div className="grid grid-cols-1 gap-2">
                                     {availableCapabilities.map(cap => {
                                         const isSelected = formData.capabilities.includes(cap.id);
                                         return (
@@ -188,15 +188,20 @@ export default function AddSongModal({ isOpen, onClose, onSongAdded, initialData
                                                 key={cap.id}
                                                 onClick={() => handleCapabilityToggle(cap.id)}
                                                 className={`
-                                                    cursor-pointer p-2 rounded border flex items-center gap-2 transition-all
+                                                    cursor-pointer flex items-center gap-2 p-2 rounded-lg border transition-colors relative group
                                                     ${isSelected
-                                                        ? 'bg-primary/20 border-primary text-primary'
-                                                        : 'bg-surface border-border hover:border-primary/50 text-text-secondary hover:text-text-primary'
+                                                        ? 'bg-primary/10 border-primary'
+                                                        : 'bg-surface border-border hover:bg-surface-secondary'
                                                     }
                                                 `}
                                             >
-                                                <CapabilityIcon capability={cap} className="w-4 h-4 shrink-0" />
-                                                <span className="text-xs truncate font-medium capitalize select-none">{cap.name}</span>
+                                                <div className="w-4 h-4 flex items-center justify-center">
+                                                    <CapabilityIcon capability={cap} className="w-4 h-4" />
+                                                </div>
+                                                <span className="text-xs font-medium text-text-primary capitalize">{cap.name}</span>
+                                                {isSelected && (
+                                                    <div className="ml-auto text-primary text-xs font-bold">✓</div>
+                                                )}
                                             </div>
                                         );
                                     })}
