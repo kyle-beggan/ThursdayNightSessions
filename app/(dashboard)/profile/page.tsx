@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import StatusBadge from '@/components/admin/StatusBadge';
 import Image from 'next/image';
+import CapabilityIcon from '@/components/ui/CapabilityIcon';
 
 type User = {
     id: string;
@@ -399,8 +400,8 @@ export default function ProfilePage() {
                                                 ✓
                                             </div>
                                         )}
-                                        <div className="text-3xl mb-2">
-                                            {cap.icon || '🎸'}
+                                        <div className="mb-2">
+                                            <CapabilityIcon capability={cap} className="w-8 h-8 md:w-10 md:h-10" />
                                         </div>
                                         <h4 className={`font-medium text-sm capitalize ${isSelected ? 'text-primary' : 'text-text-primary'}`}>
                                             {cap.name}

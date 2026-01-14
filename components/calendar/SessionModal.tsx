@@ -643,7 +643,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                 onClick={() => setStep('details')}
                                 variant="ghost"
                                 disabled={isCommitting}
-                                className="w-[150px] bg-gray-500 hover:bg-black text-white hover:text-white border-transparent"
+                                className="w-[150px] bg-surface-secondary hover:bg-surface-hover text-text-primary border border-border"
                             >
                                 Back
                             </Button>
