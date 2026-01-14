@@ -18,7 +18,7 @@
   --warning: #f59e0b;
 }
 
-[data-theme='light'] {
+:root[data-theme='light'] {
   --background: #ffffff;
   --surface: #f3f4f6;
   /* gray-100 */
