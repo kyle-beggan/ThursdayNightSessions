@@ -47,14 +47,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
     return (
         <ThemeContext.Provider value={{ theme, toggleTheme }}>
-            Better generic solution: just render children. 
+            {/* 
+              We can render children always. 
+              If children use theme for styling that differs from server, 
+              React might warn. But crashing is worse.
             */}
-            {!mounted ? <>{children}</> : children}
+            {children}
         </ThemeContext.Provider>
     );
-
-    // Wait, simpler: just remove the "if (!mounted) return children" block
-    // And render the Provider always.
 }
 
 // Actually, I'll allow the rewrite to standard form:
