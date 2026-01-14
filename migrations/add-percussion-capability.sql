@@ -1,3 +1,3 @@
-INSERT INTO capabilities (name, category, icon)
-VALUES ('Percussion', 'Percussion', '🥁')
+INSERT INTO capabilities (name)
+VALUES ('Percussion')
 ON CONFLICT (name) DO NOTHING;

@@ -1,3 +1,3 @@
-INSERT INTO capabilities (name, category, icon)
-VALUES ('Ukulele', 'Strings', '🎸')
+INSERT INTO capabilities (name)
+VALUES ('Ukulele')
 ON CONFLICT (name) DO NOTHING;

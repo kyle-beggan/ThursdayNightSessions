@@ -1,3 +1,3 @@
-INSERT INTO capabilities (name, category, icon)
-VALUES ('Acoustic Guitar', 'Strings', '🎸')
+INSERT INTO capabilities (name)
+VALUES ('Acoustic Guitar')
 ON CONFLICT (name) DO NOTHING;
