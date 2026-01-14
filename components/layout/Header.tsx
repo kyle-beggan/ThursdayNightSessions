@@ -26,7 +26,7 @@ export default function Header() {
             <header className="w-full bg-surface/50 backdrop-blur-lg border-b border-border sticky top-0 z-50">
                 <div className="w-full flex justify-center py-4 relative">
                     {/* Theme Toggle - Absolute Left */}
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
                         <button
                             onClick={toggleTheme}
                             className="p-2 rounded-lg hover:bg-surface-hover text-text-secondary hover:text-text-primary transition-colors"
