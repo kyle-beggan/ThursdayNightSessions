@@ -1,4 +1,4 @@
-import React from 'react';
+import { ICON_MAP } from '@/lib/icons';
 
 interface CapabilityIconProps {
     capability: {
@@ -19,8 +19,14 @@ const CapabilityIcon: React.FC<CapabilityIconProps> = ({ capability, className =
         xmlns: "http://www.w3.org/2000/svg"
     };
 
-    // If a specific icon is set in the DB, use it
+    // If a specific icon is set in the DB, check if it's a React Icon key or just a character
     if (dbIcon) {
+        // Check if it matches our new icon usage
+        const IconComponent = ICON_MAP[dbIcon];
+        if (IconComponent) {
+            return <IconComponent className={className} />;
+        }
+        // Fallback for emojis or other strings
         return <span className={className}>{dbIcon}</span>;
     }
 

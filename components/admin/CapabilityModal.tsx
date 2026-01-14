@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button';
 import { useToast } from '@/hooks/useToast';
 import Input from '@/components/ui/Input';
 import CapabilityIcon from '@/components/ui/CapabilityIcon';
+import { INSTRUMENT_ICONS } from '@/lib/icons';
 
 type CapabilityModalProps = {
     isOpen: boolean;
@@ -14,21 +15,6 @@ type CapabilityModalProps = {
     initialIcon?: string;
     title: string;
 };
-
-const MUSICAL_ICONS = [
-    { emoji: '🎸', label: 'Guitar' },
-    { emoji: '🎹', label: 'Keyboard' },
-    { emoji: '🥁', label: 'Drums' },
-    { emoji: '🎤', label: 'Vocals' },
-    { emoji: '🎷', label: 'Saxophone' },
-    { emoji: '🎺', label: 'Trumpet' },
-    { emoji: '🎻', label: 'Violin' },
-    { emoji: '🪕', label: 'Banjo' },
-    { emoji: '🪘', label: 'Conga/Djembe' },
-    { emoji: '🪗', label: 'Accordion' },
-    { emoji: '🪇', label: 'Maracas' },
-    { emoji: '🪈', label: 'Flute' },
-];
 
 export default function CapabilityModal({
     isOpen,
@@ -112,17 +98,17 @@ export default function CapabilityModal({
                             Auto
                         </button>
 
-                        {MUSICAL_ICONS.map((icon) => (
+                        {INSTRUMENT_ICONS.map((inst) => (
                             <button
-                                key={icon.emoji}
-                                onClick={() => setSelectedIcon(icon.emoji)}
-                                className={`p-3 text-2xl rounded-lg transition-all ${selectedIcon === icon.emoji
+                                key={inst.id}
+                                onClick={() => setSelectedIcon(inst.id)}
+                                className={`p-3 text-2xl rounded-lg transition-all flex items-center justify-center ${selectedIcon === inst.id
                                     ? 'bg-primary text-white ring-2 ring-primary scale-110'
-                                    : 'bg-surface-secondary hover:bg-surface-tertiary'
+                                    : 'bg-surface-secondary hover:bg-surface-tertiary text-text-secondary'
                                     }`}
-                                title={icon.label}
+                                title={inst.label}
                             >
-                                {icon.emoji}
+                                <inst.icon />
                             </button>
                         ))}
                     </div>
