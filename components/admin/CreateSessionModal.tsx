@@ -219,16 +219,10 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     onClick={(e) => e.stopPropagation()}
-                                                    className="absolute top-1/2 right-1 -translate-y-1/2 z-10"
+                                                    className="absolute top-1 left-1 w-5 h-5 flex items-center justify-center bg-surface border border-green-500/30 text-green-400 rounded-full hover:bg-green-500/10 hover:border-green-500 transition-colors text-[10px]"
                                                     title="Play song"
                                                 >
-                                                    <Button
-                                                        size="sm"
-                                                        variant="secondary"
-                                                        className="w-[30px] px-0 text-[10px] h-6 flex items-center justify-center text-green-400 border-green-500/30 hover:bg-green-500/10"
-                                                    >
-                                                        ▶
-                                                    </Button>
+                                                    ▶
                                                 </a>
                                             )}
                                             <div className="w-full px-1">
