@@ -196,7 +196,7 @@ export default function AnalyticsPage() {
                                 itemStyle={{ color: '#E5E7EB' }}
                                 labelFormatter={(date) => new Date(date).toLocaleDateString()}
                             />
-                            <Line type="monotone" dataKey="attendees" stroke="#8B5CF6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 8 }} animationDuration={500} />
+                            <Line type="monotone" dataKey="attendees" stroke="#8B5CF6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 8 }} />
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
@@ -206,14 +206,14 @@ export default function AnalyticsPage() {
                 {/* Instrument Distribution */}
                 <div className="bg-surface rounded-xl p-6 border border-border">
                     <h3 className="text-xl font-semibold mb-6 text-text-primary">Instrument Distribution</h3>
-                    <div className="h-[300px] w-full flex items-center justify-center">
+                    <div className="h-[400px] w-full flex items-center justify-center">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie
                                     data={data.charts.instrumentDistribution}
                                     cx="50%"
                                     cy="50%"
-                                    outerRadius={60}
+                                    outerRadius={120}
                                     fill="#8884d8"
                                     dataKey="count"
                                     label={(props: { x: number; y: number; cx: number; name?: string; percent?: number }) => {
@@ -232,7 +232,6 @@ export default function AnalyticsPage() {
                                             </text>
                                         );
                                     }}
-                                    animationDuration={500}
                                 >
                                     {data.charts.instrumentDistribution.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -261,7 +260,7 @@ export default function AnalyticsPage() {
                                     contentStyle={{ backgroundColor: '#1F2937', border: 'none', borderRadius: '8px' }}
                                     itemStyle={{ color: '#E5E7EB' }}
                                 />
-                                <Bar dataKey="count" fill="#10B981" radius={[0, 4, 4, 0]} barSize={20} animationDuration={500} />
+                                <Bar dataKey="count" fill="#10B981" radius={[0, 4, 4, 0]} barSize={20} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -284,7 +283,7 @@ export default function AnalyticsPage() {
                                     contentStyle={{ backgroundColor: '#1F2937', border: 'none', borderRadius: '8px' }}
                                     itemStyle={{ color: '#E5E7EB' }}
                                 />
-                                <Bar dataKey="count" fill="#F59E0B" radius={[4, 4, 0, 0]} barSize={40} animationDuration={500} />
+                                <Bar dataKey="count" fill="#F59E0B" radius={[4, 4, 0, 0]} barSize={40} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>

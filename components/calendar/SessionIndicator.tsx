@@ -26,7 +26,7 @@ const toProperCase = (str: string) => {
 export default function SessionIndicator({ session, onClick, className }: SessionIndicatorProps) {
     const { data: authSession } = useSession();
     const toast = useToast();
-    const [showTooltip, setShowTooltip] = useState(false);
+
     const [candidateModal, setCandidateModal] = useState<{ isOpen: boolean; capabilityId: string | null; capabilityName: string | null }>({
         isOpen: false,
         capabilityId: null,
@@ -91,8 +91,6 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
         <>
             <div
                 className={`relative h-full ${className || ''}`}
-                onMouseEnter={() => setShowTooltip(true)}
-                onMouseLeave={() => setShowTooltip(false)}
             >
 
                 <button
@@ -207,35 +205,7 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
                 </button>
 
                 {/* Tooltip */}
-                {showTooltip && committedCount > 0 && (
-                    <div className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-3 bg-surface border border-border rounded-lg shadow-xl pointer-events-none">
-                        <div className="text-sm font-semibold text-text-primary mb-2">
-                            Committed Players ({committedCount})
-                        </div>
-                        <div className="space-y-2">
-                            {session.commitments.map((commitment) => (
-                                <div key={commitment.user_id} className="flex items-start gap-2">
-                                    <div className="flex-1">
-                                        <div className="text-sm text-text-primary font-medium">
-                                            {commitment.user.name}
-                                        </div>
-                                        <div className="flex flex-wrap gap-1 mt-1">
-                                            {(commitment.capabilities || []).map((cap) => (
-                                                <span
-                                                    key={cap.id}
-                                                    className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/20 text-primary text-xs rounded-full"
-                                                >
-                                                    <CapabilityIcon capability={cap} className="w-3 h-3" />
-                                                    <span className="capitalize">{cap.name}</span>
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
+
             </div>
 
             <CandidateListModal

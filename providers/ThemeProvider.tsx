@@ -17,7 +17,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
             const saved = localStorage.getItem('theme') as Theme;
             if (saved) return saved;
         }
-        return 'dark';
+        return 'light';
     });
 
     useEffect(() => {
