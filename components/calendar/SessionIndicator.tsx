@@ -114,7 +114,7 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
                                 {session.songs.slice(0, 3).map((song, i) => (
                                     <div key={song.id || i} className="flex flex-col gap-0.5">
                                         <div className="flex gap-1.5 items-start min-w-0">
-                                            <span className="text-[10px] bg-white text-black rounded px-1 py-0.5 mt-0.5 shrink-0">🎵</span>
+                                            <span className="text-[10px] bg-white text-black rounded px-1 py-0.5 mt-0.5 shrink-0 not-italic">🎵</span>
                                             <div className="flex-1 min-w-0">
                                                 <div className="text-sm text-text-primary font-medium truncate leading-tight">
                                                     {song.song_name}
@@ -175,7 +175,7 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
                             </div>
                         ) : (
                             <div className="text-xs text-text-secondary/60 italic flex items-center gap-1.5">
-                                <span className="text-[10px] bg-white text-black rounded px-1 py-0.5">🎵</span> Songs TBD
+                                <span className="text-[10px] bg-white text-black rounded px-1 py-0.5 not-italic">🎵</span> Songs TBD
                             </div>
                         )}
                     </div>

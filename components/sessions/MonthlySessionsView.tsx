@@ -52,11 +52,11 @@ export default function MonthlySessionsView({ sessions, onRefresh }: MonthlySess
         <div className="space-y-0">
             {MONTHS.map((month, index) => {
                 const monthSessions = sessionsByMonth[index] || [];
-                const hasMoreThan4 = monthSessions.length > 4;
-                const displaySessions = monthSessions.slice(0, 4);
+                // Only show months that have sessions or distinct empty state if desired. 
+                // Current design shows all months.
 
                 return (
-                    <div key={month} className="mb-[25px]">
+                    <div key={month} className="mb-8">
                         {/* Month Header */}
                         <div className="flex items-baseline gap-2 md:gap-3 mb-4">
                             <h2 className="text-lg md:text-2xl font-bold text-text-primary">
@@ -70,31 +70,21 @@ export default function MonthlySessionsView({ sessions, onRefresh }: MonthlySess
                         </div>
 
                         {/* Sessions Container */}
-                        <div
-                            className="bg-surface-hover border border-border rounded-lg p-4"
-                            style={{ minHeight: '400px', maxHeight: '400px' }}
-                        >
+                        <div className="bg-surface-hover border border-border rounded-lg p-4">
                             {monthSessions.length > 0 ? (
-                                <div className="h-full overflow-y-auto pr-2">
-                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 h-full">
-                                        {displaySessions.map(session => (
-                                            <div key={session.id} className="h-full">
-                                                <SessionIndicator
-                                                    session={session}
-                                                    className="h-full"
-                                                    onClick={() => setSelectedSession(session)}
-                                                />
-                                            </div>
-                                        ))}
-                                    </div>
-                                    {hasMoreThan4 && (
-                                        <div className="text-center py-4 text-sm text-text-secondary w-full">
-                                            +{monthSessions.length - 4} more sessions
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                    {monthSessions.map(session => (
+                                        <div key={session.id}>
+                                            <SessionIndicator
+                                                session={session}
+                                                className="h-full"
+                                                onClick={() => setSelectedSession(session)}
+                                            />
                                         </div>
-                                    )}
+                                    ))}
                                 </div>
                             ) : (
-                                <div className="h-full flex items-center justify-center text-text-secondary">
+                                <div className="h-32 flex items-center justify-center text-text-secondary">
                                     No sessions scheduled for {month}
                                 </div>
                             )}
