@@ -4,13 +4,15 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import CreateSessionModal from '@/components/admin/CreateSessionModal';
-import { Song, SessionWithDetails } from '@/lib/types';
+import { Song, SessionWithDetails, Session } from '@/lib/types';
 import { useSortableData } from '@/hooks/useSortableData';
 import { useToast } from '@/hooks/useToast';
 import { useConfirm } from '@/providers/ConfirmProvider';
+import { format } from 'date-fns';
 
-type FormSession = Omit<SessionWithDetails, 'songs'> & {
+type FormSession = Omit<SessionWithDetails, 'songs' | 'commitments'> & {
     songs?: Song[];
+    commitments?: any[];
 };
 
 export default function AdminSessionsPage() {
@@ -58,7 +60,7 @@ export default function AdminSessionsPage() {
 
         const preparedSession: FormSession = {
             ...session,
-            songs: session.songs?.map((s, index) => ({
+            songs: session.songs?.map((s: any, index: number) => ({
                 id: s.id || `temp-${index}`, // Fallback ID
                 title: s.song_name,
                 artist: '', // Information lost in session_songs table
@@ -78,7 +80,7 @@ export default function AdminSessionsPage() {
     const handleDeleteSession = async (id: string, date: string) => {
         if (!await confirm({
             title: 'Delete Session',
-            message: `Are you sure you want to delete the session on ${new Date(date).toLocaleDateString()}?`,
+            message: `Are you sure you want to delete the session on ${format(new Date(date + 'T00:00:00'), 'MMMM do, yyyy')}?`,
             confirmLabel: 'Delete',
             variant: 'danger'
         })) {
@@ -214,8 +216,8 @@ export default function AdminSessionsPage() {
                                         <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => sortUpcoming('start_time')}>
                                             Time {upcomingConfig?.key === 'start_time' && (upcomingConfig.direction === 'ascending' ? '↑' : '↓')}
                                         </th>
-                                        <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => sortUpcoming('commitments_count')}>
-                                            Commitments {upcomingConfig?.key === 'commitments_count' && (upcomingConfig.direction === 'ascending' ? '↑' : '↓')}
+                                        <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => sortUpcoming('commitments')}>
+                                            Commitments {upcomingConfig?.key === 'commitments' && (upcomingConfig.direction === 'ascending' ? '↑' : '↓')}
                                         </th>
                                         <th className="px-4 py-3 text-center text-sm font-semibold text-text-primary">
                                             Actions
@@ -237,7 +239,7 @@ export default function AdminSessionsPage() {
                                                 {formatTime(session.start_time)} - {formatTime(session.end_time)}
                                             </td>
                                             <td className="px-4 py-3 text-text-secondary">
-                                                {session.commitments_count || 0} committed
+                                                {session.commitments?.length || 0} committed
                                             </td>
                                             <td className="px-4 py-3">
                                                 <div className="flex gap-2 justify-center">

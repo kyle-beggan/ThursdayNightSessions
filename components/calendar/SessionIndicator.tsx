@@ -94,6 +94,7 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
                 onMouseEnter={() => setShowTooltip(true)}
                 onMouseLeave={() => setShowTooltip(false)}
             >
+
                 <button
                     onClick={onClick}
                     className="w-full h-full text-left p-3 bg-primary/20 border border-primary/20 hover:bg-primary/30 hover:border-primary/50 rounded-lg transition-all duration-200 flex flex-col group"

@@ -50,7 +50,9 @@ export default function ProfilePage() {
         selectedCapabilities: [] as string[]
     });
 
-    const isProfileIncomplete = session?.user?.status === 'approved' && !session?.user?.phone;
+    const isProfileIncomplete = user
+        ? (user.status === 'approved' && (!user.phone || user.phone.length < 10))
+        : (session?.user?.status === 'approved' && (!session?.user?.phone || session.user.phone.length < 10));
 
     useEffect(() => {
         if (session) {
@@ -422,7 +424,7 @@ export default function ProfilePage() {
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             {(isEditing ? allCapabilities : user.capabilities).map(cap => {
                                 const isSelected = isEditing
                                     ? formData.selectedCapabilities.includes(cap.id)

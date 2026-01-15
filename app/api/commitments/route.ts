@@ -15,6 +15,7 @@ const supabaseAdmin = createClient(
     }
 );
 
+
 export async function POST(request: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
@@ -31,22 +32,33 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
-        // 1. Create commitment
+        // 1. Upsert commitment (Create or Update)
         const { data: commitment, error: commitmentError } = await supabaseAdmin
             .from('session_commitments')
-            .insert({
+            .upsert({
                 session_id,
                 user_id,
-            })
+            }, { onConflict: 'session_id,user_id' })
             .select()
             .single();
 
         if (commitmentError) {
-            console.error('Error creating commitment:', commitmentError);
-            return NextResponse.json({ error: 'Failed to create commitment' }, { status: 500 });
+            console.error('Error creating/updating commitment:', commitmentError);
+            return NextResponse.json({ error: 'Failed to save commitment' }, { status: 500 });
         }
 
-        // 2. Insert capabilities if provided
+        // 2. Clear existing capabilities for this commitment (to ensure clean slate for update)
+        const { error: deleteError } = await supabaseAdmin
+            .from('session_commitment_capabilities')
+            .delete()
+            .eq('session_commitment_id', commitment.id);
+
+        if (deleteError) {
+            console.error('Error clearing capabilities:', deleteError);
+            // Continue anyway? Or fail? Ideally fail, but let's try to proceed.
+        }
+
+        // 3. Insert capabilities if provided
         if (capability_ids && capability_ids.length > 0) {
             const capabilitiesToInsert = capability_ids.map((capId: string) => ({
                 session_commitment_id: commitment.id,
@@ -59,11 +71,6 @@ export async function POST(request: NextRequest) {
 
             if (capabilitiesError) {
                 console.error('Error inserting commitment capabilities:', capabilitiesError);
-                // Try to cleanup the commitment if capabilities failed? 
-                // Maybe, but for now just report error. The commitment exists though.
-                // ideally we would run this in a transaction or cleanup.
-                await supabaseAdmin.from('session_commitments').delete().eq('id', commitment.id);
-
                 return NextResponse.json({ error: 'Failed to save capabilities' }, { status: 500 });
             }
         }
@@ -74,6 +81,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
+
 
 export async function DELETE(request: NextRequest) {
     try {

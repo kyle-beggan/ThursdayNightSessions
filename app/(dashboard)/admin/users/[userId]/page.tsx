@@ -147,7 +147,7 @@ export default function EditUserPage() {
     if (!user) return <div className="p-8 text-center text-text-secondary">User not found</div>;
 
     return (
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="max-w-4xl mx-auto space-y-6">
             <div>
                 <Link
                     href="/admin/users"
@@ -227,7 +227,7 @@ export default function EditUserPage() {
 
                 <div className="space-y-4 pt-4 border-t border-border">
                     <h3 className="text-lg font-semibold text-text-primary">Capabilities</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         {allCapabilities.map(cap => (
                             <label
                                 key={cap.id}

@@ -258,3 +258,46 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
+
+export async function DELETE(request: NextRequest) {
+    try {
+        const session = await getServerSession(authOptions);
+
+        if (!session?.user || session.user.userType !== 'admin') {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+        }
+
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get('id');
+
+        if (!id) {
+            return NextResponse.json({ error: 'Session ID is required' }, { status: 400 });
+        }
+
+        const supabaseAdmin = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            {
+                auth: {
+                    autoRefreshToken: false,
+                    persistSession: false
+                }
+            }
+        );
+
+        const { error } = await supabaseAdmin
+            .from('sessions')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error('Error deleting session:', error);
+            return NextResponse.json({ error: 'Failed to delete session' }, { status: 500 });
+        }
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('Error in DELETE /api/sessions:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    }
+}

@@ -70,6 +70,18 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
         setStep('rsvp');
     };
 
+    const handleEditRsvp = () => {
+        if (userCapabilities.length === 0) {
+            fetchUserCapabilities();
+        }
+        if (userCommitment?.capabilities) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const ids = userCommitment.capabilities.map((c: any) => c.id);
+            setSelectedCapabilities(ids);
+        }
+        setStep('rsvp');
+    };
+
     const handleCapabilityToggle = (capId: string) => {
         setSelectedCapabilities(prev =>
             prev.includes(capId)
@@ -547,14 +559,24 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                         )}
                         <div className="flex justify-center gap-3 pt-4 border-t border-border mt-auto shrink-0">
                             {isCommitted ? (
-                                <Button
-                                    onClick={handleCancelRsvp}
-                                    variant="danger"
-                                    disabled={isCommitting}
-                                    className="w-[150px]"
-                                >
-                                    {isCommitting ? 'Cancelling...' : 'Cancel RSVP'}
-                                </Button>
+                                <>
+                                    <Button
+                                        onClick={handleEditRsvp}
+                                        variant="secondary"
+                                        disabled={isCommitting}
+                                        className="w-[150px]"
+                                    >
+                                        Edit RSVP
+                                    </Button>
+                                    <Button
+                                        onClick={handleCancelRsvp}
+                                        variant="danger"
+                                        disabled={isCommitting}
+                                        className="w-[150px]"
+                                    >
+                                        {isCommitting ? 'Cancelling...' : 'Cancel RSVP'}
+                                    </Button>
+                                </>
                             ) : (
                                 <Button
                                     onClick={handleRsvpClick}
@@ -586,7 +608,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                 {isLoadingCapabilities ? (
                                     <div className="text-center py-4 text-text-secondary">Loading capabilities...</div>
                                 ) : (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                         {userCapabilities.map(cap => {
                                             const isSelected = selectedCapabilities.includes(cap.id);
                                             return (

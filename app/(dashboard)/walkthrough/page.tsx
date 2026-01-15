@@ -158,6 +158,41 @@ export default function WalkthroughPage() {
                     </div>
                 </div>
             )
+        },
+        {
+            id: 'updates',
+            title: 'Latest Updates',
+            icon: '🚀',
+            content: (
+                <div className="space-y-4">
+                    <h3 className="text-xl font-bold text-text-primary">New Features & Refinements</h3>
+                    <p className="text-text-secondary">
+                        We&apos;re constantly improving the experience. Here&apos;s what&apos;s new in Jan 2026:
+                    </p>
+
+                    <div className="space-y-4 mt-4">
+                        <div className="bg-surface-secondary p-4 rounded-lg">
+                            <h4 className="font-semibold text-primary mb-2 flex items-center gap-2">
+                                <span>📱</span> SMS Reminders
+                            </h4>
+                            <p className="text-sm text-text-secondary">
+                                Admins can now send session reminders directly to your phone. Make sure your profile has a valid phone number to receive updates!
+                            </p>
+                        </div>
+
+                        <div className="bg-surface-secondary p-4 rounded-lg">
+                            <h4 className="font-semibold text-primary mb-2 flex items-center gap-2">
+                                <span>🎨</span> UI Polish
+                            </h4>
+                            <ul className="text-sm text-text-secondary space-y-2 list-disc pl-4">
+                                <li><strong>Tab Icons:</strong> Easier navigation in profiles and session details.</li>
+                                <li><strong>Song Previews:</strong> New &quot;Play&quot; button in the song selector lets you listen before you choose.</li>
+                                <li><strong>Better Grids:</strong> Capabilities now display in a cleaner 4-column layout on desktop.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            )
         }
     ];
 

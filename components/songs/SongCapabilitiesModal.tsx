@@ -103,7 +103,7 @@ export default function SongCapabilitiesModal({ isOpen, onClose, song, onSave }:
                 {loading ? (
                     <div className="text-center py-8 text-text-secondary">Loading capabilities...</div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto p-1">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-h-[60vh] overflow-y-auto p-1">
                         {allCapabilities.map(cap => {
                             const isSelected = selectedCapabilities.includes(cap.id);
                             return (
