@@ -35,7 +35,8 @@ export async function GET(request: Request) {
                     capability_id,
                     capabilities (
                         id,
-                        name
+                        name,
+                        icon
                     )
                 )
             `)
@@ -62,7 +63,8 @@ export async function GET(request: Request) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             capabilities: user.user_capabilities?.map((uc: any) => ({
                 id: uc.capabilities.id,
-                name: uc.capabilities.name
+                name: uc.capabilities.name,
+                icon: uc.capabilities.icon
             })) || []
         }));
 

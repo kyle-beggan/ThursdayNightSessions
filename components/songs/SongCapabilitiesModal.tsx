@@ -38,7 +38,9 @@ export default function SongCapabilitiesModal({ isOpen, onClose, song, onSave }:
             const res = await fetch('/api/capabilities');
             if (res.ok) {
                 const data = await res.json();
-                setAllCapabilities(data);
+                // Filter out 'hanging out' capability
+                const filtered = data.filter((c: Capability) => c.name.toLowerCase() !== 'hanging out');
+                setAllCapabilities(filtered);
             }
         } catch (error) {
             console.error('Error fetching capabilities:', error);

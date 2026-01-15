@@ -91,6 +91,32 @@ export default function Sidebar() {
                         return null;
                     }
 
+                    // Disable navigation if profile is incomplete (approved status but no phone)
+                    // Allow access to 'Feedback' or 'Walkthrough' maybe? No, strict lock as per request.
+                    // But allow access to current page if it is /profile (though this component is Sidebar)
+                    // Actually Sidebar handles links TO other places. If blocked, disable all except maybe "Log out" (in Header).
+                    const isProfileIncomplete = session?.user?.status === 'approved' && !session?.user?.phone;
+                    const isDisabled = isProfileIncomplete;
+
+                    if (isDisabled) {
+                        return (
+                            <div
+                                key={item.href}
+                                className={`flex items-center gap-3 px-3 py-2 rounded-lg opacity-50 cursor-not-allowed ${isCollapsed ? 'justify-center' : ''}`}
+                                title="Please complete your profile first"
+                            >
+                                <span className="text-xl flex-shrink-0 relative flex items-center justify-center grayscale">
+                                    {item.icon}
+                                </span>
+                                {!isCollapsed && (
+                                    <span className="font-medium text-sm flex-1 text-text-secondary">
+                                        {item.name}
+                                    </span>
+                                )}
+                            </div>
+                        );
+                    }
+
                     return (
                         <Link
                             key={item.href}

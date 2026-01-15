@@ -14,10 +14,14 @@ export async function middleware(req: NextRequest) {
         pathname.startsWith('/_next'); // Next.js assets
 
     if (isPublicPath) {
-        // If user is already logged in and tries to go to login, redirect to dashboard or pending
+        // If user is already logged in and tries to go to login, redirect to dashboard or proper page
         if (token && pathname === '/login') {
             if (token.status === 'pending') {
                 return NextResponse.redirect(new URL('/pending', req.url));
+            }
+            // For approved users, checking phone requirement
+            if (!token.phone) {
+                return NextResponse.redirect(new URL('/profile', req.url));
             }
             return NextResponse.redirect(new URL('/dashboard', req.url));
         }
@@ -34,6 +38,13 @@ export async function middleware(req: NextRequest) {
 
     // Case: Approved/Admin User
     if (userStatus === 'approved' || userStatus === 'admin') {
+        const hasPhone = !!token.phone;
+
+        // If missing phone number, force redirect to /profile
+        if (!hasPhone && pathname !== '/profile' && !pathname.startsWith('/api')) {
+            return NextResponse.redirect(new URL('/profile', req.url));
+        }
+
         // If approved user tries to go to /pending, redirect to dashboard
         if (pathname === '/pending') {
             return NextResponse.redirect(new URL('/dashboard', req.url));

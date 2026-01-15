@@ -3,6 +3,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import ScrollToTop from '@/components/layout/ScrollToTop';
 
 import MobileNav from '@/components/layout/MobileNav';
+import ProfileGuard from '@/components/layout/ProfileGuard';
 
 export default function DashboardLayout({
     children,
@@ -12,6 +13,7 @@ export default function DashboardLayout({
     // Development mode: No auth checks, just show the content
     return (
         <div className="min-h-screen bg-background">
+            <ProfileGuard />
             <ScrollToTop />
             <Header />
             <MobileNav />

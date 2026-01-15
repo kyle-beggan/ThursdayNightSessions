@@ -36,7 +36,9 @@ export default function AddSongModal({ isOpen, onClose, onSongAdded, initialData
                 const res = await fetch('/api/capabilities');
                 if (res.ok) {
                     const data = await res.json();
-                    setAvailableCapabilities(data);
+                    // Filter out 'hanging out' capability
+                    const filtered = data.filter((c: Capability) => c.name.toLowerCase() !== 'hanging out');
+                    setAvailableCapabilities(filtered);
                 }
             } catch (error) {
                 console.error('Error fetching capabilities:', error);

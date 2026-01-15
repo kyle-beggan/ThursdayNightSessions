@@ -8,13 +8,7 @@ import Modal from '@/components/ui/Modal';
 import { useSortableData } from '@/hooks/useSortableData';
 import { useToast } from '@/hooks/useToast';
 import { useConfirm } from '@/providers/ConfirmProvider';
-
-// Checking imports, I don't see toaster in the file list but I can check if it exists.
-// Actually, I'll stick to 'alert' fallback if toast doesn't exist, but wait, the plan said "toast/notification".
-// I'll check if Toaster content exists or simply use valid UI.
-// Let's stick to using Modal for confirmation and simple alert/console for errors if no toast system.
-// Wait, I can see Button and Modal are in components/ui.
-// I'll add the logic now.
+import CapabilityIcon from '@/components/ui/CapabilityIcon';
 
 type User = {
     id: string;
@@ -23,7 +17,7 @@ type User = {
     phone: string;
     status: 'pending' | 'approved' | 'rejected';
     user_type: 'admin' | 'user';
-    capabilities: { id: string; name: string }[];
+    capabilities: { id: string; name: string; icon?: string }[];
     created_at: string;
 };
 
@@ -41,8 +35,6 @@ export default function AdminUsersPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [userToDelete, setUserToDelete] = useState<User | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
-
-
 
     const fetchUsers = async () => {
         try {
@@ -95,7 +87,6 @@ export default function AdminUsersPage() {
             } else if (action === 'reject') {
                 updates.status = 'rejected';
             } else if (action === 'make-admin') {
-                // If changing to admin, double check
                 if (!await confirm({
                     title: 'Make Admin',
                     message: 'Are you sure you want to make this user an admin? They will have full access to the system.',
@@ -140,7 +131,6 @@ export default function AdminUsersPage() {
             });
 
             if (response.ok) {
-                // Remove from local state immediately for responsiveness
                 setUsers(prev => prev.filter(u => u.id !== userToDelete.id));
                 setIsDeleteModalOpen(false);
                 setUserToDelete(null);
@@ -244,11 +234,11 @@ export default function AdminUsersPage() {
                             <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('email')}>
                                 Email {sortConfig?.key === 'email' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                             </th>
+                            <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('phone')}>
+                                Phone {sortConfig?.key === 'phone' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                            </th>
                             <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('status')}>
                                 Status {sortConfig?.key === 'status' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                            </th>
-                            <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('user_type')}>
-                                Type {sortConfig?.key === 'user_type' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                             </th>
                             <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
                                 Capabilities
@@ -272,27 +262,23 @@ export default function AdminUsersPage() {
                                         <div className="font-medium text-text-primary">{user.name}</div>
                                     </td>
                                     <td className="px-4 py-3 text-text-secondary">{user.email}</td>
+                                    <td className="px-4 py-3 text-text-secondary">{user.phone}</td>
                                     <td className="px-4 py-3">
                                         <StatusBadge status={user.status} />
                                     </td>
                                     <td className="px-4 py-3">
-                                        <span className={`text-sm ${user.user_type === 'admin' ? 'text-primary font-semibold' : 'text-text-secondary'}`}>
-                                            {user.user_type}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3">
                                         <div className="flex flex-wrap gap-1">
-                                            {user.capabilities.slice(0, 3).map(cap => (
+                                            {user.capabilities.slice(0, 5).map(cap => (
                                                 <span
                                                     key={cap.id}
-                                                    className="px-2 py-0.5 bg-surface-tertiary text-text-secondary text-xs rounded"
+                                                    title={cap.name}
                                                 >
-                                                    <span className="capitalize">{cap.name}</span>
+                                                    <CapabilityIcon capability={cap} className="w-5 h-5" />
                                                 </span>
                                             ))}
-                                            {user.capabilities.length > 3 && (
-                                                <span className="px-2 py-0.5 text-text-secondary text-xs">
-                                                    +{user.capabilities.length - 3}
+                                            {user.capabilities.length > 5 && (
+                                                <span className="px-1 text-text-secondary text-xs flex items-center">
+                                                    +{user.capabilities.length - 5}
                                                 </span>
                                             )}
                                         </div>

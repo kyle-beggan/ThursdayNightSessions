@@ -21,8 +21,8 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
     const toast = useToast();
     const [formData, setFormData] = useState({
         date: '',
-        start_time: '19:30',
-        end_time: '23:30',
+        start_time: '20:00',
+        end_time: '00:00',
     });
     const [availableSongs, setAvailableSongs] = useState<Song[]>([]);
     const [selectedSongs, setSelectedSongs] = useState<Song[]>([]);
@@ -45,8 +45,8 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
             } else {
                 setFormData({
                     date: '',
-                    start_time: '19:30',
-                    end_time: '23:30',
+                    start_time: '20:00',
+                    end_time: '00:00',
                 });
                 setSelectedSongs([]);
             }
@@ -143,7 +143,7 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
                         <input
                             type="date"
                             required
-                            className="w-full px-4 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert"
+                            className="w-full px-4 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
                             value={formData.date}
                             onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                             min={initialData ? undefined : new Date().toISOString().split('T')[0]}
@@ -155,7 +155,7 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
                             <input
                                 type="time"
                                 required
-                                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert"
+                                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
                                 value={formData.start_time}
                                 onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
                             />
@@ -165,7 +165,7 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
                             <input
                                 type="time"
                                 required
-                                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert"
+                                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
                                 value={formData.end_time}
                                 onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
                             />
@@ -212,6 +212,24 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
                                                 <div className="absolute top-1 right-1 flex items-center justify-center w-4 h-4 bg-primary text-white rounded-full text-[10px] font-bold">
                                                     ✓
                                                 </div>
+                                            )}
+                                            {song.resource_url && (
+                                                <a
+                                                    href={song.resource_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="absolute top-1/2 right-1 -translate-y-1/2 z-10"
+                                                    title="Play song"
+                                                >
+                                                    <Button
+                                                        size="sm"
+                                                        variant="secondary"
+                                                        className="w-[30px] px-0 text-[10px] h-6 flex items-center justify-center text-green-400 border-green-500/30 hover:bg-green-500/10"
+                                                    >
+                                                        ▶
+                                                    </Button>
+                                                </a>
                                             )}
                                             <div className="w-full px-1">
                                                 <h4 className={`font-medium text-xs mb-0.5 line-clamp-2 leading-tight ${isSelected ? 'text-primary' : 'text-text-primary'}`}>

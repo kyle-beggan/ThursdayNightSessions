@@ -127,16 +127,19 @@ export const authOptions: NextAuthOptions = {
 
             // If we have an ID but no status (or on every req if we want real-time), fetch status
             // Taking a balanced approach: fetch if missing or if forced update
+            // If we have an ID but no status (or on every req if we want real-time), fetch status
+            // Taking a balanced approach: fetch if missing or if forced update
             if (token.id && (!token.status || trigger === 'update')) {
                 const { data: userData } = await supabaseAdmin
                     .from('users')
-                    .select('status, user_type, image')
+                    .select('status, user_type, image, phone')
                     .eq('id', token.id)
                     .single();
 
                 if (userData) {
                     token.status = userData.status;
                     token.userType = userData.user_type;
+                    token.phone = userData.phone;
                     if (userData.image) token.picture = userData.image; // optional: sync avatar
                 }
             }
@@ -151,6 +154,7 @@ export const authOptions: NextAuthOptions = {
                 // Pass properties from token to session
                 session.user.status = token.status as string;
                 session.user.userType = token.userType as string;
+                session.user.phone = token.phone as string;
                 if (token.picture) session.user.image = token.picture;
             }
             return session;

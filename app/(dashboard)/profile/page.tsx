@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { FaUser, FaMusic } from 'react-icons/fa';
 import { useToast } from '@/hooks/useToast';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import StatusBadge from '@/components/admin/StatusBadge';
 import Image from 'next/image';
 import CapabilityIcon from '@/components/ui/CapabilityIcon';
+import { formatPhoneNumber } from '@/lib/utils';
 
 type User = {
     id: string;
@@ -48,12 +50,29 @@ export default function ProfilePage() {
         selectedCapabilities: [] as string[]
     });
 
+    const isProfileIncomplete = session?.user?.status === 'approved' && !session?.user?.phone;
+
     useEffect(() => {
         if (session) {
             fetchProfile();
             fetchCapabilities();
         }
     }, [session]);
+
+    // Force Edit Mode if profile is incomplete
+    useEffect(() => {
+        if (isProfileIncomplete && user) {
+            setIsEditing(true);
+            setFormData(prev => ({
+                ...prev,
+                name: user.name,
+                email: user.email,
+                phone: user.phone || '', // Should be empty but ensures state sync
+                selectedCapabilities: user.capabilities.map(c => c.id)
+            }));
+        }
+    }, [isProfileIncomplete, user]);
+
 
     const fetchProfile = async () => {
         try {
@@ -81,7 +100,9 @@ export default function ProfilePage() {
             const response = await fetch('/api/capabilities');
             if (response.ok) {
                 const data = await response.json();
-                setAllCapabilities(data);
+                // Filter out 'hanging out' capability
+                const filteredCaps = data.filter((c: Capability) => c.name.toLowerCase() !== 'hanging out');
+                setAllCapabilities(filteredCaps);
             }
         } catch (error) {
             console.error('Error fetching capabilities:', error);
@@ -158,6 +179,11 @@ export default function ProfilePage() {
     };
 
     const handleSave = async () => {
+        if (!formData.phone) {
+            toast.error('Phone number is required');
+            return;
+        }
+
         setIsSaving(true);
         try {
             const response = await fetch('/api/profile', {
@@ -173,9 +199,14 @@ export default function ProfilePage() {
             });
 
             if (response.ok) {
-                await updateSession();
+                await updateSession(); // Refresh session to get updated 'phone'
                 setIsEditing(false);
                 toast.success('Profile updated successfully');
+
+                // Redirect if this was a forced completion
+                if (isProfileIncomplete) {
+                    window.location.href = '/dashboard';
+                }
             } else {
                 toast.error('Failed to update profile');
             }
@@ -215,22 +246,35 @@ export default function ProfilePage() {
 
     return (
         <div className="max-w-4xl mx-auto space-y-6">
+            {isProfileIncomplete && (
+                <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-lg mb-6">
+                    <h3 className="text-lg font-semibold text-yellow-500 mb-1">Action Required</h3>
+                    <p className="text-text-secondary">You must add a phone number to your profile to continue using the application.</p>
+                </div>
+            )}
+
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold text-text-primary mb-2">My Profile</h1>
                     <p className="text-text-secondary">Manage your personal information and capabilities</p>
                 </div>
-                {!isEditing && (
+                {!isEditing && !isProfileIncomplete && (
                     <Button onClick={handleEdit} variant="primary">
                         Edit Profile
                     </Button>
                 )}
                 {isEditing && (
                     <div className="flex gap-3">
-                        <Button onClick={handleCancel} variant="ghost" disabled={isSaving}>
-                            Cancel
-                        </Button>
-                        <Button onClick={handleSave} variant="primary" disabled={isSaving}>
+                        {!isProfileIncomplete && (
+                            <Button onClick={handleCancel} variant="ghost" disabled={isSaving}>
+                                Cancel
+                            </Button>
+                        )}
+                        <Button
+                            onClick={handleSave}
+                            variant="primary"
+                            disabled={isSaving || !formData.phone}
+                        >
                             {isSaving ? 'Saving...' : 'Save Changes'}
                         </Button>
                     </div>
@@ -280,20 +324,22 @@ export default function ProfilePage() {
             <div className="flex p-1 bg-surface-secondary/30 border border-border rounded-xl mb-6">
                 <button
                     onClick={() => setActiveTab('details')}
-                    className={`flex-1 px-4 py-3 text-lg font-bold rounded-lg transition-all duration-300 ${activeTab === 'details'
+                    className={`flex-1 px-4 py-3 text-lg font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'details'
                         ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
                         : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
                         }`}
                 >
+                    <FaUser className="w-4 h-4" />
                     Profile Details
                 </button>
                 <button
                     onClick={() => setActiveTab('capabilities')}
-                    className={`flex-1 px-4 py-3 text-lg font-bold rounded-lg transition-all duration-300 ${activeTab === 'capabilities'
+                    className={`flex-1 px-4 py-3 text-lg font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'capabilities'
                         ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
                         : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
                         }`}
                 >
+                    <FaMusic className="w-4 h-4" />
                     Capabilities
                 </button>
             </div>
@@ -336,8 +382,10 @@ export default function ProfilePage() {
                                 <Input
                                     type="tel"
                                     value={formData.phone}
-                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                    onChange={(e) => setFormData({ ...formData, phone: formatPhoneNumber(e.target.value) })}
                                     required
+                                    placeholder="555-555-5555"
+                                    maxLength={12}
                                 />
                             ) : (
                                 <p className="text-text-primary font-medium">{user.phone}</p>

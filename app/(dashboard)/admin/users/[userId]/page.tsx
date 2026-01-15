@@ -9,6 +9,7 @@ import Input from '@/components/ui/Input';
 import { Capability } from '@/lib/types';
 import { useToast } from '@/hooks/useToast';
 import CapabilityIcon from '@/components/ui/CapabilityIcon';
+import { formatPhoneNumber } from '@/lib/utils';
 
 interface User {
     id: string;
@@ -51,7 +52,9 @@ export default function EditUserPage() {
             const capRes = await fetch('/api/admin/capabilities');
             if (capRes.ok) {
                 const caps = await capRes.json();
-                setAllCapabilities(caps);
+                // Filter out 'hanging out' capability
+                const filteredCaps = caps.filter((c: Capability) => c.name.toLowerCase() !== 'hanging out');
+                setAllCapabilities(filteredCaps);
             }
 
             // Fetch user details
@@ -183,8 +186,10 @@ export default function EditUserPage() {
                         <label className="block text-sm font-medium text-text-secondary mb-1">Phone</label>
                         <Input
                             value={formData.phone}
-                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, phone: formatPhoneNumber(e.target.value) })}
                             type="tel"
+                            placeholder="555-555-5555"
+                            maxLength={12}
                         />
                     </div>
                 </div>

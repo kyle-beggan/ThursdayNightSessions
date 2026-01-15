@@ -1,10 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { SessionWithDetails } from '@/lib/types';
 import { format } from 'date-fns';
 import CandidateListModal from './CandidateListModal';
+import RemindPreviewModal from './RemindPreviewModal';
 import CapabilityIcon from '@/components/ui/CapabilityIcon';
+import { useToast } from '@/hooks/useToast';
 
 interface SessionIndicatorProps {
     session: SessionWithDetails;
@@ -21,13 +24,57 @@ const toProperCase = (str: string) => {
 };
 
 export default function SessionIndicator({ session, onClick, className }: SessionIndicatorProps) {
+    const { data: authSession } = useSession();
+    const toast = useToast();
     const [showTooltip, setShowTooltip] = useState(false);
     const [candidateModal, setCandidateModal] = useState<{ isOpen: boolean; capabilityId: string | null; capabilityName: string | null }>({
         isOpen: false,
         capabilityId: null,
         capabilityName: null,
     });
+    const [isRemindModalOpen, setIsRemindModalOpen] = useState(false);
+    const [isSendingRemind, setIsSendingRemind] = useState(false);
+
     const committedCount = session.commitments?.length || 0;
+    const isAdmin = authSession?.user?.userType === 'admin';
+
+    const handleRemindClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setIsRemindModalOpen(true);
+    };
+
+    const handleSendRemind = async (message: string) => {
+        setIsSendingRemind(true);
+        try {
+            const res = await fetch('/api/notify/remind', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sessionId: session.id,
+                    message: message
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                if (data.sentCount > 0) {
+                    toast.success(`Sent reminders to ${data.sentCount} players!`);
+                } else {
+                    toast.info(data.message || 'No reminders sent (no valid phone numbers found).');
+                }
+                setIsRemindModalOpen(false);
+            } else {
+                toast.error(data.error || 'Failed to send reminders.');
+                if (data.details) console.error(data.details);
+            }
+        } catch (error) {
+            console.error('Error sending reminders:', error);
+            toast.error('An error occurred while sending reminders.');
+        } finally {
+            setIsSendingRemind(false);
+        }
+    };
 
     const handleMissingCapabilityClick = (e: React.MouseEvent, capId: string, capName: string) => {
         e.stopPropagation(); // Prevent opening session details
@@ -37,6 +84,8 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
             capabilityName: capName,
         });
     };
+
+
 
     return (
         <>
@@ -75,6 +124,16 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
                                                     </div>
                                                 )}
                                             </div>
+                                            {/* Remind Button for Admins (First Song Only) */}
+                                            {i === 0 && isAdmin && (
+                                                <div
+                                                    onClick={handleRemindClick}
+                                                    className="shrink-0 ml-2 px-2 py-0.5 bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-bold uppercase rounded cursor-pointer transition-colors"
+                                                    title="Send SMS reminder to all RSVP'd players"
+                                                >
+                                                    Remind
+                                                </div>
+                                            )}
                                         </div>
                                         {/* Song Capabilities */}
                                         {song.capabilities && song.capabilities.length > 0 && (
@@ -188,6 +247,13 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
                     timeFormatted: format(new Date(`2000-01-01T${session.start_time}`), 'h:mm a'),
                     songCount: session.songs?.length || 0,
                 }}
+            />
+            <RemindPreviewModal
+                isOpen={isRemindModalOpen}
+                onClose={() => setIsRemindModalOpen(false)}
+                session={session}
+                onSend={handleSendRemind}
+                isSending={isSendingRemind}
             />
         </>
     );

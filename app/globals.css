@@ -75,6 +75,17 @@ textarea {
   transition: all 200ms ease-in-out;
 }
 
+/* Ensure native inputs match the theme */
+input[type="date"],
+input[type="time"] {
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] input[type="date"],
+:root[data-theme='light'] input[type="time"] {
+  color-scheme: light;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

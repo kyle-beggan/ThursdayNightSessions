@@ -31,13 +31,20 @@ export function formatTime(time: string): string {
     return `${displayHour}:${minutes} ${ampm}`;
 }
 
-export function formatPhoneNumber(phone: string): string {
-    const cleaned = phone.replace(/\D/g, '');
-    const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
-    if (match) {
-        return `(${match[1]}) ${match[2]}-${match[3]}`;
+export function formatPhoneNumber(value: string): string {
+    const numbers = value.replace(/\D/g, '');
+
+    // Limit to 10 digits
+    const truncated = numbers.slice(0, 10);
+
+    // Format: 555-555-5555
+    if (truncated.length > 6) {
+        return `${truncated.slice(0, 3)}-${truncated.slice(3, 6)}-${truncated.slice(6)}`;
     }
-    return phone;
+    if (truncated.length > 3) {
+        return `${truncated.slice(0, 3)}-${truncated.slice(3)}`;
+    }
+    return truncated;
 }
 
 export function isAdmin(userType: string): boolean {

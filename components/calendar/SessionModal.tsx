@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import ChatWindow from '@/components/chat/ChatWindow';
+import { FaInfoCircle, FaComments } from 'react-icons/fa';
 import { useSession } from 'next-auth/react';
 import { useConfirm } from '@/providers/ConfirmProvider';
 import { useToast } from '@/hooks/useToast';
@@ -301,21 +302,23 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                 {step === 'details' && (
                     <div className="flex p-1 bg-surface-secondary/30 border border-border rounded-xl mb-6 shrink-0">
                         <button
-                            className={`flex-1 px-4 py-3 text-lg font-bold rounded-lg transition-all duration-300 ${activeTab === 'details'
+                            className={`flex-1 px-4 py-3 text-lg font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'details'
                                 ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
                                 : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
                                 }`}
                             onClick={() => setActiveTab('details')}
                         >
+                            <FaInfoCircle className="w-4 h-4" />
                             Details
                         </button>
                         <button
-                            className={`flex-1 px-4 py-3 text-lg font-bold rounded-lg transition-all duration-300 ${activeTab === 'chat'
+                            className={`flex-1 px-4 py-3 text-lg font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'chat'
                                 ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
                                 : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
                                 }`}
                             onClick={() => setActiveTab('chat')}
                         >
+                            <FaComments className="w-4 h-4" />
                             Chat
                         </button>
                     </div>
