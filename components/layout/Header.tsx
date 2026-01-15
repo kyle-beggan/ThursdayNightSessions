@@ -60,7 +60,7 @@ export default function Header() {
                                 alt="Sleepy Hollows Studios"
                                 width={50}
                                 height={50}
-                                className="rounded-lg w-[35px] h-[35px] md:w-[50px] md:h-[50px]"
+                                className={`rounded-lg w-[35px] h-[35px] md:w-[50px] md:h-[50px] ${mounted && theme === 'light' ? 'invert' : ''}`}
                             />
                             <div className="text-center">
                                 <h1 className="text-base md:text-xl font-bold text-text-primary leading-tight md:leading-normal">
