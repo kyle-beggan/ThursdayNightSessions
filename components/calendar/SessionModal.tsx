@@ -446,7 +446,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                 {/* Tabs for Details */}
                                 <div className="flex gap-2 p-1 bg-surface-secondary/30 border border-border rounded-xl mb-4 shrink-0 overflow-x-auto">
                                     <button
-                                        className={`flex-1 min-w-[100px] px-3 py-2 text-sm font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${subTab === 'players'
+                                        className={`flex-1 min-w-0 md:min-w-[100px] px-2 md:px-3 py-2 text-xs md:text-sm font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-1.5 md:gap-2 ${subTab === 'players'
                                             ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
                                             : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
                                             }`}
@@ -456,7 +456,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                         Players ({session.commitments?.length || 0})
                                     </button>
                                     <button
-                                        className={`flex-1 min-w-[100px] px-3 py-2 text-sm font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${subTab === 'recordings'
+                                        className={`flex-1 min-w-0 md:min-w-[100px] px-2 md:px-3 py-2 text-xs md:text-sm font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-1.5 md:gap-2 ${subTab === 'recordings'
                                             ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
                                             : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
                                             }`}
@@ -466,7 +466,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                         Recordings ({session.recordings?.length || 0})
                                     </button>
                                     <button
-                                        className={`flex-1 min-w-[100px] px-3 py-2 text-sm font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${subTab === 'photos'
+                                        className={`flex-1 min-w-0 md:min-w-[100px] px-2 md:px-3 py-2 text-xs md:text-sm font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-1.5 md:gap-2 ${subTab === 'photos'
                                             ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
                                             : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
                                             }`}

@@ -239,47 +239,47 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
                     <div className="flex gap-2 p-1 bg-surface-secondary/30 border border-border rounded-xl mb-6 shrink-0 overflow-x-auto">
                         <button
                             type="button"
-                            className={`flex-1 min-w-[100px] px-3 py-3 text-sm md:text-base font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'details'
+                            className={`flex-1 min-w-0 md:min-w-[100px] px-1 py-2 md:px-3 md:py-3 text-[10px] md:text-base font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-1 md:gap-2 ${activeTab === 'details'
                                 ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
                                 : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
                                 }`}
                             onClick={() => setActiveTab('details')}
                         >
-                            <FaInfoCircle className="w-4 h-4" />
-                            <span className="hidden md:inline">Details</span>
+                            <FaInfoCircle className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                            <span>Details</span>
                         </button>
                         <button
                             type="button"
-                            className={`flex-1 min-w-[100px] px-3 py-3 text-sm md:text-base font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'players'
+                            className={`flex-1 min-w-0 md:min-w-[100px] px-1 py-2 md:px-3 md:py-3 text-[10px] md:text-base font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-1 md:gap-2 ${activeTab === 'players'
                                 ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
                                 : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
                                 }`}
                             onClick={() => setActiveTab('players')}
                         >
-                            <FaUserFriends className="w-4 h-4" />
-                            <span className="hidden md:inline">Players ({initialData?.commitments?.length || 0})</span>
+                            <FaUserFriends className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                            <span>Players <span className="hidden sm:inline">({initialData?.commitments?.length || 0})</span></span>
                         </button>
                         <button
                             type="button"
-                            className={`flex-1 min-w-[100px] px-3 py-3 text-sm md:text-base font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'recordings'
+                            className={`flex-1 min-w-0 md:min-w-[100px] px-1 py-2 md:px-3 md:py-3 text-[10px] md:text-base font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-1 md:gap-2 ${activeTab === 'recordings'
                                 ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
                                 : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
                                 }`}
                             onClick={() => setActiveTab('recordings')}
                         >
-                            <FaMicrophone className="w-4 h-4" />
-                            <span className="hidden md:inline">Recs ({initialData?.recordings?.length || 0})</span>
+                            <FaMicrophone className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                            <span>Recs <span className="hidden sm:inline">({initialData?.recordings?.length || 0})</span></span>
                         </button>
                         <button
                             type="button"
-                            className={`flex-1 min-w-[100px] px-3 py-3 text-sm md:text-base font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'photos'
+                            className={`flex-1 min-w-0 md:min-w-[100px] px-1 py-2 md:px-3 md:py-3 text-[10px] md:text-base font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-1 md:gap-2 ${activeTab === 'photos'
                                 ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
                                 : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
                                 }`}
                             onClick={() => setActiveTab('photos')}
                         >
-                            <FaCamera className="w-4 h-4" />
-                            <span className="hidden md:inline">Photos ({photoCount})</span>
+                            <FaCamera className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                            <span>Photos <span className="hidden sm:inline">({photoCount})</span></span>
                         </button>
                     </div>
                 )}
