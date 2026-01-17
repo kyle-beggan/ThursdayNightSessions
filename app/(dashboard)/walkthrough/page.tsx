@@ -182,6 +182,15 @@ export default function WalkthroughPage() {
 
                         <div className="bg-surface-secondary p-4 rounded-lg">
                             <h4 className="font-semibold text-primary mb-2 flex items-center gap-2">
+                                <span>📸</span> Session Photos
+                            </h4>
+                            <p className="text-sm text-text-secondary">
+                                Capture the moment! You can now upload and view photos for each session directly in the Session Details.
+                            </p>
+                        </div>
+
+                        <div className="bg-surface-secondary p-4 rounded-lg">
+                            <h4 className="font-semibold text-primary mb-2 flex items-center gap-2">
                                 <span>🎨</span> UI Polish
                             </h4>
                             <ul className="text-sm text-text-secondary space-y-2 list-disc pl-4">

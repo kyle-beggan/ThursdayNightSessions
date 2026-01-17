@@ -11,6 +11,7 @@ import CapabilityIcon from '@/components/ui/CapabilityIcon';
 import { formatDate, formatTime, generateGoogleCalendarLink, downloadICSFile } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import SongPicker from '@/components/ui/SongPicker';
+import PhotoGallery from '@/components/session/PhotoGallery';
 
 interface SessionModalProps {
     isOpen: boolean;
@@ -554,6 +555,11 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                             </p>
                                         )}
                                     </div>
+                                </div>
+
+                                {/* Photo Gallery */}
+                                <div className="flex-1 min-h-[100px] border-t border-border/50 pt-4 mt-2">
+                                    <PhotoGallery sessionId={session.id} />
                                 </div>
                             </div>
                         )}

@@ -108,7 +108,17 @@ export interface SessionWithDetails extends Session {
     songs: SessionSong[];
     commitments: (SessionCommitment & { user: UserWithCapabilities })[];
     recordings?: SessionRecording[];
+    photos?: SessionPhoto[];
     newMessageCount?: number;
+}
+
+export interface SessionPhoto {
+    id: string;
+    session_id: string;
+    user_id: string;
+    storage_path: string;
+    created_at: string;
+    user?: User; // Joined user data
 }
 
 export interface ChatReaction {
