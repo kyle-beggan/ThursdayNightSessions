@@ -184,7 +184,30 @@ export async function GET(request: NextRequest) {
             .sort((a, b) => b.count - a.count)
             .slice(0, 5); // Top 5 keys
 
-        // 7. Fetch Total Recordings
+        // 7. Fetch Photos by Player
+        // Since we can't easily group-by in standard Supabase client without raw SQL or RPC,
+        // we'll fetch all photos (lightweight id, user_id selection) and aggregate in memory.
+        // For larger scale, an RPC or specific view would be better.
+        const { data: photosData, error: photosError } = await supabaseAdmin
+            .from('session_photos')
+            .select('user_id');
+
+        if (photosError) {
+            console.error('Error fetching photos stats:', photosError);
+        }
+
+        const photoCounts: Record<string, number> = {};
+        photosData?.forEach(p => {
+            const name = userMap.get(p.user_id) || 'Unknown';
+            photoCounts[name] = (photoCounts[name] || 0) + 1;
+        });
+
+        const photosByPlayer = Object.entries(photoCounts)
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 10); // Top 10 uploaders
+
+        // 8. Fetch Total Recordings
         const { count: recordingsCount, error: recordingsError } = await supabaseAdmin
             .from('session_recordings')
             .select('*', { count: 'exact', head: true });
@@ -205,7 +228,8 @@ export async function GET(request: NextRequest) {
                 attendanceHistory,
                 memberAttendance,
                 instrumentDistribution,
-                songKeyDistribution
+                songKeyDistribution,
+                photosByPlayer
             },
             meta: {
                 allTime: {

@@ -44,7 +44,9 @@ export async function GET(
                   capabilities:session_commitment_capabilities(
                      capability:capabilities(*)
                   )
-                )
+                ),
+                recordings:session_recordings(*),
+                photos:session_photos(*)
             `)
             .eq('id', id)
             .single();

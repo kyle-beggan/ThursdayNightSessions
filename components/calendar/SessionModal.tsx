@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import ChatWindow from '@/components/chat/ChatWindow';
-import { FaInfoCircle, FaComments } from 'react-icons/fa';
+import { FaInfoCircle, FaComments, FaUserFriends, FaMicrophone, FaCamera } from 'react-icons/fa';
 import { useSession } from 'next-auth/react';
 import { useConfirm } from '@/providers/ConfirmProvider';
 import { useToast } from '@/hooks/useToast';
@@ -32,7 +32,8 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
     const [isLoadingCapabilities, setIsLoadingCapabilities] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'details' | 'chat'>('details');
+    const [mainTab, setMainTab] = useState<'details' | 'chat'>('details');
+    const [subTab, setSubTab] = useState<'players' | 'recordings' | 'photos'>('players');
 
     // Admin Song Management State
     const [isPickerOpen, setIsPickerOpen] = useState(false);
@@ -315,21 +316,21 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                 {step === 'details' && (
                     <div className="flex p-1 bg-surface-secondary/30 border border-border rounded-xl mb-6 shrink-0">
                         <button
-                            className={`flex-1 px-4 py-3 text-lg font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'details'
+                            className={`flex-1 px-4 py-3 text-lg font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${mainTab === 'details'
                                 ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
                                 : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
                                 }`}
-                            onClick={() => setActiveTab('details')}
+                            onClick={() => setMainTab('details')}
                         >
                             <FaInfoCircle className="w-4 h-4" />
                             Details
                         </button>
                         <button
-                            className={`flex-1 px-4 py-3 text-lg font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'chat'
+                            className={`flex-1 px-4 py-3 text-lg font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${mainTab === 'chat'
                                 ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
                                 : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
                                 }`}
-                            onClick={() => setActiveTab('chat')}
+                            onClick={() => setMainTab('chat')}
                         >
                             <FaComments className="w-4 h-4" />
                             Chat
@@ -339,7 +340,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
 
                 {step === 'details' ? (
                     <>
-                        {activeTab === 'chat' ? (
+                        {mainTab === 'chat' ? (
                             <div className="flex-1 min-h-0">
                                 <ChatWindow sessionId={session.id} className="h-full border-0" />
                             </div>
@@ -378,14 +379,13 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                     <div className="flex items-center justify-between mb-2 pt-[20px]">
                                         <h4 className="text-base font-bold text-text-primary">Songs</h4>
                                         {isAdmin && !isPickerOpen && (
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                className="text-xs h-6 px-2 text-primary hover:bg-primary/10"
+                                            <button
+                                                type="button"
+                                                className="cursor-pointer inline-flex items-center justify-center rounded-lg font-medium transition-colors text-xs h-6 px-2 text-primary bg-surface border border-border hover:bg-primary/10"
                                                 onClick={() => setIsPickerOpen(true)}
                                             >
                                                 + Add Song
-                                            </Button>
+                                            </button>
                                         )}
                                     </div>
 
@@ -443,124 +443,164 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                     )}
                                 </div>
 
-                                {/* Committed Players */}
-                                <div>
-                                    <h4 className="text-base font-bold text-text-primary mb-2">
-                                        Committed Players ({session.commitments?.length || 0})
-                                    </h4>
-                                    {session.commitments && session.commitments.length > 0 ? (
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                            {session.commitments.map((commitment) => (
-                                                <div key={commitment.id} className="bg-primary/20 border border-primary/20 hover:bg-primary/30 hover:border-primary/50 hover:shadow-[0_0_15px_rgba(139,92,246,0.5)] rounded-lg p-2 transition-all duration-200 group flex flex-col items-center text-center">
-                                                    <div className="font-medium text-text-primary mb-1 w-full truncate text-sm">
-                                                        {commitment.user?.name}
-                                                    </div>
-                                                    <div className="flex flex-wrap gap-1 justify-center">
-                                                        {(commitment.capabilities || []).map((cap) => (
-                                                            <span
-                                                                key={cap.id}
-                                                                className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/20 text-primary text-xs rounded-full"
-                                                            >
-                                                                <CapabilityIcon capability={cap} className="w-3 h-3" />
-                                                                <span className="capitalize">{cap.name}</span>
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <p className="text-text-secondary text-xs">No commitments yet</p>
-                                    )}
+                                {/* Tabs for Details */}
+                                <div className="flex gap-2 p-1 bg-surface-secondary/30 border border-border rounded-xl mb-4 shrink-0 overflow-x-auto">
+                                    <button
+                                        className={`flex-1 min-w-[100px] px-3 py-2 text-sm font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${subTab === 'players'
+                                            ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
+                                            : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
+                                            }`}
+                                        onClick={() => setSubTab('players')}
+                                    >
+                                        <FaUserFriends className="w-3.5 h-3.5" />
+                                        Players ({session.commitments?.length || 0})
+                                    </button>
+                                    <button
+                                        className={`flex-1 min-w-[100px] px-3 py-2 text-sm font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${subTab === 'recordings'
+                                            ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
+                                            : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
+                                            }`}
+                                        onClick={() => setSubTab('recordings')}
+                                    >
+                                        <FaMicrophone className="w-3.5 h-3.5" />
+                                        Recordings ({session.recordings?.length || 0})
+                                    </button>
+                                    <button
+                                        className={`flex-1 min-w-[100px] px-3 py-2 text-sm font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${subTab === 'photos'
+                                            ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
+                                            : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
+                                            }`}
+                                        onClick={() => setSubTab('photos')}
+                                    >
+                                        <FaCamera className="w-3.5 h-3.5" />
+                                        Photos ({session.photos?.length || 0})
+                                    </button>
                                 </div>
+
+                                {/* Committed Players */}
+                                {subTab === 'players' && (
+                                    <div>
+                                        <h4 className="text-base font-bold text-text-primary mb-2">
+                                            Committed Players
+                                        </h4>
+                                        {session.commitments && session.commitments.length > 0 ? (
+                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                                {session.commitments.map((commitment) => (
+                                                    <div key={commitment.id} className="bg-primary/20 border border-primary/20 hover:bg-primary/30 hover:border-primary/50 hover:shadow-[0_0_15px_rgba(139,92,246,0.5)] rounded-lg p-2 transition-all duration-200 group flex flex-col items-center text-center">
+                                                        <div className="font-medium text-text-primary mb-1 w-full truncate text-sm">
+                                                            {commitment.user?.name}
+                                                        </div>
+                                                        <div className="flex flex-wrap gap-1 justify-center">
+                                                            {(commitment.capabilities || []).map((cap) => (
+                                                                <span
+                                                                    key={cap.id}
+                                                                    className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/20 text-primary text-xs rounded-full"
+                                                                >
+                                                                    <CapabilityIcon capability={cap} className="w-3 h-3" />
+                                                                    <span className="capitalize">{cap.name}</span>
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p className="text-text-secondary text-xs">No commitments yet</p>
+                                        )}
+                                    </div>
+                                )}
 
                                 {/* Recordings */}
-                                <div className="flex-1 min-h-[100px]">
-                                    <div className="flex items-center justify-between mb-2 pt-[20px]">
-                                        <h4 className="text-base font-bold text-text-primary">
-                                            Recordings ({session.recordings?.length || 0})
-                                        </h4>
-                                        {isAdmin && (
-                                            <div className="relative">
-                                                <input
-                                                    type="file"
-                                                    accept="audio/*,video/*"
-                                                    onChange={handleFileUpload}
-                                                    disabled={isUploading}
-                                                    className="hidden"
-                                                    id="recording-upload"
-                                                />
-                                                <label
-                                                    htmlFor="recording-upload"
-                                                    className={`
-                                            cursor-pointer text-xs bg-surface border border-border px-2 py-1 rounded 
-                                            hover:bg-surface-hover transition-colors
+                                {subTab === 'recordings' && (
+                                    <div className="flex-1 min-h-[100px]">
+                                        <div className="flex items-center justify-between mb-2 pt-[20px]">
+                                            <h4 className="text-base font-bold text-text-primary">
+                                                Recordings ({session.recordings?.length || 0})
+                                            </h4>
+                                            {isAdmin && (
+                                                <div className="relative">
+                                                    <input
+                                                        type="file"
+                                                        accept="audio/*,video/*"
+                                                        onChange={handleFileUpload}
+                                                        disabled={isUploading}
+                                                        className="hidden"
+                                                        id="recording-upload"
+                                                    />
+                                                    <label
+                                                        htmlFor="recording-upload"
+                                                        className={`
+                                            cursor-pointer inline-flex items-center justify-center rounded-lg font-medium transition-colors
+                                            text-xs h-6 px-2 text-primary bg-surface border border-border hover:bg-primary/10
                                             ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}
                                         `}
-                                                >
-                                                    {isUploading ? (
-                                                        <span className="flex items-center gap-2">
-                                                            <svg className="animate-spin h-4 w-4 text-text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                            </svg>
-                                                            <span>Uploading...</span>
-                                                        </span>
-                                                    ) : (
-                                                        '+ Add'
-                                                    )}
-                                                </label>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {uploadError && (
-                                        <div className="text-red-500 text-xs mb-2">{uploadError}</div>
-                                    )}
-
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                        {session.recordings && session.recordings.length > 0 ? (
-                                            session.recordings.map((rec) => (
-                                                <div key={rec.id} className="bg-primary/20 rounded-lg p-3 border border-border flex items-center justify-between gap-2 hover:bg-primary/30 hover:border-primary/50 transition-colors group relative">
-                                                    {isAdmin && (
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleDeleteRecording(rec.id, rec.title);
-                                                            }}
-                                                            className="absolute -top-2 -right-2 w-5 h-5 bg-surface border border-border rounded-full text-xs text-text-secondary hover:text-red-500 hover:border-red-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center shadow-md z-10"
-                                                            title="Delete recording"
-                                                        >
-                                                            ✕
-                                                        </button>
-                                                    )}
-                                                    <div className="font-medium text-text-primary truncate mb-0 text-xs min-w-0 flex-1" title={rec.title}>
-                                                        {rec.title}
-                                                    </div>
-                                                    <a
-                                                        href={rec.url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="shrink-0"
                                                     >
-                                                        <Button size="sm" variant="secondary" className="w-[40px] px-0 text-[10px] h-7 flex items-center justify-center text-green-400 border-green-500/30 hover:bg-green-500/10">
-                                                            ▶
-                                                        </Button>
-                                                    </a>
+                                                        {isUploading ? (
+                                                            <span className="flex items-center gap-2">
+                                                                <svg className="animate-spin h-4 w-4 text-text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                                </svg>
+                                                                <span>Uploading...</span>
+                                                            </span>
+                                                        ) : (
+                                                            '+ Add Recording'
+                                                        )}
+                                                    </label>
                                                 </div>
-                                            ))
-                                        ) : (
-                                            <p className="text-text-secondary text-xs italic col-span-3">
-                                                No recordings yet.
-                                            </p>
+                                            )}
+                                        </div>
+
+                                        {uploadError && (
+                                            <div className="text-red-500 text-xs mb-2">{uploadError}</div>
                                         )}
+
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                            {session.recordings && session.recordings.length > 0 ? (
+                                                session.recordings.map((rec) => (
+                                                    <div key={rec.id} className="bg-primary/20 rounded-lg p-3 border border-border flex items-center justify-between gap-2 hover:bg-primary/30 hover:border-primary/50 transition-colors group relative">
+                                                        {isAdmin && (
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleDeleteRecording(rec.id, rec.title);
+                                                                }}
+                                                                className="absolute -top-2 -right-2 w-5 h-5 bg-surface border border-border rounded-full text-xs text-text-secondary hover:text-red-500 hover:border-red-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center shadow-md z-10"
+                                                                title="Delete recording"
+                                                            >
+                                                                ✕
+                                                            </button>
+                                                        )}
+                                                        <div className="font-medium text-text-primary truncate mb-0 text-xs min-w-0 flex-1" title={rec.title}>
+                                                            {rec.title}
+                                                        </div>
+                                                        <a
+                                                            href={rec.url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="shrink-0"
+                                                        >
+                                                            <Button size="sm" variant="secondary" className="w-[40px] px-0 text-[10px] h-7 flex items-center justify-center text-green-400 border-green-500/30 hover:bg-green-500/10">
+                                                                ▶
+                                                            </Button>
+                                                        </a>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <p className="text-text-secondary text-xs italic col-span-3">
+                                                    No recordings yet.
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
+                                )}
 
                                 {/* Photo Gallery */}
-                                <div className="flex-1 min-h-[100px] border-t border-border/50 pt-4 mt-2">
-                                    <PhotoGallery sessionId={session.id} />
-                                </div>
+                                {subTab === 'photos' && (
+                                    <div className="flex-1 min-h-[100px] border-t border-border/50 pt-4 mt-2">
+                                        <PhotoGallery sessionId={session.id} onUpdate={onUpdate} />
+                                    </div>
+                                )}
                             </div>
                         )}
                         <div className="flex justify-center gap-3 pt-4 border-t border-border mt-auto shrink-0">

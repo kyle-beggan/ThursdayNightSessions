@@ -65,7 +65,8 @@ export async function GET() {
              capability:capabilities(*)
           )
         ),
-        recordings:session_recordings(*)
+        recordings:session_recordings(*),
+        photos:session_photos(*)
       `)
             .order('date', { ascending: true });
 

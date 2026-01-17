@@ -3,13 +3,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { SessionPhoto } from '@/lib/types';
-import Button from '@/components/ui/Button';
+
 import UploadPhotoModal from './UploadPhotoModal';
 import { useSession } from 'next-auth/react';
 import { createClient } from '@/lib/supabase/client';
+import { useConfirm } from '@/providers/ConfirmProvider';
+import { useToast } from '@/hooks/useToast';
 
-export default function PhotoGallery({ sessionId }: { sessionId: string }) {
+export default function PhotoGallery({ sessionId, onUpdate }: { sessionId: string; onUpdate?: (count?: number) => void }) {
     const { data: session } = useSession();
+    const { confirm } = useConfirm();
+    const toast = useToast();
     const [photos, setPhotos] = useState<SessionPhoto[]>([]);
     const [loading, setLoading] = useState(true);
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -34,9 +38,45 @@ export default function PhotoGallery({ sessionId }: { sessionId: string }) {
         fetchPhotos();
     }, [fetchPhotos]);
 
+    // Sync photo count with parent
+    useEffect(() => {
+        if (onUpdate) onUpdate(photos.length);
+    }, [photos.length, onUpdate]);
+
     const getPhotoUrl = (path: string) => {
         const { data } = supabase.storage.from('session-media').getPublicUrl(path);
         return data.publicUrl;
+    };
+
+    const handleDelete = async (photo: SessionPhoto) => {
+        if (!await confirm({
+            title: 'Delete Photo',
+            message: 'Are you sure you want to delete this photo? This action cannot be undone.',
+            confirmLabel: 'Delete',
+            variant: 'danger'
+        })) return;
+
+        try {
+            const res = await fetch(`/api/photos/${photo.id}`, {
+                method: 'DELETE',
+            });
+
+            if (res.ok) {
+                toast.success('Photo deleted');
+                setPhotos(prev => prev.filter(p => p.id !== photo.id));
+            } else {
+                const data = await res.json();
+                toast.error(data.error || 'Failed to delete photo');
+            }
+        } catch (error) {
+            console.error('Error deleting photo:', error);
+            toast.error('Failed to delete photo');
+        }
+    };
+
+    const handleUploadComplete = () => {
+        fetchPhotos();
+        if (onUpdate) onUpdate();
     };
 
     if (loading) return <div className="h-40 animate-pulse bg-surface-secondary rounded-xl" />;
@@ -44,27 +84,20 @@ export default function PhotoGallery({ sessionId }: { sessionId: string }) {
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                <h4 className="text-base font-bold text-text-primary flex items-center gap-2">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     Photos
-                    <span className="text-xs font-normal text-text-tertiary bg-surface-tertiary px-2 py-0.5 rounded-full">
-                        {photos.length}
-                    </span>
-                </h3>
+                </h4>
                 {session?.user && (
-                    <Button
-                        size="sm"
-                        variant="secondary"
+                    <button
+                        type="button"
                         onClick={() => setIsUploadModalOpen(true)}
-                        className="gap-2"
+                        className="cursor-pointer inline-flex items-center justify-center rounded-lg font-medium transition-colors text-xs h-6 px-2 text-primary bg-surface border border-border hover:bg-primary/10"
                     >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                        Add Photo
-                    </Button>
+                        + Add Photo
+                    </button>
                 )}
             </div>
 
@@ -89,6 +122,25 @@ export default function PhotoGallery({ sessionId }: { sessionId: string }) {
                                 sizes="(max-width: 768px) 50vw, 25vw"
                             />
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                            {/* Delete Button */}
+                            {session?.user && (
+                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                // @ts-ignore
+                                (session.user.userType === 'admin' || session.user.id === photo.user_id) && (
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            handleDelete(photo);
+                                        }}
+                                        className="absolute top-2 right-2 w-6 h-6 bg-surface/80 backdrop-blur-sm border border-white/20 rounded-full text-xs text-text-primary hover:text-red-500 hover:bg-white hover:shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center z-10"
+                                        title="Delete photo"
+                                    >
+                                        ✕
+                                    </button>
+                                )
+                            )}
                             {photo.user && (
                                 <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <div className="text-[10px] text-white font-medium bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full w-fit">
@@ -105,7 +157,7 @@ export default function PhotoGallery({ sessionId }: { sessionId: string }) {
                 isOpen={isUploadModalOpen}
                 onClose={() => setIsUploadModalOpen(false)}
                 sessionId={sessionId}
-                onUploadComplete={fetchPhotos}
+                onUploadComplete={handleUploadComplete}
             />
 
             {/* Simple Lightbox Modal */}

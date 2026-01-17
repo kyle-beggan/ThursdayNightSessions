@@ -29,6 +29,7 @@ interface AnalyticsData {
         memberAttendance: { name: string; count: number }[];
         instrumentDistribution: { name: string; count: number }[];
         songKeyDistribution?: { name: string; count: number }[];
+        photosByPlayer?: { name: string; count: number }[];
     };
     meta?: {
         allTime: {
@@ -284,6 +285,38 @@ export default function AnalyticsPage() {
                                     itemStyle={{ color: '#E5E7EB' }}
                                 />
                                 <Bar dataKey="count" fill="#F59E0B" radius={[4, 4, 0, 0]} barSize={40} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                {/* Photos by Player Chart */}
+                <div className="bg-surface rounded-xl p-6 border border-border mb-8">
+                    <h3 className="text-xl font-semibold mb-6 text-text-primary">Top Photographers 📸</h3>
+                    <div className="h-[300px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart
+                                data={data.charts.photosByPlayer || []}
+                                layout="vertical"
+                                margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
+                            >
+                                <CartesianGrid strokeDasharray="3 3" stroke="#374151" horizontal={false} />
+                                <XAxis type="number" stroke="#9CA3AF" />
+                                <YAxis
+                                    dataKey="name"
+                                    type="category"
+                                    stroke="#9CA3AF"
+                                    width={100}
+                                    tick={{ fill: '#9CA3AF', fontSize: 12 }}
+                                />
+                                <Tooltip
+                                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                                    contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
+                                    itemStyle={{ color: '#E5E7EB' }}
+                                />
+                                <Bar dataKey="count" fill="#8B5CF6" radius={[0, 4, 4, 0]} name="Photos" barSize={30}>
+                                    {/* Optional: Add labels to bars if desired, but tooltip is usually enough */}
+                                </Bar>
                             </BarChart>
                         </ResponsiveContainer>
                     </div>

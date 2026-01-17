@@ -4,16 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import CreateSessionModal from '@/components/admin/CreateSessionModal';
-import { Song, SessionWithDetails, Session, SessionSong, SessionCommitment } from '@/lib/types';
-import { useSortableData } from '@/hooks/useSortableData';
-import { useToast } from '@/hooks/useToast';
-import { useConfirm } from '@/providers/ConfirmProvider';
-import { format } from 'date-fns';
-
-type FormSession = Omit<SessionWithDetails, 'songs' | 'commitments'> & {
-    songs?: Song[];
-    commitments?: SessionCommitment[];
-};
+import { Song, SessionWithDetails, SessionSong, SessionCommitment } from '@/lib/types';
 
 export default function AdminSessionsPage() {
     const toast = useToast();
@@ -25,8 +16,9 @@ export default function AdminSessionsPage() {
     // Add state for filtration
     const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all');
 
-    // Add state for editing
-    const [editingSession, setEditingSession] = useState<FormSession | null>(null);
+    // Use a flexible type for editing session to accommodate transformed songs
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [editingSession, setEditingSession] = useState<any>(null);
 
     const upcomingSessions = sessions.filter(s => new Date(s.date) >= new Date());
     const pastSessions = sessions.filter(s => new Date(s.date) < new Date());
@@ -52,13 +44,13 @@ export default function AdminSessionsPage() {
         }
     };
 
-    const handleEditSession = (session: Session) => {
+    const handleEditSession = (session: SessionWithDetails) => {
         // Prepare session data for modal
         // We need to transform session.songs to match Song type expected by modal
         // session.songs from API is usually session_songs table rows { song_name, song_url, ... }
         // The modal matches by ID or Title. Since we might not have original ID here, we rely on Title match.
 
-        const preparedSession: FormSession = {
+        const preparedSession = {
             ...session,
             songs: session.songs?.map((s: SessionSong, index: number) => ({
                 id: s.id || `temp-${index}`, // Fallback ID
