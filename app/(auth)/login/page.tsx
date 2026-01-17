@@ -3,8 +3,18 @@
 import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 import Button from '@/components/ui/Button';
+import { useTheme } from '@/providers/ThemeProvider';
+import { useEffect, useState } from 'react';
 
 export default function LoginPage() {
+    const { theme } = useTheme();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        // eslint-disable-next-line
+        setMounted(true);
+    }, []);
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-surface to-background p-4">
             <div className="w-full max-w-md">
@@ -16,7 +26,7 @@ export default function LoginPage() {
                             alt="Sleepy Hollows Studios"
                             width={100}
                             height={100}
-                            className="rounded-lg mb-4"
+                            className={`rounded-lg mb-4 ${mounted && theme === 'light' ? 'invert' : ''}`}
                         />
                         <h1 className="text-3xl font-bold text-text-primary text-center">
                             Sleepy Hollows Studios

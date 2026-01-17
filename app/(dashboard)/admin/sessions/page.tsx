@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import CreateSessionModal from '@/components/admin/CreateSessionModal';
-import { Song, SessionWithDetails, Session } from '@/lib/types';
+import { Song, SessionWithDetails, Session, SessionSong, SessionCommitment } from '@/lib/types';
 import { useSortableData } from '@/hooks/useSortableData';
 import { useToast } from '@/hooks/useToast';
 import { useConfirm } from '@/providers/ConfirmProvider';
@@ -12,7 +12,7 @@ import { format } from 'date-fns';
 
 type FormSession = Omit<SessionWithDetails, 'songs' | 'commitments'> & {
     songs?: Song[];
-    commitments?: any[];
+    commitments?: SessionCommitment[];
 };
 
 export default function AdminSessionsPage() {
@@ -60,7 +60,7 @@ export default function AdminSessionsPage() {
 
         const preparedSession: FormSession = {
             ...session,
-            songs: session.songs?.map((s: any, index: number) => ({
+            songs: session.songs?.map((s: SessionSong, index: number) => ({
                 id: s.id || `temp-${index}`, // Fallback ID
                 title: s.song_name,
                 artist: '', // Information lost in session_songs table
@@ -305,7 +305,7 @@ export default function AdminSessionsPage() {
                                             {formatTime(session.start_time)} - {formatTime(session.end_time)}
                                         </td>
                                         <td className="px-4 py-3 text-text-secondary">
-                                            {session.commitments_count || 0} attended
+                                            {session.commitments?.length || 0} attended
                                         </td>
                                         <td className="px-4 py-3">
                                             <div className="flex gap-2 justify-center">

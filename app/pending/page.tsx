@@ -3,8 +3,18 @@
 import Button from '@/components/ui/Button';
 import { signOut } from 'next-auth/react';
 import Image from 'next/image';
+import { useTheme } from '@/providers/ThemeProvider';
+import { useEffect, useState } from 'react';
 
 export default function PendingPage() {
+    const { theme } = useTheme();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        // eslint-disable-next-line
+        setMounted(true);
+    }, []);
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-background px-4">
             <div className="max-w-md w-full text-center space-y-8 bg-surface border border-border p-8 rounded-2xl shadow-xl">
@@ -15,7 +25,7 @@ export default function PendingPage() {
                         src="/logo.png"
                         alt="Logo"
                         fill
-                        className="object-contain"
+                        className={`object-contain ${mounted && theme === 'light' ? 'invert' : ''}`}
                         priority
                     />
                 </div>

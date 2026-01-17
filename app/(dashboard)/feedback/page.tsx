@@ -182,7 +182,7 @@ export default function FeedbackPage() {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'completed': return 'bg-green-500/20 text-green-400 border-green-500/30';
+            case 'completed': return 'bg-green-500/20 !text-black dark:text-green-400 border-green-500/30';
             case 'in_progress': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
             case 'rejected': return 'bg-red-500/20 text-red-400 border-red-500/30';
             default: return 'bg-surface-tertiary text-text-secondary border-border';

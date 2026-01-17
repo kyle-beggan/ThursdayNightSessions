@@ -69,10 +69,10 @@ export async function POST(request: Request) {
         }
 
         // 4. Filter Users with Phones
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // 4. Filter Users with Phones
         const recipients = sessionData.session_commitments
-            .map((c: any) => c.users)
-            .filter((u: any) => u.phone && u.phone.length >= 10);
+            .map((c: { users: { name: string; phone: string } }) => c.users)
+            .filter((u: { name: string; phone: string }) => u.phone && u.phone.length >= 10);
 
         if (recipients.length === 0) {
             return NextResponse.json({
@@ -93,16 +93,37 @@ export async function POST(request: Request) {
         let sentCount = 0;
         let failCount = 0;
 
-        await Promise.all(recipients.map(async (user: any) => {
+        await Promise.all(recipients.map(async (user: { name: string; phone: string }) => {
             try {
-                await twilioClient.messages.create({
+                // Formatting: remove all non-digits
+                let cleanPhone = user.phone.replace(/\D/g, '');
+
+                // Assuming US/Canada: if 10 digits, add +1. If 11 digits starting with 1, add +.
+                if (cleanPhone.length === 10) {
+                    cleanPhone = `+1${cleanPhone}`;
+                } else if (cleanPhone.length === 11 && cleanPhone.startsWith('1')) {
+                    cleanPhone = `+${cleanPhone}`;
+                } else {
+                    // Fallback: Just ensure it has a plus if it looks like a full international number
+                    if (!user.phone.startsWith('+')) {
+                        cleanPhone = `+${cleanPhone}`;
+                    } else {
+                        cleanPhone = user.phone;
+                    }
+                }
+
+                console.log(`[SMS] Sending to ${user.name} (${cleanPhone})...`);
+
+                const result = await twilioClient.messages.create({
                     body: messageBody,
                     from: twilioPhoneNumber,
-                    to: user.phone
+                    to: cleanPhone
                 });
+
+                console.log(`[SMS] Success! SID: ${result.sid}`);
                 sentCount++;
-            } catch (err) {
-                console.error(`Failed to send SMS to ${user.name}:`, err);
+            } catch (err: unknown) {
+                console.error(`[SMS] Failed to send to ${user.name} (${user.phone}):`, (err as Error).message || String(err));
                 failCount++;
             }
         }));
@@ -114,7 +135,7 @@ export async function POST(request: Request) {
             totalRecipients: recipients.length
         });
 
-    } catch (error) {
+    } catch (error: unknown) {
         console.error('Error in /api/notify/remind:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }

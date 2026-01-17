@@ -17,32 +17,29 @@ interface RemindPreviewModalProps {
 export default function RemindPreviewModal({ isOpen, onClose, session, onSend, isSending }: RemindPreviewModalProps) {
     const [message, setMessage] = useState('');
 
-    useEffect(() => {
-        if (isOpen && session) {
-            setMessage(generateDefaultMessage(session));
-        }
-    }, [isOpen, session]);
-
     const generateDefaultMessage = (session: SessionWithDetails) => {
         const date = format(new Date(session.date + 'T00:00:00'), 'MMMM d');
         const time = format(new Date(`2000-01-01T${session.start_time}`), 'h:mm a');
 
-        let msg = `Session Reminder 📅\n${date} @ ${time}\n\n`;
+        let msg = `Session Reminder 📅\n*${date} @ ${time}*\n\n`;
 
         // Songs
+        msg += '*Setlist*\n';
         if (session.songs && session.songs.length > 0) {
-            msg += 'Setlist:\n';
             session.songs.forEach((song, i) => {
                 const title = song.song_name;
-                const link = song.song_url ? ` - ${song.song_url}` : '';
+                // Format: "Title: URL"
+                const link = song.song_url ? `: ${song.song_url}` : '';
                 msg += `${i + 1}. ${title}${link}\n`;
             });
-            msg += '\n';
+        } else {
+            msg += 'Song(s) TBD\n';
         }
+        msg += '\n';
 
         // Committed Players
         if (session.commitments && session.commitments.length > 0) {
-            msg += 'Lineup:\n';
+            msg += '*Lineup*\n';
             session.commitments.forEach(commitment => {
                 const name = commitment.user.name;
                 const caps = commitment.capabilities?.map(c => c.name).join(', ') || 'General';
@@ -52,6 +49,13 @@ export default function RemindPreviewModal({ isOpen, onClose, session, onSend, i
 
         return msg.trim();
     };
+
+    useEffect(() => {
+        if (isOpen && session) {
+            // eslint-disable-next-line
+            setMessage(generateDefaultMessage(session));
+        }
+    }, [isOpen, session]);
 
     return (
         <Modal

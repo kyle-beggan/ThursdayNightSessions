@@ -174,6 +174,15 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
                         ) : (
                             <div className="text-xs text-text-secondary/60 italic flex items-center gap-1.5">
                                 <span className="text-[10px] bg-white text-black rounded px-1 py-0.5 not-italic">🎵</span> Songs TBD
+                                {isAdmin && committedCount > 0 && (
+                                    <div
+                                        onClick={handleRemindClick}
+                                        className="ml-auto px-2 py-0.5 bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-bold uppercase rounded cursor-pointer transition-colors not-italic"
+                                        title="Send SMS reminder to all RSVP'd players"
+                                    >
+                                        Remind
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
