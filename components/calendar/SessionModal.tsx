@@ -587,9 +587,10 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                                     </div>
                                                 ))
                                             ) : (
-                                                <p className="text-text-secondary text-xs italic col-span-3">
-                                                    No recordings yet.
-                                                </p>
+                                                <div className="col-span-1 md:col-span-3 text-center py-8 bg-surface rounded-xl border border-border border-dashed">
+                                                    <p className="text-text-secondary text-sm">No recordings yet.</p>
+                                                    <p className="text-text-tertiary text-xs mt-1">Upload a recording to share the memory!</p>
+                                                </div>
                                             )}
                                         </div>
                                     </div>

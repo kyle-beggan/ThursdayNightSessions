@@ -476,7 +476,10 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
                                             </div>
                                         ))
                                     ) : (
-                                        <p className="text-text-secondary italic text-sm">No recordings uploaded.</p>
+                                        <div className="text-center py-8 bg-surface-secondary/30 rounded-xl border border-border border-dashed">
+                                            <p className="text-text-secondary text-sm">No recordings uploaded.</p>
+                                            <p className="text-text-tertiary text-xs mt-1">Add recordings for this session.</p>
+                                        </div>
                                     )}
                                 </div>
                             </div>
