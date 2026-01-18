@@ -22,7 +22,7 @@ export default function MonthlySessionsView({ sessions, onRefresh }: MonthlySess
     // Group sessions by month
     const sessionsByMonth = sessions.reduce((acc, session) => {
         const sessionDate = new Date(session.date);
-        const monthIndex = sessionDate.getMonth();
+        const monthIndex = sessionDate.getUTCMonth();
         if (!acc[monthIndex]) {
             acc[monthIndex] = [];
         }
