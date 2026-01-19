@@ -87,6 +87,8 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
 
 
 
+    const isCommitted = session.commitments?.some(c => c.user_id === authSession?.user?.id);
+
     return (
         <>
             <div
@@ -95,7 +97,11 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
 
                 <button
                     onClick={onClick}
-                    className="w-full h-full text-left p-3 bg-primary/20 border border-primary/20 hover:bg-primary/30 hover:border-primary/50 rounded-lg transition-all duration-200 flex flex-col group"
+                    className={`w-full h-full text-left p-3 border rounded-lg transition-all duration-200 flex flex-col group
+                        ${isCommitted
+                            ? 'bg-green-500/20 border-green-500/20 hover:bg-green-500/30 hover:border-green-500/50'
+                            : 'bg-primary/20 border-primary/20 hover:bg-primary/30 hover:border-primary/50'
+                        }`}
                 >
                     <div className="flex items-center justify-between mb-2">
                         <div className="text-xl font-bold text-text-primary">
