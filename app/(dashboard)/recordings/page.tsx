@@ -225,7 +225,7 @@ export default function RecordingsPage() {
                                         <td className="p-4">
                                             <div className="font-medium text-text-primary">{rec.title}</div>
                                         </td>
-                                        <td className="p-4 text-text-secondary">
+                                        <td className="p-4 text-xs text-text-secondary whitespace-nowrap">
                                             {formatDate(rec.session_date)}
                                         </td>
                                         <td className="p-4">
@@ -251,18 +251,19 @@ export default function RecordingsPage() {
                                             <div className="flex items-center justify-center gap-2">
                                                 <Button
                                                     variant="primary"
-                                                    className="text-xs px-3 py-1.5 h-auto transition-opacity whitespace-nowrap flex items-center justify-center gap-1"
+                                                    className="w-8 h-8 p-0 flex items-center justify-center rounded-full flex-shrink-0"
                                                     onClick={() => handlePlay(rec.url)}
+                                                    title="Play"
                                                 >
-                                                    <span>▶</span> <span>Play</span>
+                                                    <span className="text-xs">▶</span>
                                                 </Button>
                                                 <Button
-                                                    variant="ghost"
-                                                    className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-text-primary border border-border/50"
+                                                    variant="primary"
+                                                    className="w-8 h-8 p-0 flex items-center justify-center rounded-full flex-shrink-0"
                                                     onClick={() => handleDownload(rec.url, rec.title)}
                                                     title="Download"
                                                 >
-                                                    Download
+                                                    <span className="text-xs">⬇</span>
                                                 </Button>
                                                 {isAdmin && (
                                                     <Button

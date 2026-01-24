@@ -85,7 +85,7 @@ export default function MessageBubble({ message, onReact }: MessageBubbleProps) 
                         onClick={() => setShowPicker(!showPicker)}
                         className={`
                             absolute top-1/2 -translate-y-1/2 p-1 rounded-full bg-surface border border-border text-text-secondary hover:text-primary transition-opacity shadow-sm
-                            opacity-100 md:opacity-0 md:group-hover/message:opacity-100
+                            opacity-100
                             ${isMe ? '-left-8' : '-right-8'}
                         `}
                         title="Add reaction"
@@ -99,7 +99,7 @@ export default function MessageBubble({ message, onReact }: MessageBubbleProps) 
                     {showPicker && (
                         <div className={`
                             absolute bottom-full mb-2 bg-surface text-text-primary rounded-full shadow-lg border border-border flex gap-1 p-1 z-10
-                            ${isMe ? 'right-0' : 'left-0'}
+                            ${isMe ? 'left-0' : 'right-0'}
                         `}>
                             {['👍', '❤️', '😂', '😮', '😢', '🔥'].map(emoji => (
                                 <button

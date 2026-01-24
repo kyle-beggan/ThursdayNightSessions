@@ -7,6 +7,7 @@ import { Song, SessionCommitment, SessionRecording, SessionPhoto } from '@/lib/t
 import PhotoGallery from '@/components/session/PhotoGallery';
 import CapabilityIcon from '@/components/ui/CapabilityIcon';
 import { createClient } from '@/lib/supabase/client';
+import { useConfirm } from '@/providers/ConfirmProvider';
 
 import { FaInfoCircle, FaUserFriends, FaMicrophone, FaCamera } from 'react-icons/fa';
 
@@ -29,6 +30,7 @@ interface CreateSessionModalProps {
 export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, initialData }: CreateSessionModalProps) {
     const router = useRouter();
     const toast = useToast();
+    const { confirm } = useConfirm();
     const [formData, setFormData] = useState({
         date: '',
         start_time: '20:00',
@@ -42,6 +44,7 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
     const [activeTab, setActiveTab] = useState<'details' | 'players' | 'recordings' | 'photos'>('details');
     const [isUploading, setIsUploading] = useState(false);
     const [photoCount, setPhotoCount] = useState(0);
+    const [commitments, setCommitments] = useState<SessionCommitment[]>([]);
 
 
 
@@ -64,6 +67,7 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
                     setSelectedSongs(initialData.songs);
                 }
                 setPhotoCount(initialData.photos?.length || 0);
+                setCommitments(initialData.commitments || []);
             } else {
                 setFormData({
                     date: '',
@@ -135,7 +139,12 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
     };
 
     const handleDeleteRecording = async (recordingId: string) => {
-        if (!confirm('Are you sure you want to delete this recording?')) return;
+        if (!await confirm({
+            title: 'Delete Recording',
+            message: 'Are you sure you want to delete this recording?',
+            confirmLabel: 'Delete',
+            variant: 'danger'
+        })) return;
 
         try {
             const res = await fetch(`/api/recordings/${recordingId}`, {
@@ -151,6 +160,39 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
         } catch (error) {
             console.error('Error deleting recording:', error);
             toast.error('Failed to delete recording');
+        }
+    };
+
+    const handleDeleteCommitment = async (userId: string, userName: string) => {
+        if (!initialData?.id) return;
+        if (!await confirm({
+            title: 'Remove Player',
+            message: `Are you sure you want to remove ${userName} from this session?`,
+            confirmLabel: 'Remove',
+            variant: 'danger'
+        })) return;
+
+        try {
+            const res = await fetch('/api/commitments', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    session_id: initialData.id,
+                    user_id: userId
+                }),
+            });
+
+            if (res.ok) {
+                toast.success('Player removed from session');
+                setCommitments(prev => prev.filter(c => c.user_id !== userId));
+                onSessionCreated(); // Refresh data in background
+            } else {
+                const data = await res.json();
+                toast.error(data.error || 'Failed to remove player');
+            }
+        } catch (error) {
+            console.error('Error removing player:', error);
+            toast.error('Failed to remove player');
         }
     };
 
@@ -257,7 +299,7 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
                             onClick={() => setActiveTab('players')}
                         >
                             <FaUserFriends className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                            <span>Players <span className="hidden sm:inline">({initialData?.commitments?.length || 0})</span></span>
+                            <span>Players <span className="hidden sm:inline">({commitments.length})</span></span>
                         </button>
                         <button
                             type="button"
@@ -392,10 +434,18 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
                         {activeTab === 'players' && initialData && (
                             <div>
                                 <h3 className="text-lg font-bold text-text-primary mb-3">Committed Players</h3>
-                                {initialData.commitments && initialData.commitments.length > 0 ? (
+                                {commitments.length > 0 ? (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        {initialData.commitments.map((commitment) => (
-                                            <div key={commitment.id} className="bg-primary/10 border border-primary/20 rounded-lg p-3 flex items-center justify-between">
+                                        {commitments.map((commitment) => (
+                                            <div key={commitment.id} className="bg-primary/10 border border-primary/20 rounded-lg p-3 flex items-center justify-between relative group">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDeleteCommitment(commitment.user_id, commitment.user?.name || 'User')}
+                                                    className="absolute -top-2 -right-2 w-5 h-5 bg-surface border border-border rounded-full text-text-secondary hover:text-red-500 hover:border-red-500 flex items-center justify-center shadow-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10 text-[10px]"
+                                                    title="Remove player"
+                                                >
+                                                    ✕
+                                                </button>
                                                 <div>
                                                     <div className="font-medium text-text-primary">{commitment.user?.name}</div>
                                                     <div className="flex gap-1 mt-1">
