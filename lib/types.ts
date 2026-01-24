@@ -77,6 +77,7 @@ export interface SessionCommitment {
     committed_at: string;
     user?: User;
     capabilities?: Capability[];
+    status?: 'confirmed' | 'maybe';
 }
 
 export interface Notification {

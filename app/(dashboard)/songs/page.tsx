@@ -214,274 +214,323 @@ export default function SongsPage() {
                 />
             </div>
 
-            {/* Song List */}
-            <div className="bg-surface border border-border rounded-lg overflow-hidden">
-                {loading ? (
-                    <div className="p-8 text-center text-text-secondary">Loading songs...</div>
-                ) : songs.length === 0 ? (
-                    <div className="p-8 text-center text-text-secondary">
-                        {searchTerm ? 'No songs found matching your search.' : 'No songs in the library yet.'}
-                    </div>
-                ) : (
-                    <>
-                        {/* Mobile Card View */}
-                        <div className="grid grid-cols-1 gap-4 p-4 md:hidden">
-                            {sortedSongs.map((song) => (
-                                <div key={song.id} className="bg-primary/20 rounded-lg p-4 border border-border shadow-sm hover:bg-primary/30 transition-colors">
-                                    <div className="mb-3">
-                                        <div className="w-full">
-                                            <h3 className="font-bold text-text-primary text-base leading-tight break-words">{song.title}</h3>
-                                            <p className="text-text-secondary text-sm break-words mb-2">{song.artist || 'Unknown Artist'}</p>
+            <div className="space-y-8">
+                {(() => {
+                    const today = new Date().toISOString().split('T')[0];
+                    const upcomingSongs = sortedSongs.filter(song => !song.session_date || song.session_date >= today);
+                    const pastSongs = sortedSongs.filter(song => song.session_date && song.session_date < today);
 
-                                            {/* Play Button */}
-                                            {song.resource_url && (
-                                                <Button
-                                                    variant="secondary"
-                                                    className="w-8 h-8 p-0 flex items-center justify-center text-green-400 hover:text-green-300 border-green-500/30 bg-green-500/10 rounded-full flex-shrink-0"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        window.open(song.resource_url, '_blank');
-                                                    }}
-                                                    title="Play"
-                                                >
-                                                    <span className="text-xs">▶</span>
-                                                </Button>
-                                            )}
-                                        </div>
-                                    </div>
+                    const renderSongList = (songsToRender: Song[]) => (
+                        <div className="bg-surface border border-border rounded-lg overflow-hidden">
+                            {songsToRender.length === 0 ? (
+                                <div className="p-8 text-center text-text-secondary">
+                                    No songs in this category.
+                                </div>
+                            ) : (
+                                <>
+                                    {/* Mobile Card View */}
+                                    <div className="grid grid-cols-1 gap-4 p-4 md:hidden">
+                                        {songsToRender.map((song) => (
+                                            <div key={song.id} className="bg-primary/20 rounded-lg p-4 border border-border shadow-sm hover:bg-primary/30 transition-colors">
+                                                <div className="mb-3">
+                                                    <div className="w-full">
+                                                        <h3 className="font-bold text-text-primary text-base leading-tight break-words">{song.title}</h3>
+                                                        <p className="text-text-secondary text-sm break-words mb-2">{song.artist || 'Unknown Artist'}</p>
 
-                                    <div className="flex gap-2 mb-4 text-sm text-text-secondary">
-                                        <div className="flex flex-col gap-1">
-                                            <div className="bg-surface-tertiary px-2 py-1 rounded inline-flex items-center">
-                                                <span className="font-medium text-text-primary min-w-[20px] text-center">{song.key || '?'}</span>
-                                                <span className="text-[10px] ml-1 opacity-70 uppercase tracking-wide">Key</span>
-                                            </div>
-                                            <div className="bg-surface-tertiary px-2 py-1 rounded inline-flex items-center">
-                                                <span className="font-medium text-text-primary min-w-[20px] text-center">{song.tempo || '?'}</span>
-                                                <span className="text-[10px] ml-1 opacity-70 uppercase tracking-wide">BPM</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center justify-between pt-3 border-t border-border/50">
-                                        {/* Left: Added By */}
-                                        <div className="flex items-center gap-2 max-w-[40%]">
-                                            {song.creator ? (
-                                                <>
-                                                    <div className="w-5 h-5 rounded-full overflow-hidden relative border border-border flex-shrink-0">
-                                                        {song.creator.image ? (
-                                                            <Image
-                                                                src={song.creator.image}
-                                                                alt={song.creator.name}
-                                                                fill
-                                                                className="object-cover"
-                                                                sizes="20px"
-                                                            />
-                                                        ) : (
-                                                            <div className="w-full h-full bg-surface-tertiary flex items-center justify-center text-[8px]">
-                                                                {song.creator.name.charAt(0)}
-                                                            </div>
+                                                        {/* Play Button */}
+                                                        {song.resource_url && (
+                                                            <Button
+                                                                variant="secondary"
+                                                                className="w-8 h-8 p-0 flex items-center justify-center text-green-400 hover:text-green-300 border-green-500/30 bg-green-500/10 rounded-full flex-shrink-0"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    window.open(song.resource_url, '_blank');
+                                                                }}
+                                                                title="Play"
+                                                            >
+                                                                <span className="text-xs">▶</span>
+                                                            </Button>
                                                         )}
                                                     </div>
-                                                    <span className="text-[10px] text-text-secondary truncate">
-                                                        {song.creator.name.split(' ')[0]}
-                                                    </span>
-                                                </>
-                                            ) : (
-                                                <span className="text-[10px] text-text-secondary">Added by: -</span>
-                                            )}
-                                        </div>
+                                                </div>
 
-                                        {/* Right: Voting */}
-                                        <div className="flex items-center bg-surface rounded-full px-1 py-0.5 border border-border flex-shrink-0 ml-2">
-                                            <button
-                                                onClick={() => !song.user_has_voted && handleVote(song)}
-                                                className={`p-1 rounded-full ${song.user_has_voted ? 'text-green-500' : 'text-text-secondary'}`}
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                                                    <path d="M1 8.25a1.25 1.25 0 112.5 0v7.5a1.25 1.25 0 11-2.5 0v-7.5zM11 3V1.7c0-.268.14-.526.395-.607A2 2 0 0114 3c0 .995-.182 1.948-.514 2.826-.204.54.166 1.174.744 1.174h2.52c1.243 0 2.261 1.01 2.146 2.247a23.864 23.864 0 01-1.341 5.974C17.153 16.323 16.072 17 14.9 17h-3.192a3 3 0 01-1.341-.317l-2.734-1.366A3 3 0 006.292 15H5V8h.963c.685 0 1.258-.483 1.612-1.068a4.011 4.011 0 012.16-1.779A10.55 10.55 0 0011 3z" />
-                                                </svg>
-                                            </button>
-                                            <span className={`text-xs font-medium mx-1 min-w-[12px] text-center ${song.user_has_voted ? 'text-green-500' : 'text-text-secondary'}`}>
-                                                {song.vote_count || 0}
-                                            </span>
-                                            <button
-                                                onClick={() => song.user_has_voted && handleVote(song)}
-                                                disabled={!song.user_has_voted}
-                                                className={`p-1 rounded-full ${!song.user_has_voted ? 'text-text-secondary/30' : 'text-text-secondary hover:text-red-400'}`}
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                                                    <path d="M18.905 12.75a1.25 1.25 0 01-2.5 0v-7.5a1.25 1.25 0 112.5 0v7.5zM8.905 17v1.3c0 .268-.14.526-.395.607A2 2 0 015.905 17c0-.995.182-1.948.514-2.826.204-.54-.166-1.174-.744-1.174h-2.52c-1.243 0-2.261-1.01-2.146-2.247.193-2.08.652-4.082 1.341-5.974C2.752 3.677 3.833 3 5.005 3h3.192a3 3 0 011.341.317l2.734 1.366A3 3 0 0013.613 5h1.292v7h-.963c-.685 0-1.258.483-1.612 1.068a4.011 4.011 0 01-2.16 1.779 10.55 10.55 0 00-1.265 2.153z" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                                                <div className="flex gap-2 mb-4 text-sm text-text-secondary">
+                                                    <div className="flex flex-col gap-1">
+                                                        <div className="bg-surface-tertiary px-2 py-1 rounded inline-flex items-center">
+                                                            <span className="font-medium text-text-primary min-w-[20px] text-center">{song.key || '?'}</span>
+                                                            <span className="text-[10px] ml-1 opacity-70 uppercase tracking-wide">Key</span>
+                                                        </div>
+                                                        <div className="bg-surface-tertiary px-2 py-1 rounded inline-flex items-center">
+                                                            <span className="font-medium text-text-primary min-w-[20px] text-center">{song.tempo || '?'}</span>
+                                                            <span className="text-[10px] ml-1 opacity-70 uppercase tracking-wide">BPM</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
 
-                        {/* Desktop Table View */}
-                        <table className="hidden md:table w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-surface-secondary border-b border-border text-text-secondary text-sm uppercase tracking-wider">
-                                    <th className="p-4 font-medium cursor-pointer hover:text-text-primary transition-colors" onClick={() => requestSort('title')}>
-                                        Song {sortConfig?.key === 'title' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                                    </th>
-                                    <th className="p-4 font-medium w-48 cursor-pointer hover:text-text-primary transition-colors" onClick={() => requestSort('key')}>
-                                        Key / Tempo
-                                    </th>
-                                    <th className="p-4 font-medium w-40 cursor-pointer hover:text-text-primary transition-colors" onClick={() => requestSort('session_date')}>
-                                        Session {sortConfig?.key === 'session_date' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                                    </th>
-                                    <th className="p-4 font-medium w-32">Requirements</th>
-                                    <th className="p-4 font-medium w-32 text-center text-xs">Interested?</th>
-                                    <th className="p-4 font-medium w-32 text-center">Added By</th>
-                                    <th className="p-4 font-medium w-32 text-center">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-border">
-                                {sortedSongs.map((song) => (
-                                    <tr key={song.id} className="hover:bg-surface-hover transition-colors">
-                                        <td className="p-4 max-w-[200px]">
-                                            <div>
-                                                <div className="text-text-primary font-medium whitespace-nowrap overflow-hidden text-ellipsis" title={song.title}>{song.title}</div>
-                                                <div className="text-text-secondary text-sm whitespace-nowrap overflow-hidden text-ellipsis" title={song.artist}>{song.artist || '-'}</div>
-                                            </div>
-                                        </td>
-                                        <td className="p-4 text-text-secondary">
-                                            <div className="flex flex-col">
-                                                <span className="font-medium text-text-primary">{song.key || '-'}</span>
-                                                <span className="text-xs">{song.tempo ? `${song.tempo} bpm` : '-'}</span>
-                                            </div>
-                                        </td>
-                                        <td className="p-4 text-text-secondary whitespace-nowrap">
-                                            {song.session_date && song.session_id ? (
-                                                <button
-                                                    onClick={() => handleSessionClick(song.session_id!)}
-                                                    className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-surface-hover text-primary border border-primary/30 hover:bg-surface transition-colors"
-                                                >
-                                                    {formatDate(song.session_date)}
-                                                </button>
-                                            ) : (
-                                                <span className="text-text-secondary italic">To Be Done</span>
-                                            )}
-                                        </td>
-                                        <td className="p-4">
-                                            <Button
-                                                onClick={() => {
-                                                    setSelectedSongForCaps(song);
-                                                    setIsCapsModalOpen(true);
-                                                }}
-                                                variant="ghost"
-                                                className="text-xs px-3 py-1.5 h-auto whitespace-nowrap"
-                                            >
-                                                {song.capabilities && song.capabilities.length > 0
-                                                    ? `${song.capabilities.length} Req.`
-                                                    : `+ Add Req.`}
-                                                {/* Debug ID */}
-                                                <span className="hidden group-hover:inline text-[8px] ml-1 text-gray-400">{song.id}</span>
-                                            </Button>
-                                        </td>
-                                        <td className="p-4 text-center">
-                                            <div className="inline-flex items-center bg-surface-tertiary rounded-full p-1 border border-border">
-                                                <button
-                                                    onClick={() => !song.user_has_voted && handleVote(song)}
-                                                    className={`
-                                                    p-1.5 rounded-full transition-colors
-                                                    ${song.user_has_voted
-                                                            ? 'text-green-500 bg-green-500/10'
-                                                            : 'text-text-secondary hover:text-green-500 hover:bg-surface-hover'
-                                                        }
-                                                `}
-                                                    title="I'm interested"
-                                                >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                                                        <path d="M1 8.25a1.25 1.25 0 112.5 0v7.5a1.25 1.25 0 11-2.5 0v-7.5zM11 3V1.7c0-.268.14-.526.395-.607A2 2 0 0114 3c0 .995-.182 1.948-.514 2.826-.204.54.166 1.174.744 1.174h2.52c1.243 0 2.261 1.01 2.146 2.247a23.864 23.864 0 01-1.341 5.974C17.153 16.323 16.072 17 14.9 17h-3.192a3 3 0 01-1.341-.317l-2.734-1.366A3 3 0 006.292 15H5V8h.963c.685 0 1.258-.483 1.612-1.068a4.011 4.011 0 012.16-1.779A10.55 10.55 0 0011 3z" />
-                                                    </svg>
-                                                </button>
-
-                                                <span className={`text-xs font-medium mx-1.5 min-w-[12px] ${song.user_has_voted ? 'text-green-500' : 'text-text-secondary'}`}>
-                                                    {song.vote_count || 0}
-                                                </span>
-
-                                                <button
-                                                    onClick={() => song.user_has_voted && handleVote(song)}
-                                                    className={`
-                                                    p-1.5 rounded-full transition-colors text-text-secondary hover:text-red-400 hover:bg-surface-hover
-                                                    ${!song.user_has_voted ? 'opacity-50 cursor-not-allowed' : ''}
-                                                `}
-                                                    disabled={!song.user_has_voted}
-                                                    title="Not interested"
-                                                >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                                                        <path d="M18.905 12.75a1.25 1.25 0 01-2.5 0v-7.5a1.25 1.25 0 112.5 0v7.5zM8.905 17v1.3c0 .268-.14.526-.395.607A2 2 0 015.905 17c0-.995.182-1.948.514-2.826.204-.54-.166-1.174-.744-1.174h-2.52c-1.243 0-2.261-1.01-2.146-2.247.193-2.08.652-4.082 1.341-5.974C2.752 3.677 3.833 3 5.005 3h3.192a3 3 0 011.341.317l2.734 1.366A3 3 0 0013.613 5h1.292v7h-.963c-.685 0-1.258.483-1.612 1.068a4.011 4.011 0 01-2.16 1.779 10.55 10.55 0 00-1.265 2.153z" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </td>
-                                        <td className="p-4">
-                                            <div className="flex items-center justify-center gap-2">
-                                                {song.creator ? (
-                                                    <div className="flex items-center gap-2 group relative">
-                                                        <div className="w-8 h-8 rounded-full overflow-hidden relative border border-border">
-                                                            {song.creator.image ? (
-                                                                <Image
-                                                                    src={song.creator.image}
-                                                                    alt={song.creator.name}
-                                                                    fill
-                                                                    className="object-cover"
-                                                                    sizes="32px"
-                                                                />
-                                                            ) : (
-                                                                <div className="w-full h-full bg-surface-tertiary flex items-center justify-center text-xs">
-                                                                    {song.creator.name.charAt(0)}
+                                                <div className="flex items-center justify-between pt-3 border-t border-border/50">
+                                                    {/* Left: Added By */}
+                                                    <div className="flex items-center gap-2 max-w-[40%]">
+                                                        {song.creator ? (
+                                                            <>
+                                                                <div className="w-5 h-5 rounded-full overflow-hidden relative border border-border flex-shrink-0">
+                                                                    {song.creator.image ? (
+                                                                        <Image
+                                                                            src={song.creator.image}
+                                                                            alt={song.creator.name}
+                                                                            fill
+                                                                            className="object-cover"
+                                                                            sizes="20px"
+                                                                        />
+                                                                    ) : (
+                                                                        <div className="w-full h-full bg-surface-tertiary flex items-center justify-center text-[8px]">
+                                                                            {song.creator.name.charAt(0)}
+                                                                        </div>
+                                                                    )}
                                                                 </div>
+                                                                <span className="text-[10px] text-text-secondary truncate">
+                                                                    {song.creator.name.split(' ')[0]}
+                                                                </span>
+                                                            </>
+                                                        ) : (
+                                                            <span className="text-[10px] text-text-secondary">Added by: -</span>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Right: Voting */}
+                                                    <div className="flex items-center bg-surface rounded-full px-1 py-0.5 border border-border flex-shrink-0 ml-2">
+                                                        <button
+                                                            onClick={() => !song.user_has_voted && handleVote(song)}
+                                                            className={`p-1 rounded-full ${song.user_has_voted ? 'text-green-500' : 'text-text-secondary'}`}
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                                                <path d="M1 8.25a1.25 1.25 0 112.5 0v7.5a1.25 1.25 0 11-2.5 0v-7.5zM11 3V1.7c0-.268.14-.526.395-.607A2 2 0 0114 3c0 .995-.182 1.948-.514 2.826-.204.54.166 1.174.744 1.174h2.52c1.243 0 2.261 1.01 2.146 2.247a23.864 23.864 0 01-1.341 5.974C17.153 16.323 16.072 17 14.9 17h-3.192a3 3 0 01-1.341-.317l-2.734-1.366A3 3 0 006.292 15H5V8h.963c.685 0 1.258-.483 1.612-1.068a4.011 4.011 0 012.16-1.779A10.55 10.55 0 0011 3z" />
+                                                            </svg>
+                                                        </button>
+                                                        <span className={`text-xs font-medium mx-1 min-w-[12px] text-center ${song.user_has_voted ? 'text-green-500' : 'text-text-secondary'}`}>
+                                                            {song.vote_count || 0}
+                                                        </span>
+                                                        <button
+                                                            onClick={() => song.user_has_voted && handleVote(song)}
+                                                            disabled={!song.user_has_voted}
+                                                            className={`p-1 rounded-full ${!song.user_has_voted ? 'text-text-secondary/30' : 'text-text-secondary hover:text-red-400'}`}
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                                                <path d="M18.905 12.75a1.25 1.25 0 01-2.5 0v-7.5a1.25 1.25 0 112.5 0v7.5zM8.905 17v1.3c0 .268-.14.526-.395.607A2 2 0 015.905 17c0-.995.182-1.948.514-2.826.204-.54-.166-1.174-.744-1.174h-2.52c-1.243 0-2.261-1.01-2.146-2.247.193-2.08.652-4.082 1.341-5.974C2.752 3.677 3.833 3 5.005 3h3.192a3 3 0 011.341.317l2.734 1.366A3 3 0 0013.613 5h1.292v7h-.963c-.685 0-1.258.483-1.612 1.068a4.011 4.011 0 01-2.16 1.779 10.55 10.55 0 00-1.265 2.153z" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Desktop Table View */}
+                                    <table className="hidden md:table w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="bg-surface-secondary border-b border-border text-text-secondary text-sm uppercase tracking-wider">
+                                                <th className="p-4 font-medium cursor-pointer hover:text-text-primary transition-colors" onClick={() => requestSort('title')}>
+                                                    Song {sortConfig?.key === 'title' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                                </th>
+                                                <th className="p-4 font-medium w-48 cursor-pointer hover:text-text-primary transition-colors" onClick={() => requestSort('key')}>
+                                                    Key / Tempo
+                                                </th>
+                                                <th className="p-4 font-medium w-40 cursor-pointer hover:text-text-primary transition-colors" onClick={() => requestSort('session_date')}>
+                                                    Session {sortConfig?.key === 'session_date' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                                </th>
+                                                <th className="p-4 font-medium w-32">Requirements</th>
+                                                <th className="p-4 font-medium w-32 text-center text-xs">Interested?</th>
+                                                <th className="p-4 font-medium w-32 text-center">Added By</th>
+                                                <th className="p-4 font-medium w-32 text-center">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-border">
+                                            {songsToRender.map((song) => (
+                                                <tr key={song.id} className="hover:bg-surface-hover transition-colors">
+                                                    <td className="p-4 max-w-[200px]">
+                                                        <div>
+                                                            <div className="text-text-primary font-medium whitespace-nowrap overflow-hidden text-ellipsis" title={song.title}>{song.title}</div>
+                                                            <div className="text-text-secondary text-sm whitespace-nowrap overflow-hidden text-ellipsis" title={song.artist}>{song.artist || '-'}</div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4 text-text-secondary">
+                                                        <div className="flex flex-col">
+                                                            <span className="font-medium text-text-primary">{song.key || '-'}</span>
+                                                            <span className="text-xs">{song.tempo ? `${song.tempo} bpm` : '-'}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4 text-text-secondary whitespace-nowrap">
+                                                        {song.session_date && song.session_id ? (
+                                                            <button
+                                                                onClick={() => handleSessionClick(song.session_id!)}
+                                                                className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-surface-hover text-primary border border-primary/30 hover:bg-surface transition-colors"
+                                                            >
+                                                                {formatDate(song.session_date)}
+                                                            </button>
+                                                        ) : (
+                                                            <span className="text-text-secondary italic">To Be Done</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <Button
+                                                            onClick={() => {
+                                                                setSelectedSongForCaps(song);
+                                                                setIsCapsModalOpen(true);
+                                                            }}
+                                                            variant="ghost"
+                                                            className="text-xs px-3 py-1.5 h-auto whitespace-nowrap"
+                                                        >
+                                                            {song.capabilities && song.capabilities.length > 0
+                                                                ? `${song.capabilities.length} Req.`
+                                                                : `+ Add Req.`}
+                                                            {/* Debug ID */}
+                                                            <span className="hidden group-hover:inline text-[8px] ml-1 text-gray-400">{song.id}</span>
+                                                        </Button>
+                                                    </td>
+                                                    <td className="p-4 text-center">
+                                                        <div className="inline-flex items-center bg-surface-tertiary rounded-full p-1 border border-border">
+                                                            <button
+                                                                onClick={() => !song.user_has_voted && handleVote(song)}
+                                                                className={`
+                                                                p-1.5 rounded-full transition-colors
+                                                                ${song.user_has_voted
+                                                                        ? 'text-green-500 bg-green-500/10'
+                                                                        : 'text-text-secondary hover:text-green-500 hover:bg-surface-hover'
+                                                                    }
+                                                            `}
+                                                                title="I'm interested"
+                                                            >
+                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                                                    <path d="M1 8.25a1.25 1.25 0 112.5 0v7.5a1.25 1.25 0 11-2.5 0v-7.5zM11 3V1.7c0-.268.14-.526.395-.607A2 2 0 0114 3c0 .995-.182 1.948-.514 2.826-.204.54.166 1.174.744 1.174h2.52c1.243 0 2.261 1.01 2.146 2.247a23.864 23.864 0 01-1.341 5.974C17.153 16.323 16.072 17 14.9 17h-3.192a3 3 0 01-1.341-.317l-2.734-1.366A3 3 0 006.292 15H5V8h.963c.685 0 1.258-.483 1.612-1.068a4.011 4.011 0 012.16-1.779A10.55 10.55 0 0011 3z" />
+                                                                </svg>
+                                                            </button>
+
+                                                            <span className={`text-xs font-medium mx-1.5 min-w-[12px] ${song.user_has_voted ? 'text-green-500' : 'text-text-secondary'}`}>
+                                                                {song.vote_count || 0}
+                                                            </span>
+
+                                                            <button
+                                                                onClick={() => song.user_has_voted && handleVote(song)}
+                                                                className={`
+                                                                p-1.5 rounded-full transition-colors text-text-secondary hover:text-red-400 hover:bg-surface-hover
+                                                                ${!song.user_has_voted ? 'opacity-50 cursor-not-allowed' : ''}
+                                                            `}
+                                                                disabled={!song.user_has_voted}
+                                                                title="Not interested"
+                                                            >
+                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                                                    <path d="M18.905 12.75a1.25 1.25 0 01-2.5 0v-7.5a1.25 1.25 0 112.5 0v7.5zM8.905 17v1.3c0 .268-.14.526-.395.607A2 2 0 015.905 17c0-.995.182-1.948.514-2.826.204-.54-.166-1.174-.744-1.174h-2.52c-1.243 0-2.261-1.01-2.146-2.247.193-2.08.652-4.082 1.341-5.974C2.752 3.677 3.833 3 5.005 3h3.192a3 3 0 011.341.317l2.734 1.366A3 3 0 0013.613 5h1.292v7h-.963c-.685 0-1.258.483-1.612 1.068a4.011 4.011 0 01-2.16 1.779 10.55 10.55 0 00-1.265 2.153z" />
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <div className="flex items-center justify-center gap-2">
+                                                            {song.creator ? (
+                                                                <div className="flex items-center gap-2 group relative">
+                                                                    <div className="w-8 h-8 rounded-full overflow-hidden relative border border-border">
+                                                                        {song.creator.image ? (
+                                                                            <Image
+                                                                                src={song.creator.image}
+                                                                                alt={song.creator.name}
+                                                                                fill
+                                                                                className="object-cover"
+                                                                                sizes="32px"
+                                                                            />
+                                                                        ) : (
+                                                                            <div className="w-full h-full bg-surface-tertiary flex items-center justify-center text-xs">
+                                                                                {song.creator.name.charAt(0)}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                    {/* Tooltip */}
+                                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black/80 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                                                                        {song.creator.name}
+                                                                    </span>
+                                                                </div>
+                                                            ) : (
+                                                                <span className="text-text-secondary text-xs">-</span>
                                                             )}
                                                         </div>
-                                                        {/* Tooltip */}
-                                                        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black/80 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                                                            {song.creator.name}
-                                                        </span>
-                                                    </div>
-                                                ) : (
-                                                    <span className="text-text-secondary text-xs">-</span>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="p-4 text-center">
-                                            <div className="flex items-center justify-center gap-1">
-                                                {song.resource_url && (
-                                                    <Button
-                                                        variant="secondary"
-                                                        className="w-8 h-8 p-0 flex items-center justify-center text-green-400 hover:text-green-300 border-green-500/30 hover:bg-green-500/10 rounded-full"
-                                                        onClick={() => window.open(song.resource_url, '_blank')}
-                                                        title="Play"
-                                                    >
-                                                        ▶
-                                                    </Button>
-                                                )}
-                                                <Button
-                                                    variant="ghost"
-                                                    className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-text-primary"
-                                                    onClick={() => handleEditSong(song)}
-                                                >
-                                                    Edit
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-red-400"
-                                                    onClick={() => handleDeleteSong(song.id)}
-                                                >
-                                                    Delete
-                                                </Button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </>
-                )}
+                                                    </td>
+                                                    <td className="p-4 text-center">
+                                                        <div className="flex items-center justify-center gap-1">
+                                                            {song.resource_url && (
+                                                                <Button
+                                                                    variant="secondary"
+                                                                    className="w-8 h-8 p-0 flex items-center justify-center text-green-400 hover:text-green-300 border-green-500/30 hover:bg-green-500/10 rounded-full"
+                                                                    onClick={() => window.open(song.resource_url, '_blank')}
+                                                                    title="Play"
+                                                                >
+                                                                    ▶
+                                                                </Button>
+                                                            )}
+                                                            <Button
+                                                                variant="ghost"
+                                                                className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-text-primary"
+                                                                onClick={() => handleEditSong(song)}
+                                                            >
+                                                                Edit
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-red-400"
+                                                                onClick={() => handleDeleteSong(song.id)}
+                                                            >
+                                                                Delete
+                                                            </Button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </>
+                            )}
+                        </div>
+                    );
+
+                    return loading ? (
+                        <div className="bg-surface border border-border rounded-lg overflow-hidden">
+                            <div className="p-8 text-center text-text-secondary">Loading songs...</div>
+                        </div>
+                    ) : songs.length === 0 ? (
+                        <div className="bg-surface border border-border rounded-lg overflow-hidden">
+                            <div className="p-8 text-center text-text-secondary">
+                                {searchTerm ? 'No songs found matching your search.' : 'No songs in the library yet.'}
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            {/* Upcoming / To Be Done Section */}
+                            <div className="space-y-3">
+                                <h2 className="text-lg font-semibold text-text-primary pl-1 flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                                    Upcoming / To Be Done
+                                    <span className="text-sm font-normal text-text-secondary ml-1 count-badge bg-surface-tertiary px-2 py-0.5 rounded-full">
+                                        {upcomingSongs.length}
+                                    </span>
+                                </h2>
+                                {renderSongList(upcomingSongs)}
+                            </div>
+
+                            {/* Past Performances Section */}
+                            {pastSongs.length > 0 && (
+                                <div className="space-y-3 pt-4 border-t border-border/50">
+                                    <h2 className="text-lg font-semibold text-text-primary pl-1 flex items-center gap-2 opacity-80">
+                                        <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                                        Past Performances
+                                        <span className="text-sm font-normal text-text-secondary ml-1 count-badge bg-surface-tertiary px-2 py-0.5 rounded-full">
+                                            {pastSongs.length}
+                                        </span>
+                                    </h2>
+                                    <div className="opacity-80 hover:opacity-100 transition-opacity duration-300">
+                                        {renderSongList(pastSongs)}
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    );
+                })()}
             </div>
 
             <AddSongModal

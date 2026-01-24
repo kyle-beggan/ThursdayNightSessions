@@ -24,8 +24,9 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+
         const body = await request.json();
-        const { session_id, user_id, capability_ids } = body;
+        const { session_id, user_id, capability_ids, status } = body;
 
         // Verify the user is acting for themselves or is an admin
         if (user_id !== session.user.id && session.user.userType !== 'admin') {
@@ -38,6 +39,7 @@ export async function POST(request: NextRequest) {
             .upsert({
                 session_id,
                 user_id,
+                status: status || 'confirmed',
             }, { onConflict: 'session_id,user_id' })
             .select()
             .single();

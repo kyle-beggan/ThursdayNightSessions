@@ -27,6 +27,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
     const [isCommitting, setIsCommitting] = useState(false);
 
     const [step, setStep] = useState<'details' | 'rsvp'>('details');
+    const [rsvpStatus, setRsvpStatus] = useState<'confirmed' | 'maybe'>('confirmed');
     const [userCapabilities, setUserCapabilities] = useState<Capability[]>([]);
     const [selectedCapabilities, setSelectedCapabilities] = useState<string[]>([]);
     const [isLoadingCapabilities, setIsLoadingCapabilities] = useState(false);
@@ -69,6 +70,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
         if (userCapabilities.length === 0) {
             fetchUserCapabilities();
         }
+        setRsvpStatus('confirmed');
         setStep('rsvp');
     };
 
@@ -81,6 +83,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
             const ids = userCommitment.capabilities.map((c: any) => c.id);
             setSelectedCapabilities(ids);
         }
+        setRsvpStatus(userCommitment?.status || 'confirmed');
         setStep('rsvp');
     };
 
@@ -106,7 +109,8 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                 body: JSON.stringify({
                     session_id: session.id,
                     user_id: userId,
-                    capability_ids: selectedCapabilities
+                    capability_ids: selectedCapabilities,
+                    status: rsvpStatus
                 }),
             });
 
@@ -499,33 +503,65 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                 {/* Committed Players */}
                                 {subTab === 'players' && (
                                     <div>
-                                        <h4 className="text-base font-bold text-text-primary mb-2">
-                                            Committed Players
-                                        </h4>
-                                        {session.commitments && session.commitments.length > 0 ? (
-                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                                {session.commitments.map((commitment) => (
-                                                    <div key={commitment.id} className="bg-primary/20 border border-primary/20 hover:bg-primary/30 hover:border-primary/50 hover:shadow-[0_0_15px_rgba(139,92,246,0.5)] rounded-lg p-2 transition-all duration-200 group flex flex-col items-center text-center">
-                                                        <div className="font-medium text-text-primary mb-1 w-full truncate text-sm">
-                                                            {commitment.user?.name}
-                                                        </div>
-                                                        <div className="flex flex-wrap gap-1 justify-center">
-                                                            {(commitment.capabilities || []).map((cap) => (
-                                                                <span
-                                                                    key={cap.id}
-                                                                    className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/20 text-primary text-xs rounded-full"
-                                                                >
-                                                                    <CapabilityIcon capability={cap} className="w-3 h-3" />
-                                                                    <span className="capitalize">{cap.name}</span>
-                                                                </span>
-                                                            ))}
-                                                        </div>
+                                        {(() => {
+                                            const confirmed = session.commitments?.filter(c => !c.status || c.status === 'confirmed') || [];
+                                            const maybe = session.commitments?.filter(c => c.status === 'maybe') || [];
+
+                                            const renderPlayerCard = (commitment: SessionWithDetails['commitments'][0]) => (
+                                                <div key={commitment.id} className="bg-primary/20 border border-primary/20 hover:bg-primary/30 hover:border-primary/50 hover:shadow-[0_0_15px_rgba(139,92,246,0.5)] rounded-lg p-2 transition-all duration-200 group flex flex-col items-center text-center">
+                                                    <div className="font-medium text-text-primary mb-1 w-full truncate text-sm">
+                                                        {commitment.user?.name}
                                                     </div>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <p className="text-text-secondary text-xs">No commitments yet</p>
-                                        )}
+                                                    <div className="flex flex-wrap gap-1 justify-center">
+                                                        {(commitment.capabilities || []).map((cap) => (
+                                                            <span
+                                                                key={cap.id}
+                                                                className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/20 text-primary text-xs rounded-full"
+                                                            >
+                                                                <CapabilityIcon capability={cap} className="w-3 h-3" />
+                                                                <span className="capitalize">{cap.name}</span>
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            );
+
+                                            return (
+                                                <div className="space-y-6">
+                                                    {/* Definitely In Section */}
+                                                    <div>
+                                                        <h4 className="text-base font-bold text-text-primary mb-2 flex items-center gap-2">
+                                                            Definitely In
+                                                            <span className="text-xs font-normal text-text-secondary bg-surface-tertiary px-2 py-0.5 rounded-full">
+                                                                {confirmed.length}
+                                                            </span>
+                                                        </h4>
+                                                        {confirmed.length > 0 ? (
+                                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                                                {confirmed.map(renderPlayerCard)}
+                                                            </div>
+                                                        ) : (
+                                                            <p className="text-text-secondary text-xs italic">No confirmed players yet.</p>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Maybe Section */}
+                                                    {maybe.length > 0 && (
+                                                        <div className="pt-2 border-t border-border/30">
+                                                            <h4 className="text-base font-bold text-yellow-500 mb-2 flex items-center gap-2">
+                                                                Maybe
+                                                                <span className="text-xs font-normal text-text-secondary bg-surface-tertiary px-2 py-0.5 rounded-full">
+                                                                    {maybe.length}
+                                                                </span>
+                                                            </h4>
+                                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                                                {maybe.map(renderPlayerCard)}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
                                 )}
 
@@ -677,6 +713,30 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                         {/* RSVP Step Content - Wrapped in scroll view */}
                         <div className="flex-1 overflow-y-auto min-h-0">
                             <div className="bg-surface/50 rounded-lg p-4 mb-4">
+                                <p className="text-text-primary mb-4">
+                                    Are you definitely in or just a maybe?
+                                </p>
+                                <div className="flex gap-3 mb-6">
+                                    <button
+                                        onClick={() => setRsvpStatus('confirmed')}
+                                        className={`flex-1 py-3 px-4 rounded-lg font-bold border transition-all ${rsvpStatus === 'confirmed'
+                                            ? 'bg-primary text-white border-primary shadow-[0_0_15px_rgba(139,92,246,0.4)]'
+                                            : 'bg-surface-secondary text-text-secondary border-transparent hover:bg-surface-tertiary'
+                                            }`}
+                                    >
+                                        Definitely In
+                                    </button>
+                                    <button
+                                        onClick={() => setRsvpStatus('maybe')}
+                                        className={`flex-1 py-3 px-4 rounded-lg font-bold border transition-all ${rsvpStatus === 'maybe'
+                                            ? 'bg-yellow-500/20 text-yellow-500 border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.2)]'
+                                            : 'bg-surface-secondary text-text-secondary border-transparent hover:bg-surface-tertiary'
+                                            }`}
+                                    >
+                                        Maybe
+                                    </button>
+                                </div>
+
                                 <p className="text-text-primary mb-4">
                                     What will you be playing/doing for this session?
                                 </p>
