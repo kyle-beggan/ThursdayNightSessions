@@ -310,6 +310,25 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
         }
     };
 
+    const handleDownload = async (url: string, filename: string) => {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+            console.error('Download failed:', error);
+            window.open(url, '_blank');
+        }
+    };
+
     return (
         <Modal isOpen={isOpen} onClose={handleClose} title={step === 'details' ? "Session Details" : "Confirm RSVP"} size="xl" className="!p-5 h-[90dvh] md:h-[80vh] flex flex-col">
             <div className="flex-1 flex flex-col min-h-0">
@@ -574,16 +593,26 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                                         <div className="font-medium text-text-primary truncate mb-0 text-xs min-w-0 flex-1" title={rec.title}>
                                                             {rec.title}
                                                         </div>
-                                                        <a
-                                                            href={rec.url}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="shrink-0"
-                                                        >
-                                                            <Button size="sm" variant="secondary" className="w-[40px] px-0 text-[10px] h-7 flex items-center justify-center text-green-400 border-green-500/30 hover:bg-green-500/10">
-                                                                ▶
+                                                        <div className="flex gap-2 shrink-0">
+                                                            <a
+                                                                href={rec.url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                            >
+                                                                <Button size="sm" variant="secondary" className="w-[40px] px-0 text-[10px] h-7 flex items-center justify-center text-green-400 border-green-500/30 hover:bg-green-500/10" title="Play">
+                                                                    ▶
+                                                                </Button>
+                                                            </a>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="secondary"
+                                                                className="w-[40px] px-0 text-[10px] h-7 flex items-center justify-center text-text-secondary border-border hover:bg-surface-hover hover:text-text-primary"
+                                                                onClick={() => handleDownload(rec.url, rec.title)}
+                                                                title="Download"
+                                                            >
+                                                                ⬇
                                                             </Button>
-                                                        </a>
+                                                        </div>
                                                     </div>
                                                 ))
                                             ) : (

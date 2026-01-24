@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/useToast';
 import Input from '@/components/ui/Input';
 import CapabilityIcon from '@/components/ui/CapabilityIcon';
 import { INSTRUMENT_ICONS } from '@/lib/icons';
+import { createClient } from '@/lib/supabase/client';
 
 type CapabilityModalProps = {
     isOpen: boolean;
@@ -27,6 +28,7 @@ export default function CapabilityModal({
     const toast = useToast();
     const [name, setName] = useState(initialName);
     const [selectedIcon, setSelectedIcon] = useState(initialIcon);
+    const [isUploading, setIsUploading] = useState(false);
 
     const [customIcons, setCustomIcons] = useState<{ name: string; path: string }[]>([]);
 
@@ -67,6 +69,62 @@ export default function CapabilityModal({
         setName(initialName);
         setSelectedIcon(initialIcon);
         onClose();
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) return;
+        const file = e.target.files[0];
+
+        // Basic validation
+        if (!file.type.startsWith('image/')) {
+            toast.error('Please upload an image file');
+            return;
+        }
+
+        if (file.size > 2 * 1024 * 1024) { // 2MB limit
+            toast.error('Image must be less than 2MB');
+            return;
+        }
+
+        setIsUploading(true);
+
+        try {
+            const supabase = createClient();
+            const fileExt = file.name.split('.').pop();
+            const fileName = `custom-${Date.now()}.${fileExt}`;
+
+            // 1. Get signed upload URL
+            const signRes = await fetch('/api/admin/capabilities/icon/sign', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fileName, fileType: file.type })
+            });
+
+            if (!signRes.ok) throw new Error('Failed to get upload permission');
+            const { token, path } = await signRes.json();
+
+            // 2. Upload to Supabase
+            const { error: uploadError } = await supabase.storage
+                .from('icons')
+                .uploadToSignedUrl(path, token, file);
+
+            if (uploadError) throw uploadError;
+
+            // 3. Get public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('icons')
+                .getPublicUrl(path);
+
+            setSelectedIcon(publicUrl);
+            toast.success('Icon uploaded successfully');
+        } catch (error) {
+            console.error('Upload failed:', error);
+            const message = error instanceof Error ? error.message : 'Failed to upload icon';
+            toast.error(message);
+        } finally {
+            setIsUploading(false);
+            if (e.target) e.target.value = '';
+        }
     };
 
     if (!isOpen) return null;
@@ -126,6 +184,30 @@ export default function CapabilityModal({
                         >
                             Auto
                         </button>
+
+                        {/* Upload Button */}
+                        <label
+                            className={`
+                                cursor-pointer p-3 text-xs flex flex-col items-center justify-center rounded-lg transition-all border border-dashed border-primary/50 text-primary hover:bg-primary/10
+                                ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}
+                            `}
+                            title="Upload custom icon"
+                        >
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileUpload}
+                                disabled={isUploading}
+                                className="hidden"
+                            />
+                            {isUploading ? (
+                                <span className="animate-spin text-lg">↻</span>
+                            ) : (
+                                <>
+                                    <span className="text-lg mb-1">↑</span>
+                                </>
+                            )}
+                        </label>
 
                         {/* Custom Icons (Uploaded) */}
                         {customIcons.map((icon) => (

@@ -21,8 +21,8 @@ const CapabilityIcon: React.FC<CapabilityIconProps> = ({ capability, className =
 
     // If a specific icon is set in the DB
     if (dbIcon) {
-        // If it looks like a path (starts with /), render as Image
-        if (dbIcon.startsWith('/')) {
+        // If it looks like a path (starts with /) or url (http/https), render as Image
+        if (dbIcon.startsWith('/') || dbIcon.startsWith('http')) {
             // eslint-disable-next-line @next/next/no-img-element
             return <img src={dbIcon} alt={name} className={`${className} object-contain`} />;
         }
