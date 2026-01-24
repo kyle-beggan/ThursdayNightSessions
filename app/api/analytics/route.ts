@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
             .select(`
                 id,
                 date,
-                session_commitments (count)
+                session_commitments (status)
             `)
             .gte('date', startIso)
             .lte('date', endIso)
@@ -72,10 +72,15 @@ export async function GET(request: NextRequest) {
 
         if (sessionsError) throw sessionsError;
 
-        const attendanceHistory = sessionsData?.map(s => ({
-            date: s.date,
-            attendees: s.session_commitments[0]?.count || 0
-        })) || [];
+        const attendanceHistory = sessionsData?.map(s => {
+            // Filter commitments that are confirmed or null (legacy)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const confirmedCount = s.session_commitments?.filter((c: any) => !c.status || c.status === 'confirmed').length || 0;
+            return {
+                date: s.date,
+                attendees: confirmedCount
+            };
+        }) || [];
 
         // Calculate Average Attendance
         const totalAttendance = attendanceHistory.reduce((sum, item) => sum + item.attendees, 0);
@@ -98,22 +103,35 @@ export async function GET(request: NextRequest) {
         const userMap = new Map(users?.map(u => [u.id, u.name]) || []);
 
         let memberAttendance: { name: string; count: number }[] = [];
+        let maybeAttendance: { name: string; count: number }[] = [];
 
         if (sessionIds.length > 0) {
             const { data: commitmentData, error: commitmentError } = await supabaseAdmin
                 .from('session_commitments')
-                .select('user_id')
+                .select('user_id, status')
                 .in('session_id', sessionIds);
 
             if (commitmentError) throw commitmentError;
 
-            const attendanceCounts: Record<string, number> = {};
+            const confirmedCounts: Record<string, number> = {};
+            const maybeCounts: Record<string, number> = {};
+
             commitmentData?.forEach(c => {
                 const name = userMap.get(c.user_id) || 'Unknown';
-                attendanceCounts[name] = (attendanceCounts[name] || 0) + 1;
+                // Count as confirmed if status is 'confirmed' or null (legacy)
+                if (!c.status || c.status === 'confirmed') {
+                    confirmedCounts[name] = (confirmedCounts[name] || 0) + 1;
+                } else if (c.status === 'maybe') {
+                    maybeCounts[name] = (maybeCounts[name] || 0) + 1;
+                }
             });
 
-            memberAttendance = Object.entries(attendanceCounts)
+            memberAttendance = Object.entries(confirmedCounts)
+                .map(([name, count]) => ({ name, count }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 10);
+
+            maybeAttendance = Object.entries(maybeCounts)
                 .map(([name, count]) => ({ name, count }))
                 .sort((a, b) => b.count - a.count)
                 .slice(0, 10);
@@ -227,6 +245,7 @@ export async function GET(request: NextRequest) {
             charts: {
                 attendanceHistory,
                 memberAttendance,
+                maybeAttendance,
                 instrumentDistribution,
                 songKeyDistribution,
                 photosByPlayer

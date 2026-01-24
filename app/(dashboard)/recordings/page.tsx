@@ -145,7 +145,11 @@ export default function RecordingsPage() {
                                 <div className="mb-3 pr-8">
                                     <div className="w-full">
                                         <h3 className="font-bold text-text-primary text-base leading-tight break-words">{rec.title}</h3>
-                                        <p className="text-text-secondary text-sm mb-2">{formatDate(rec.session_date)}</p>
+                                        <div className="mb-2">
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-surface-hover text-primary border border-primary/30">
+                                                {formatDate(rec.session_date)}
+                                            </span>
+                                        </div>
 
                                         <div className="flex gap-2">
                                             <Button
@@ -226,7 +230,9 @@ export default function RecordingsPage() {
                                             <div className="font-medium text-text-primary">{rec.title}</div>
                                         </td>
                                         <td className="p-4 text-xs text-text-secondary whitespace-nowrap">
-                                            {formatDate(rec.session_date)}
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-surface-hover text-primary border border-primary/30">
+                                                {formatDate(rec.session_date)}
+                                            </span>
                                         </td>
                                         <td className="p-4">
                                             <div className="flex flex-wrap gap-2">

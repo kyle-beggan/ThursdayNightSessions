@@ -63,6 +63,13 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md', c
                                         {title}
                                     </Dialog.Title>
                                 )}
+                                <button
+                                    onClick={onClose}
+                                    className="absolute top-4 right-4 p-2 text-text-secondary hover:text-text-primary rounded-full hover:bg-surface-secondary transition-colors"
+                                    aria-label="Close modal"
+                                >
+                                    ✕
+                                </button>
                                 {children}
                             </Dialog.Panel>
                         </Transition.Child>

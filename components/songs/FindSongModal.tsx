@@ -29,7 +29,7 @@ export default function FindSongModal({ isOpen, onClose, onAddSongs }: FindSongM
 
     // Recommendations state
     const [recommendations, setRecommendations] = useState<RecommendedSong[]>([]);
-    const [isSearching, setIsSearching] = useState(false);
+    // const [isSearching, setIsSearching] = useState(false);
     const [searchError, setSearchError] = useState<string | null>(null);
     const [selectedSongs, setSelectedSongs] = useState<Set<number>>(new Set()); // Indices of selected songs
 
@@ -77,7 +77,7 @@ export default function FindSongModal({ isOpen, onClose, onAddSongs }: FindSongM
     const handleFind = async () => {
         if (selectedCapabilityNames.length === 0) return;
 
-        setIsSearching(true);
+        // setIsSearching(true);
         setSearchError(null);
 
         try {
@@ -100,7 +100,7 @@ export default function FindSongModal({ isOpen, onClose, onAddSongs }: FindSongM
             console.error('Search error:', error);
             setSearchError(error.message || 'Something went wrong finding songs.');
         } finally {
-            setIsSearching(false);
+            // setIsSearching(false);
         }
     };
 
@@ -184,14 +184,19 @@ export default function FindSongModal({ isOpen, onClose, onAddSongs }: FindSongM
                             >
                                 Close
                             </Button>
-                            <Button
-                                onClick={handleFind}
-                                disabled={selectedCapabilities.length === 0 || isSearching}
-                                variant="primary"
-                                className="w-full md:w-auto min-w-[150px]"
-                            >
-                                {isSearching ? 'Finding Songs...' : 'Find Songs'}
-                            </Button>
+                            <div className="relative group/tooltip">
+                                <Button
+                                    onClick={handleFind}
+                                    disabled={true}
+                                    variant="primary"
+                                    className="w-full md:w-auto min-w-[150px] opacity-50 cursor-not-allowed"
+                                >
+                                    Find Songs
+                                </Button>
+                                <div className="absolute bottom-full mb-2 right-0 hidden group-hover/tooltip:block bg-surface-secondary border border-border p-2 rounded text-xs text-text-primary whitespace-nowrap z-50 shadow-lg">
+                                    This feature requires actual money. We can turn it on later.
+                                </div>
+                            </div>
                         </div>
                     </>
                 ) : (

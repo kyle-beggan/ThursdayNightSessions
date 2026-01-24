@@ -423,7 +423,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                     )}
 
                                     {session.songs && session.songs.length > 0 ? (
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             {session.songs.map((song) => (
                                                 <div key={song.id || song.song_name} className="bg-primary/20 rounded-lg p-3 border border-border flex items-center justify-between gap-2 hover:bg-primary/30 hover:border-primary/50 transition-colors group relative">
 
@@ -453,8 +453,8 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                                             rel="noopener noreferrer"
                                                             className="shrink-0"
                                                         >
-                                                            <Button size="sm" variant="secondary" className="w-[40px] px-0 text-[10px] h-7 flex items-center justify-center text-green-400 border-green-500/30 hover:bg-green-500/10">
-                                                                ▶
+                                                            <Button variant="primary" className="w-8 h-8 p-0 flex items-center justify-center rounded-full flex-shrink-0">
+                                                                <span className="text-xs">▶</span>
                                                             </Button>
                                                         </a>
                                                     )}
@@ -610,7 +610,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                             <div className="text-red-500 text-xs mb-2">{uploadError}</div>
                                         )}
 
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             {session.recordings && session.recordings.length > 0 ? (
                                                 session.recordings.map((rec) => (
                                                     <div key={rec.id} className="bg-primary/20 rounded-lg p-3 border border-border flex items-center justify-between gap-2 hover:bg-primary/30 hover:border-primary/50 transition-colors group relative">
@@ -635,18 +635,17 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                             >
-                                                                <Button size="sm" variant="secondary" className="w-[40px] px-0 text-[10px] h-7 flex items-center justify-center text-green-400 border-green-500/30 hover:bg-green-500/10" title="Play">
-                                                                    ▶
+                                                                <Button variant="primary" className="w-8 h-8 p-0 flex items-center justify-center rounded-full flex-shrink-0" title="Play">
+                                                                    <span className="text-xs">▶</span>
                                                                 </Button>
                                                             </a>
                                                             <Button
-                                                                size="sm"
-                                                                variant="secondary"
-                                                                className="w-[40px] px-0 text-[10px] h-7 flex items-center justify-center text-text-secondary border-border hover:bg-surface-hover hover:text-text-primary"
+                                                                variant="primary"
+                                                                className="w-8 h-8 p-0 flex items-center justify-center rounded-full flex-shrink-0"
                                                                 onClick={() => handleDownload(rec.url, rec.title)}
                                                                 title="Download"
                                                             >
-                                                                ⬇
+                                                                <span className="text-xs">⬇</span>
                                                             </Button>
                                                         </div>
                                                     </div>

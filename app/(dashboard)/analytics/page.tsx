@@ -27,6 +27,7 @@ interface AnalyticsData {
     charts: {
         attendanceHistory: { date: string; attendees: number }[];
         memberAttendance: { name: string; count: number }[];
+        maybeAttendance: { name: string; count: number }[];
         instrumentDistribution: { name: string; count: number }[];
         songKeyDistribution?: { name: string; count: number }[];
         photosByPlayer?: { name: string; count: number }[];
@@ -265,6 +266,26 @@ export default function AnalyticsPage() {
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
+                </div>
+            </div>
+
+            {/* Maybe Attendance */}
+            <div className="bg-surface rounded-xl p-6 border border-border">
+                <h3 className="text-xl font-semibold mb-6 text-yellow-500">Maybe Attendance</h3>
+                <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={data.charts.maybeAttendance || []} layout="vertical" margin={{ left: 20 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={false} />
+                            <XAxis type="number" stroke="#888" allowDecimals={false} />
+                            <YAxis dataKey="name" type="category" width={100} stroke="#888" fontSize={12} />
+                            <Tooltip
+                                cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                                contentStyle={{ backgroundColor: '#1F2937', border: 'none', borderRadius: '8px' }}
+                                itemStyle={{ color: '#FBBF24' }}
+                            />
+                            <Bar dataKey="count" fill="#F59E0B" radius={[0, 4, 4, 0]} barSize={20} name="Maybe Count" />
+                        </BarChart>
+                    </ResponsiveContainer>
                 </div>
             </div>
 

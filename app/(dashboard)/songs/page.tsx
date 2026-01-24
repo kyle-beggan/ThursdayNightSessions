@@ -240,8 +240,8 @@ export default function SongsPage() {
                                                         {/* Play Button */}
                                                         {song.resource_url && (
                                                             <Button
-                                                                variant="secondary"
-                                                                className="w-8 h-8 p-0 flex items-center justify-center text-green-400 hover:text-green-300 border-green-500/30 bg-green-500/10 rounded-full flex-shrink-0"
+                                                                variant="primary"
+                                                                className="w-8 h-8 p-0 flex items-center justify-center rounded-full flex-shrink-0"
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     window.open(song.resource_url, '_blank');
@@ -456,8 +456,8 @@ export default function SongsPage() {
                                                         <div className="flex items-center justify-center gap-1">
                                                             {song.resource_url && (
                                                                 <Button
-                                                                    variant="secondary"
-                                                                    className="w-8 h-8 p-0 flex items-center justify-center text-green-400 hover:text-green-300 border-green-500/30 hover:bg-green-500/10 rounded-full"
+                                                                    variant="primary"
+                                                                    className="w-8 h-8 p-0 flex items-center justify-center rounded-full flex-shrink-0"
                                                                     onClick={() => window.open(song.resource_url, '_blank')}
                                                                     title="Play"
                                                                 >
