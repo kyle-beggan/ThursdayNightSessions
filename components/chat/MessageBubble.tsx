@@ -84,7 +84,8 @@ export default function MessageBubble({ message, onReact }: MessageBubbleProps) 
                     <button
                         onClick={() => setShowPicker(!showPicker)}
                         className={`
-                            absolute top-1/2 -translate-y-1/2 p-1 rounded-full bg-surface border border-border text-text-secondary hover:text-primary opacity-0 group-hover/message:opacity-100 transition-opacity shadow-sm
+                            absolute top-1/2 -translate-y-1/2 p-1 rounded-full bg-surface border border-border text-text-secondary hover:text-primary transition-opacity shadow-sm
+                            opacity-100 md:opacity-0 md:group-hover/message:opacity-100
                             ${isMe ? '-left-8' : '-right-8'}
                         `}
                         title="Add reaction"

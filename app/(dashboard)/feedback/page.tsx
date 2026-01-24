@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button';
 import { useToast } from '@/hooks/useToast';
 import { formatDate } from '@/lib/utils';
 import { useSession } from 'next-auth/react';
+import { useConfirm } from '@/providers/ConfirmProvider';
 
 interface FeedbackItem {
     id: string;
@@ -13,6 +14,7 @@ interface FeedbackItem {
     status: string;
     created_at: string;
     user_name: string;
+    user_id: string;
     upvotes: number;
     downvotes: number;
     user_vote: 'up' | 'down' | null;
@@ -26,6 +28,7 @@ interface FeedbackItem {
 
 export default function FeedbackPage() {
     const { data: session } = useSession();
+    const { confirm } = useConfirm();
     const toast = useToast();
     const [category, setCategory] = useState('feature_request');
     const [message, setMessage] = useState('');
@@ -143,6 +146,31 @@ export default function FeedbackPage() {
             case 'bug': return 'Bug Report';
             case 'general': return 'General';
             default: return 'Other';
+        }
+    };
+
+    const handleDelete = async (feedbackId: string) => {
+        if (!await confirm({
+            title: 'Delete Feedback',
+            message: 'Are you sure you want to delete this feedback? This action cannot be undone.',
+            confirmLabel: 'Delete',
+            variant: 'danger'
+        })) return;
+
+        try {
+            const res = await fetch(`/api/feedback?id=${feedbackId}`, {
+                method: 'DELETE',
+            });
+
+            if (res.ok) {
+                setFeedbackList(prev => prev.filter(item => item.id !== feedbackId));
+                toast.success('Feedback deleted successfully');
+            } else {
+                toast.error('Failed to delete feedback');
+            }
+        } catch (error) {
+            console.error('Error deleting feedback:', error);
+            toast.error('Failed to delete feedback');
         }
     };
 
@@ -266,8 +294,17 @@ export default function FeedbackPage() {
                         {feedbackList.map((item) => (
                             <div key={item.id}>
                                 {/* Mobile Card View */}
-                                <div className="bg-primary/20 border border-border rounded-xl p-4 md:hidden hover:bg-primary/30 transition-colors">
-                                    <div className="flex items-center justify-between mb-3">
+                                <div className="bg-primary/20 border border-border rounded-xl p-4 md:hidden hover:bg-primary/30 transition-colors relative group">
+                                    {session?.user?.userType === 'admin' && (
+                                        <button
+                                            onClick={() => handleDelete(item.id)}
+                                            className="absolute top-2 right-2 w-6 h-6 bg-surface border border-border rounded-full text-text-secondary hover:text-red-500 hover:border-red-500 flex items-center justify-center shadow-sm z-10"
+                                            title="Delete feedback"
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
+                                    <div className="flex items-center justify-between mb-3 pr-8">
                                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-secondary text-xs font-medium text-text-secondary border border-border">
                                             <span>{getCategoryIcon(item.category)}</span>
                                             <span>{getCategoryLabel(item.category)}</span>
@@ -325,7 +362,16 @@ export default function FeedbackPage() {
                                 </div>
 
                                 {/* Desktop View */}
-                                <div className="hidden md:flex bg-primary/20 border border-border rounded-xl p-5 gap-4 transition-all hover:bg-primary/30 hover:border-primary/50">
+                                <div className="hidden md:flex bg-primary/20 border border-border rounded-xl p-5 gap-4 transition-all hover:bg-primary/30 hover:border-primary/50 relative group">
+                                    {session?.user?.userType === 'admin' && (
+                                        <button
+                                            onClick={() => handleDelete(item.id)}
+                                            className="absolute top-2 right-2 w-6 h-6 bg-surface border border-border rounded-full text-text-secondary hover:text-red-500 hover:border-red-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center shadow-sm z-10"
+                                            title="Delete feedback"
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
                                     {/* Vote Controls */}
                                     <div className="flex flex-col items-center gap-1 shrink-0 pt-1">
                                         <button
