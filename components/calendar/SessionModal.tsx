@@ -334,11 +334,12 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={handleClose} title={step === 'details' ? "Session Details" : "Confirm RSVP"} size="xl" className="!p-5 h-[90dvh] md:h-[80vh] flex flex-col">
-            <div className="flex-1 flex flex-col min-h-0">
+        <Modal isOpen={isOpen} onClose={handleClose} title={step === 'details' ? "Session Details" : "Confirm RSVP"} size="xl" className="!p-5 h-[85vh] md:h-[80vh] flex flex-col">
+            <div className="flex-1 flex flex-col min-h-0" onClick={(e) => e.stopPropagation()}>
                 {step === 'details' && (
                     <div className="flex p-1 bg-surface-secondary/30 border border-border rounded-xl mb-6 shrink-0">
                         <button
+                            type="button"
                             className={`flex-1 px-4 py-3 text-lg font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${mainTab === 'details'
                                 ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
                                 : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
@@ -349,6 +350,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                             Details
                         </button>
                         <button
+                            type="button"
                             className={`flex-1 px-4 py-3 text-lg font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${mainTab === 'chat'
                                 ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
                                 : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
@@ -469,6 +471,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                 {/* Tabs for Details */}
                                 <div className="flex gap-2 p-1 bg-surface-secondary/30 border border-border rounded-xl mb-4 shrink-0 overflow-x-auto">
                                     <button
+                                        type="button"
                                         className={`flex-1 min-w-0 md:min-w-[100px] px-2 md:px-3 py-2 text-xs md:text-sm font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-1.5 md:gap-2 ${subTab === 'players'
                                             ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
                                             : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
@@ -479,6 +482,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                         Players ({session.commitments?.length || 0})
                                     </button>
                                     <button
+                                        type="button"
                                         className={`flex-1 min-w-0 md:min-w-[100px] px-2 md:px-3 py-2 text-xs md:text-sm font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-1.5 md:gap-2 ${subTab === 'recordings'
                                             ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
                                             : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
@@ -489,6 +493,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                         Recordings ({session.recordings?.length || 0})
                                     </button>
                                     <button
+                                        type="button"
                                         className={`flex-1 min-w-0 md:min-w-[100px] px-2 md:px-3 py-2 text-xs md:text-sm font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-1.5 md:gap-2 ${subTab === 'photos'
                                             ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
                                             : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
@@ -673,6 +678,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                 <>
                                     <Button
                                         onClick={handleEditRsvp}
+                                        type="button"
                                         variant="secondary"
                                         disabled={isCommitting}
                                         className="w-[150px]"
@@ -681,6 +687,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                     </Button>
                                     <Button
                                         onClick={handleCancelRsvp}
+                                        type="button"
                                         variant="danger"
                                         disabled={isCommitting}
                                         className="w-[150px]"
@@ -691,6 +698,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                             ) : (
                                 <Button
                                     onClick={handleRsvpClick}
+                                    type="button"
                                     variant="primary"
                                     disabled={isCommitting}
                                     className="w-[150px]"
@@ -700,6 +708,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                             )}
                             <Button
                                 onClick={handleClose}
+                                type="button"
                                 variant="ghost"
                                 className="w-[150px] bg-surface-secondary hover:bg-surface-hover text-text-primary border border-border"
                             >
@@ -717,6 +726,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                 </p>
                                 <div className="flex gap-3 mb-6">
                                     <button
+                                        type="button"
                                         onClick={() => setRsvpStatus('confirmed')}
                                         className={`flex-1 py-3 px-4 rounded-lg font-bold border transition-all ${rsvpStatus === 'confirmed'
                                             ? 'bg-primary text-white border-primary shadow-[0_0_15px_rgba(139,92,246,0.4)]'
@@ -726,6 +736,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                         Definitely In
                                     </button>
                                     <button
+                                        type="button"
                                         onClick={() => setRsvpStatus('maybe')}
                                         className={`flex-1 py-3 px-4 rounded-lg font-bold border transition-all ${rsvpStatus === 'maybe'
                                             ? 'bg-yellow-500/20 text-yellow-500 border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.2)]'
@@ -791,6 +802,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                         <div className="flex justify-center gap-3 pt-4 border-t border-border mt-auto shrink-0">
                             <Button
                                 onClick={handleConfirmRsvp}
+                                type="button"
                                 variant="primary"
                                 disabled={isCommitting || selectedCapabilities.length === 0}
                                 className="w-[150px]"
@@ -799,6 +811,7 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                             </Button>
                             <Button
                                 onClick={() => setStep('details')}
+                                type="button"
                                 variant="ghost"
                                 disabled={isCommitting}
                                 className="w-[150px] bg-surface-secondary hover:bg-surface-hover text-text-primary border border-border"
