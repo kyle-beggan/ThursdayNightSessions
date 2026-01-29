@@ -20,17 +20,19 @@ export async function GET() {
             }
         );
 
-        // Fetch user's last_sign_in_at and read receipts if logged in
+        // Fetch user's last_sign_in_at, user_type, and read receipts if logged in
         let lastSignInAt: string | null = null;
+        let currentUserType: string | null = null;
         const readReceipts: Record<string, string> = {}; // sessionId -> last_read_at
 
         if (session?.user?.id) {
             const { data: userData } = await supabaseAdmin
                 .from('users')
-                .select('last_sign_in_at')
+                .select('last_sign_in_at, user_type')
                 .eq('id', session.user.id)
                 .single();
             lastSignInAt = userData?.last_sign_in_at;
+            currentUserType = userData?.user_type;
 
             const { data: receipts } = await supabaseAdmin
                 .from('chat_read_receipts')
@@ -46,38 +48,62 @@ export async function GET() {
         }
 
         // Fetch sessions with songs and commitments
-        const { data: sessions, error } = await supabaseAdmin
+        const query = supabaseAdmin
             .from('sessions')
             .select(`
-        *,
-        songs:session_songs(*),
-        commitments:session_commitments(
-          *,
-          user:users(
-            id,
-            name,
-            email,
-            capabilities:user_capabilities(
-              capability:capabilities(*)
-            )
-          ),
-          capabilities:session_commitment_capabilities(
-             capability:capabilities(*)
-          )
-        ),
-        recordings:session_recordings(*),
-        photos:session_photos(*)
-      `)
+                *,
+                songs:session_songs(*),
+                commitments:session_commitments(
+                  *,
+                  user:users(
+                    id,
+                    name,
+                    email,
+                    capabilities:user_capabilities(
+                      capability:capabilities(*)
+                    )
+                  ),
+                  capabilities:session_commitment_capabilities(
+                     capability:capabilities(*)
+                  )
+                ),
+                recordings:session_recordings(*),
+                photos:session_photos(*),
+                visibility:session_visibility(user_id)
+            `)
             .order('date', { ascending: true });
+
+        const { data: sessions, error } = await query;
 
         if (error) {
             console.error('Error fetching sessions:', error);
             return NextResponse.json({ error: 'Failed to fetch sessions' }, { status: 500 });
         }
 
+        // Filter sessions based on visibility
+        const filteredSessions = sessions?.filter(sessionItem => {
+            // Admin sees everything (check DB role first, then session as fallback)
+            if (currentUserType === 'admin' || session?.user?.userType === 'admin') return true;
+
+            // Public sessions visible to everyone
+            if (sessionItem.is_public) return true;
+
+            // Private sessions visible to users in visibility list
+            const allowedUserIds = sessionItem.visibility?.map((v: { user_id: string }) => v.user_id) || [];
+            if (session?.user?.id && allowedUserIds.includes(session.user.id)) return true;
+
+            return false;
+        }) || [];
+
+        // Calculate new message counts (Moved logical block here and using filteredSessions)
+        const newMessageCounts: Record<string, number> = {};
+
+        // ... (rest of message count logic using filteredSessions instead of sessions)
+
+
         // Calculate new message counts
         // Logic: Count messages where created_at > MAX(last_sign_in_at, last_read_at_for_session)
-        const newMessageCounts: Record<string, number> = {};
+
 
         // We need to fetch messages for all visible sessions to count efficiently
         // Or we can do a grouped query. Let's try a grouped query for all messages newer than the global last_sign_in_at first
@@ -91,7 +117,7 @@ export async function GET() {
             // Find the baseline timestamp to fetch messages from. 
             // If we have read receipts, usage that. If not, use sign in.
             // Safest is to just fetch messages for the displayed sessions.
-            const sessionIds = sessions?.map(s => s.id) || [];
+            const sessionIds = filteredSessions.map(s => s.id);
 
             if (sessionIds.length > 0) {
                 const { data: messages } = await supabaseAdmin
@@ -123,7 +149,7 @@ export async function GET() {
 
         // Fetch artist info AND capabilities for all songs in these sessions
         // We have to match by name since session_songs doesn't seem to have a proper FK in the current schema assumption
-        const allSongNames = sessions?.flatMap(s => s.songs?.map((ss: { song_name: string }) => ss.song_name)) || [];
+        const allSongNames = filteredSessions.flatMap(s => s.songs?.map((ss: { song_name: string }) => ss.song_name)) || [];
         const uniqueSongNames = [...new Set(allSongNames)];
 
         const songDetailsMap: Record<string, { artist: string, capabilities: unknown[] }> = {};
@@ -155,7 +181,7 @@ export async function GET() {
         }
 
         // Transform the data to match our types
-        const transformedSessions = sessions?.map(session => ({
+        const transformedSessions = filteredSessions.map(session => ({
             ...session,
             songs: session.songs?.map((s: Record<string, unknown>) => {
                 const details = songDetailsMap[s.song_name as string];
@@ -177,7 +203,7 @@ export async function GET() {
             })) || [],
             commitments_count: session.commitments?.length || 0,
             newMessageCount: newMessageCounts[session.id] || 0,
-        })) || [];
+        }));
 
         return NextResponse.json(transformedSessions);
     } catch (error) {
@@ -249,7 +275,36 @@ export async function POST(request: NextRequest) {
                 .insert(songsToInsert);
 
             if (songsError) {
-                console.error('Error creating songs:', songsError);
+                console.error('Error adding songs:', songsError);
+            }
+
+        }
+
+        // Handle visibility if private
+        const { is_public, visible_user_ids } = body;
+
+        // Update is_public flag if provided (default true)
+        if (is_public !== undefined) {
+            const { error: updateError } = await supabaseAdmin
+                .from('sessions')
+                .update({ is_public })
+                .eq('id', newSession.id);
+
+            if (updateError) console.error('Error updating session visibility flag:', updateError);
+        }
+
+        if (is_public === false && visible_user_ids && visible_user_ids.length > 0) {
+            const inserts = visible_user_ids.map((uid: string) => ({
+                session_id: newSession.id,
+                user_id: uid
+            }));
+
+            const { error: visError } = await supabaseAdmin
+                .from('session_visibility')
+                .insert(inserts);
+
+            if (visError) {
+                console.error('Error creating session visibility:', visError);
             }
         }
 

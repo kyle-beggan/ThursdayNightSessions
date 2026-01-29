@@ -58,6 +58,8 @@ export interface Session {
     updated_at: string;
     songs?: SessionSong[];
     commitments?: SessionCommitment[];
+    is_public: boolean;
+    visible_to?: string[]; // Array of user IDs
 }
 
 export interface SessionSong {

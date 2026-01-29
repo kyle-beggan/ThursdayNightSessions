@@ -184,6 +184,37 @@ export async function PATCH(
             }
         }
 
+        // 3. Update Visibility (if provided)
+        const { is_public, visible_user_ids } = body;
+
+        if (is_public !== undefined) {
+            const { error: updateError } = await supabaseAdmin
+                .from('sessions')
+                .update({ is_public })
+                .eq('id', id);
+
+            if (updateError) console.error('Error updating session visibility flag:', updateError);
+        }
+
+        if (visible_user_ids) {
+            // Delete existing visibility
+            await supabaseAdmin.from('session_visibility').delete().eq('session_id', id);
+
+            // Insert new visibility if not public and user IDs provided
+            if (is_public === false && visible_user_ids.length > 0) {
+                const inserts = visible_user_ids.map((uid: string) => ({
+                    session_id: id,
+                    user_id: uid
+                }));
+
+                const { error: visError } = await supabaseAdmin
+                    .from('session_visibility')
+                    .insert(inserts);
+
+                if (visError) console.error('Error updating session visibility:', visError);
+            }
+        }
+
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error('Error in PATCH /api/sessions/[id]:', error);

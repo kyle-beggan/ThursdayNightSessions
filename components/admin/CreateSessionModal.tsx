@@ -3,13 +3,16 @@ import { useRouter } from 'next/navigation';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import { useToast } from '@/hooks/useToast';
-import { Song, SessionCommitment, SessionRecording, SessionPhoto } from '@/lib/types';
+import { Song, SessionCommitment, SessionRecording, SessionPhoto, User } from '@/lib/types';
+import VisibilitySelector from './VisibilitySelector';
 import PhotoGallery from '@/components/session/PhotoGallery';
 import CapabilityIcon from '@/components/ui/CapabilityIcon';
 import { createClient } from '@/lib/supabase/client';
 import { useConfirm } from '@/providers/ConfirmProvider';
 
-import { FaInfoCircle, FaUserFriends, FaMicrophone, FaCamera } from 'react-icons/fa';
+import { FaInfoCircle, FaUserFriends, FaMicrophone, FaCamera, FaMusic, FaEye, FaPlay } from 'react-icons/fa';
+
+
 
 interface CreateSessionModalProps {
     isOpen: boolean;
@@ -24,6 +27,8 @@ interface CreateSessionModalProps {
         commitments?: SessionCommitment[];
         recordings?: SessionRecording[];
         photos?: SessionPhoto[];
+        is_public?: boolean;
+        visible_to?: string[]; // user IDs
     } | null;
 }
 
@@ -41,10 +46,15 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
     const [songSearch, setSongSearch] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLoadingSongs, setIsLoadingSongs] = useState(false);
-    const [activeTab, setActiveTab] = useState<'details' | 'players' | 'recordings' | 'photos'>('details');
+    const [activeTab, setActiveTab] = useState<'details' | 'songs' | 'visibility' | 'players' | 'recordings' | 'photos'>('details');
     const [isUploading, setIsUploading] = useState(false);
     const [photoCount, setPhotoCount] = useState(0);
     const [commitments, setCommitments] = useState<SessionCommitment[]>([]);
+
+    // Visibility State
+    const [isPublic, setIsPublic] = useState(true);
+    const [visibleUserIds, setVisibleUserIds] = useState<string[]>([]);
+    const [allUsers, setAllUsers] = useState<User[]>([]);
 
 
 
@@ -55,29 +65,45 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
     }, []);
 
     useEffect(() => {
-        if (isOpen) {
-            fetchSongs();
-            if (initialData) {
-                setFormData({
-                    date: initialData.date,
-                    start_time: initialData.start_time.slice(0, 5),
-                    end_time: initialData.end_time.slice(0, 5),
-                });
-                if (initialData.songs) {
-                    setSelectedSongs(initialData.songs);
+        const initializeModal = async () => {
+            if (isOpen) {
+                fetchSongs();
+                const users = await fetchUsers();
+                const adminIds = users.filter(u => u.user_type === 'admin').map(u => u.id);
+
+                if (initialData) {
+                    setFormData({
+                        date: initialData.date,
+                        start_time: initialData.start_time.slice(0, 5),
+                        end_time: initialData.end_time.slice(0, 5),
+                    });
+                    if (initialData.songs) {
+                        setSelectedSongs(initialData.songs);
+                    }
+                    setPhotoCount(initialData.photos?.length || 0);
+                    setCommitments(initialData.commitments || []);
+                    setIsPublic(initialData.is_public !== false); // Default true unless explicitly false
+
+                    // If we have explicit visibility settings, use them. 
+                    // Otherwise (e.g. was public or empty), default to admins so toggling to private has a sensible default.
+                    const explicitIds = initialData.visible_to || [];
+                    setVisibleUserIds(explicitIds.length > 0 ? explicitIds : adminIds);
+                } else {
+                    setFormData({
+                        date: '',
+                        start_time: '20:00',
+                        end_time: '00:00',
+                    });
+                    setSelectedSongs([]);
+                    setIsPublic(true);
+                    // Default to admins for new sessions (pre-filled for when/if user toggles to private)
+                    setVisibleUserIds(adminIds);
                 }
-                setPhotoCount(initialData.photos?.length || 0);
-                setCommitments(initialData.commitments || []);
-            } else {
-                setFormData({
-                    date: '',
-                    start_time: '20:00',
-                    end_time: '00:00',
-                });
-                setSelectedSongs([]);
+                setActiveTab('details');
             }
-            setActiveTab('details');
-        }
+        };
+
+        initializeModal();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, initialData]);
 
@@ -196,6 +222,21 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
         }
     };
 
+    const fetchUsers = async () => {
+        try {
+            const res = await fetch('/api/admin/users');
+            if (res.ok) {
+                const data = await res.json();
+                const approvedUsers = data.filter((u: User) => u.status === 'approved');
+                setAllUsers(approvedUsers);
+                return approvedUsers as User[];
+            }
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        }
+        return [];
+    };
+
     const fetchSongs = async () => {
         setIsLoadingSongs(true);
         try {
@@ -241,7 +282,9 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
                     songs: selectedSongs.map(s => ({
                         song_name: s.title,
                         song_url: s.resource_url
-                    }))
+                    })),
+                    is_public: isPublic,
+                    visible_user_ids: visibleUserIds
                 })
             });
 
@@ -277,54 +320,79 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={initialData ? "Edit Session" : "Create New Session"} size="xl" className="!p-5 h-[90dvh] md:h-[80vh] flex flex-col">
             <div className="flex flex-col flex-1 min-h-0">
-                {initialData?.id && (
-                    <div className="flex gap-2 p-1 bg-surface-secondary/30 border border-border rounded-xl mb-6 shrink-0 overflow-x-auto">
-                        <button
-                            type="button"
-                            className={`flex-1 min-w-0 md:min-w-[100px] px-1 py-2 md:px-3 md:py-3 text-[10px] md:text-base font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-1 md:gap-2 ${activeTab === 'details'
-                                ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
-                                : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
-                                }`}
-                            onClick={() => setActiveTab('details')}
-                        >
-                            <FaInfoCircle className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                            <span>Details</span>
-                        </button>
-                        <button
-                            type="button"
-                            className={`flex-1 min-w-0 md:min-w-[100px] px-1 py-2 md:px-3 md:py-3 text-[10px] md:text-base font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-1 md:gap-2 ${activeTab === 'players'
-                                ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
-                                : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
-                                }`}
-                            onClick={() => setActiveTab('players')}
-                        >
-                            <FaUserFriends className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                            <span>Players <span className="hidden sm:inline">({commitments.length})</span></span>
-                        </button>
-                        <button
-                            type="button"
-                            className={`flex-1 min-w-0 md:min-w-[100px] px-1 py-2 md:px-3 md:py-3 text-[10px] md:text-base font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-1 md:gap-2 ${activeTab === 'recordings'
-                                ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
-                                : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
-                                }`}
-                            onClick={() => setActiveTab('recordings')}
-                        >
-                            <FaMicrophone className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                            <span>Recs <span className="hidden sm:inline">({initialData?.recordings?.length || 0})</span></span>
-                        </button>
-                        <button
-                            type="button"
-                            className={`flex-1 min-w-0 md:min-w-[100px] px-1 py-2 md:px-3 md:py-3 text-[10px] md:text-base font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-1 md:gap-2 ${activeTab === 'photos'
-                                ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
-                                : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
-                                }`}
-                            onClick={() => setActiveTab('photos')}
-                        >
-                            <FaCamera className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                            <span>Photos <span className="hidden sm:inline">({photoCount})</span></span>
-                        </button>
-                    </div>
-                )}
+                <div className="flex gap-2 p-1 bg-surface-secondary/30 border border-border rounded-xl mb-6 shrink-0 overflow-x-auto">
+                    <button
+                        type="button"
+                        className={`flex-1 min-w-0 md:min-w-[100px] px-1 py-2 md:px-3 md:py-3 text-[10px] md:text-base font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-1 md:gap-2 ${activeTab === 'details'
+                            ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
+                            : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
+                            }`}
+                        onClick={() => setActiveTab('details')}
+                    >
+                        <FaInfoCircle className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                        <span>Details</span>
+                    </button>
+                    <button
+                        type="button"
+                        className={`flex-1 min-w-0 md:min-w-[100px] px-1 py-2 md:px-3 md:py-3 text-[10px] md:text-base font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-1 md:gap-2 ${activeTab === 'songs'
+                            ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
+                            : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
+                            }`}
+                        onClick={() => setActiveTab('songs')}
+                    >
+                        <FaMusic className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                        <span>Songs</span>
+                    </button>
+                    <button
+                        type="button"
+                        className={`flex-1 min-w-0 md:min-w-[100px] px-1 py-2 md:px-3 md:py-3 text-[10px] md:text-base font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-1 md:gap-2 ${activeTab === 'visibility'
+                            ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
+                            : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
+                            }`}
+                        onClick={() => setActiveTab('visibility')}
+                    >
+                        <FaEye className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                        <span>Visibility</span>
+                    </button>
+
+                    {initialData?.id && (
+                        <>
+                            <button
+                                type="button"
+                                className={`flex-1 min-w-0 md:min-w-[100px] px-1 py-2 md:px-3 md:py-3 text-[10px] md:text-base font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-1 md:gap-2 ${activeTab === 'players'
+                                    ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
+                                    : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
+                                    }`}
+                                onClick={() => setActiveTab('players')}
+                            >
+                                <FaUserFriends className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                                <span>Players <span className="hidden sm:inline">({commitments.length})</span></span>
+                            </button>
+                            <button
+                                type="button"
+                                className={`flex-1 min-w-0 md:min-w-[100px] px-1 py-2 md:px-3 md:py-3 text-[10px] md:text-base font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-1 md:gap-2 ${activeTab === 'recordings'
+                                    ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
+                                    : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
+                                    }`}
+                                onClick={() => setActiveTab('recordings')}
+                            >
+                                <FaMicrophone className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                                <span>Recs <span className="hidden sm:inline">({initialData?.recordings?.length || 0})</span></span>
+                            </button>
+                            <button
+                                type="button"
+                                className={`flex-1 min-w-0 md:min-w-[100px] px-1 py-2 md:px-3 md:py-3 text-[10px] md:text-base font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-1 md:gap-2 ${activeTab === 'photos'
+                                    ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
+                                    : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
+                                    }`}
+                                onClick={() => setActiveTab('photos')}
+                            >
+                                <FaCamera className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                                <span>Photos <span className="hidden sm:inline">({photoCount})</span></span>
+                            </button>
+                        </>
+                    )}
+                </div>
 
                 <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
                     <div className="flex-1 overflow-y-auto min-h-0 pr-2 space-y-6">
@@ -367,68 +435,99 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Song Selection Section */}
-                                <div className="space-y-4 pt-4 border-t border-border">
-                                    <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider">Select Songs</h3>
-
-                                    <input
-                                        type="text"
-                                        placeholder="Search songs..."
-                                        className="w-full px-4 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                                        value={songSearch}
-                                        onChange={(e) => setSongSearch(e.target.value)}
-                                    />
-
-                                    <div className="max-h-[400px] overflow-y-auto rounded-lg bg-surface/50 border border-border p-4">
-                                        {isLoadingSongs ? (
-                                            <div className="text-center text-text-secondary py-8">Loading songs...</div>
-                                        ) : filteredSongs.length === 0 ? (
-                                            <div className="text-center text-text-secondary py-8">
-                                                {songSearch ? 'No matching songs found' : 'No available songs'}
-                                            </div>
-                                        ) : (
-                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                                {filteredSongs.map(song => {
-                                                    const isSelected = selectedSongs.some(s => s.id === song.id || s.title === song.title);
-                                                    return (
-                                                        <div
-                                                            key={song.id}
-                                                            onClick={() => handleSongToggle(song)}
-                                                            className={`
-                                                                cursor-pointer p-2 rounded-xl border transition-all duration-200 flex flex-col items-center justify-center text-center h-[80px] relative group
-                                                                ${isSelected
-                                                                    ? 'bg-primary/10 border-primary shadow-[0_0_15px_rgba(139,92,246,0.3)]'
-                                                                    : 'bg-surface border-border hover:border-primary/50 hover:bg-surface-hover hover:shadow-lg'
-                                                                }
-                                                            `}
-                                                        >
-                                                            <div className="font-bold text-sm text-text-primary truncate w-full px-2">{song.title}</div>
-                                                            <div className="text-xs text-text-secondary truncate w-full px-2">{song.artist}</div>
-                                                            {isSelected && (
-                                                                <div className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
-                                                            )}
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Create New Song Button */}
-                                    <div className="flex justify-center pt-2">
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            className="text-text-secondary hover:text-primary transition-colors text-xs"
-                                            onClick={() => router.push('/songs')}
-                                        >
-                                            Don&apos;t see the song? Create it in the Song Library
-                                        </Button>
-                                    </div>
-                                </div>
                             </>
+                        )}
+
+                        {activeTab === 'songs' && (
+                            <div className="space-y-4">
+                                <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider">Select Songs</h3>
+
+                                <input
+                                    type="text"
+                                    placeholder="Search songs..."
+                                    className="w-full px-4 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                                    value={songSearch}
+                                    onChange={(e) => setSongSearch(e.target.value)}
+                                />
+
+                                <div className="max-h-[400px] overflow-y-auto rounded-lg bg-surface/50 border border-border p-4">
+                                    {isLoadingSongs ? (
+                                        <div className="text-center text-text-secondary py-8">Loading songs...</div>
+                                    ) : filteredSongs.length === 0 ? (
+                                        <div className="text-center text-text-secondary py-8">
+                                            {songSearch ? 'No matching songs found' : 'No available songs'}
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                            {filteredSongs.map(song => {
+                                                const isSelected = selectedSongs.some(s => s.id === song.id || s.title === song.title);
+                                                return (
+                                                    <div
+                                                        key={song.id}
+                                                        onClick={() => handleSongToggle(song)}
+                                                        className={`
+                                                            cursor-pointer p-2 rounded-xl border transition-all duration-200 flex flex-col items-center justify-center text-center h-[80px] relative group
+                                                            ${isSelected
+                                                                ? 'bg-primary/10 border-primary shadow-[0_0_15px_rgba(139,92,246,0.3)]'
+                                                                : 'bg-surface border-border hover:border-primary/50 hover:bg-surface-hover hover:shadow-lg'
+                                                            }
+                                                        `}
+                                                    >
+                                                        <div className="font-bold text-sm text-text-primary truncate w-full px-2">{song.title}</div>
+                                                        <div className="text-xs text-text-secondary truncate w-full px-2">{song.artist}</div>
+
+                                                        {/* Play Button */}
+                                                        {song.resource_url && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    window.open(song.resource_url, '_blank');
+                                                                }}
+                                                                className="absolute top-1 left-1 w-6 h-6 rounded-full bg-surface-secondary text-primary flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary hover:text-white shadow-sm z-10"
+                                                                title="Play Song"
+                                                            >
+                                                                <FaPlay className="w-2.5 h-2.5 ml-0.5" />
+                                                            </button>
+                                                        )}
+
+                                                        {isSelected && (
+                                                            <div className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Create New Song Button */}
+                                <div className="flex justify-center pt-2">
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-text-secondary hover:text-primary transition-colors text-xs"
+                                        onClick={() => router.push('/songs')}
+                                    >
+                                        Don&apos;t see the song? Create it in the Song Library
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'visibility' && (
+                            <div className="space-y-4">
+                                <VisibilitySelector
+                                    users={allUsers}
+                                    selectedUserIds={visibleUserIds}
+                                    isPublic={isPublic}
+                                    onChange={(pub, ids) => {
+                                        setIsPublic(pub);
+                                        setVisibleUserIds(ids);
+                                    }}
+                                />
+                            </div>
                         )}
 
                         {activeTab === 'players' && initialData && (
@@ -563,7 +662,7 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, 
                         </Button>
                     </div>
                 </form>
-            </div>
-        </Modal>
+            </div >
+        </Modal >
     );
 }

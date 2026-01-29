@@ -61,7 +61,9 @@ export default function AdminSessionsPage() {
                 title: s.song_name,
                 artist: '', // Information lost in session_songs table
                 resource_url: s.song_url
-            })) as Song[]
+            })) as Song[],
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            visible_to: (session as any).visibility?.map((v: any) => v.user_id) || []
         };
 
         setEditingSession(preparedSession);

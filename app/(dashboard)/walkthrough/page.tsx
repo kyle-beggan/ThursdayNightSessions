@@ -34,7 +34,7 @@ export default function WalkthroughPage() {
                         <div className="bg-surface-secondary p-4 rounded-lg">
                             <h4 className="font-semibold text-primary mb-2">✅ RSVP Status</h4>
                             <p className="text-sm text-text-secondary">
-                                Quickly mark yourself as &quot;In&quot; or &quot;Out&quot; for sessions. You can also specify which instruments you&apos;ll be playing.
+                                Quickly mark yourself as &quot;Definitely In&quot; or &quot;Maybe&quot; for sessions. You can also specify which instruments you&apos;ll be playing.
                             </p>
                         </div>
                     </div>
@@ -173,30 +173,30 @@ export default function WalkthroughPage() {
                     <div className="space-y-4 mt-4">
                         <div className="bg-surface-secondary p-4 rounded-lg">
                             <h4 className="font-semibold text-primary mb-2 flex items-center gap-2">
-                                <span>📱</span> SMS Reminders
+                                <span>📱</span> Mobile Experience
                             </h4>
                             <p className="text-sm text-text-secondary">
-                                Admins can now send session reminders directly to your phone. Make sure your profile has a valid phone number to receive updates!
+                                Major improvements for mobile users! We&apos;ve fixed modal interactions, improved touch responsiveness, and ensured the &quot;Chat&quot; tab works perfectly without closing the window.
                             </p>
                         </div>
 
                         <div className="bg-surface-secondary p-4 rounded-lg">
                             <h4 className="font-semibold text-primary mb-2 flex items-center gap-2">
-                                <span>📸</span> Session Photos
+                                <span>📊</span> Reliable Analytics
                             </h4>
                             <p className="text-sm text-text-secondary">
-                                Capture the moment! You can now upload and view photos for each session directly in the Session Details.
+                                Squashed some bugs in the analytics engine. Your stats should now load reliably every time. Check out the improved charts!
                             </p>
                         </div>
 
                         <div className="bg-surface-secondary p-4 rounded-lg">
                             <h4 className="font-semibold text-primary mb-2 flex items-center gap-2">
-                                <span>🎨</span> UI Polish
+                                <span>🎨</span> Visual Polish
                             </h4>
                             <ul className="text-sm text-text-secondary space-y-2 list-disc pl-4">
-                                <li><strong>Tab Icons:</strong> Easier navigation in profiles and session details.</li>
-                                <li><strong>Song Previews:</strong> New &quot;Play&quot; button in the song selector lets you listen before you choose.</li>
-                                <li><strong>Better Grids:</strong> Capabilities now display in a cleaner 4-column layout on desktop.</li>
+                                <li><strong>Better Layouts:</strong> Session details now use a cleaner 2-column grid for songs and recordings.</li>
+                                <li><strong>Download Button:</strong> Added a dedicated download button for recordings in the session modal.</li>
+                                <li><strong>Consistent Styling:</strong> Buttons and icons have been standardized across the app.</li>
                             </ul>
                         </div>
                     </div>
