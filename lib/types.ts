@@ -21,6 +21,7 @@ export interface Song {
     creator?: { name: string; image?: string };
     vote_count?: number;
     user_has_voted?: boolean;
+    is_recorded?: boolean;
 }
 
 export interface User {

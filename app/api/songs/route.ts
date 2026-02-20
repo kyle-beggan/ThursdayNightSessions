@@ -127,6 +127,12 @@ export async function GET(request: NextRequest) {
             userVotes?.forEach(v => userVotedSongIds.add(v.song_id));
         }
 
+        // Fetch session recordings to check if any session has been recorded
+        const { data: sessionsWithRecordings } = await supabaseAdmin
+            .from('session_recordings')
+            .select('session_id');
+        const sessionIdsWithRecordings = new Set(sessionsWithRecordings?.map(r => r.session_id) || []);
+
         // Count votes per song
         const voteCounts = (allVotes || []).reduce((acc, curr) => {
             acc[curr.song_id] = (acc[curr.song_id] || 0) + 1;
@@ -139,6 +145,15 @@ export async function GET(request: NextRequest) {
             const sessionInfo = songSessionMap.get(song.title);
             // Flatten capabilities
             const capabilities = song.song_capabilities?.map((sc: { capability: unknown }) => sc.capability) || [];
+
+            // Check if recorded in ANY session
+            // Since a song might have multiple session entries (though songSessionMap currently only stores one)
+            // We should ideally check all sessions for this song name.
+            // However, the current songSessionMap logic only keeps the "most recent" or just one.
+            // Let's improve this to correctly identify if it's recorded in *any* session.
+            const isRecorded = usedSongs?.some((us: { song_name: string | null; session_id: string }) =>
+                us.song_name === song.title && sessionIdsWithRecordings.has(us.session_id)
+            ) || false;
 
             // Remove the raw relation property to clean up response
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -154,7 +169,8 @@ export async function GET(request: NextRequest) {
                 session_date: sessionInfo?.date || null,
                 session_id: sessionInfo?.id || null,
                 vote_count: voteCounts[song.id] || 0,
-                user_has_voted: userVotedSongIds.has(song.id)
+                user_has_voted: userVotedSongIds.has(song.id),
+                is_recorded: isRecorded
             };
         });
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useConfirm } from '@/providers/ConfirmProvider';
 import Button from '@/components/ui/Button';
@@ -15,6 +16,7 @@ import { useSortableData } from '@/hooks/useSortableData';
 import { useToast } from '@/hooks/useToast';
 
 export default function SongsPage() {
+    const { data: session } = useSession();
     const toast = useToast();
     const { confirm } = useConfirm();
     const [songs, setSongs] = useState<Song[]>([]);
@@ -296,28 +298,47 @@ export default function SongsPage() {
                                                         )}
                                                     </div>
 
-                                                    {/* Right: Voting */}
-                                                    <div className="flex items-center bg-surface rounded-full px-1 py-0.5 border border-border flex-shrink-0 ml-2">
-                                                        <button
-                                                            onClick={() => !song.user_has_voted && handleVote(song)}
-                                                            className={`p-1 rounded-full ${song.user_has_voted ? 'text-green-500' : 'text-text-secondary'}`}
-                                                        >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                                                                <path d="M1 8.25a1.25 1.25 0 112.5 0v7.5a1.25 1.25 0 11-2.5 0v-7.5zM11 3V1.7c0-.268.14-.526.395-.607A2 2 0 0114 3c0 .995-.182 1.948-.514 2.826-.204.54.166 1.174.744 1.174h2.52c1.243 0 2.261 1.01 2.146 2.247a23.864 23.864 0 01-1.341 5.974C17.153 16.323 16.072 17 14.9 17h-3.192a3 3 0 01-1.341-.317l-2.734-1.366A3 3 0 006.292 15H5V8h.963c.685 0 1.258-.483 1.612-1.068a4.011 4.011 0 012.16-1.779A10.55 10.55 0 0011 3z" />
-                                                            </svg>
-                                                        </button>
-                                                        <span className={`text-xs font-medium mx-1 min-w-[12px] text-center ${song.user_has_voted ? 'text-green-500' : 'text-text-secondary'}`}>
-                                                            {song.vote_count || 0}
-                                                        </span>
-                                                        <button
-                                                            onClick={() => song.user_has_voted && handleVote(song)}
-                                                            disabled={!song.user_has_voted}
-                                                            className={`p-1 rounded-full ${!song.user_has_voted ? 'text-text-secondary/30' : 'text-text-secondary hover:text-red-400'}`}
-                                                        >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                                                                <path d="M18.905 12.75a1.25 1.25 0 01-2.5 0v-7.5a1.25 1.25 0 112.5 0v7.5zM8.905 17v1.3c0 .268-.14.526-.395.607A2 2 0 015.905 17c0-.995.182-1.948.514-2.826.204-.54-.166-1.174-.744-1.174h-2.52c-1.243 0-2.261-1.01-2.146-2.247.193-2.08.652-4.082 1.341-5.974C2.752 3.677 3.833 3 5.005 3h3.192a3 3 0 011.341.317l2.734 1.366A3 3 0 0013.613 5h1.292v7h-.963c-.685 0-1.258.483-1.612 1.068a4.011 4.011 0 01-2.16 1.779 10.55 10.55 0 00-1.265 2.153z" />
-                                                            </svg>
-                                                        </button>
+                                                    {/* Right Actions: Voting & Optional Delete */}
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="flex items-center bg-surface rounded-full px-1 py-0.5 border border-border flex-shrink-0">
+                                                            <button
+                                                                onClick={() => !song.user_has_voted && handleVote(song)}
+                                                                className={`p-1 rounded-full ${song.user_has_voted ? 'text-green-500' : 'text-text-secondary'}`}
+                                                            >
+                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                                                    <path d="M1 8.25a1.25 1.25 0 112.5 0v7.5a1.25 1.25 0 11-2.5 0v-7.5zM11 3V1.7c0-.268.14-.526.395-.607A2 2 0 0114 3c0 .995-.182 1.948-.514 2.826-.204.54.166 1.174.744 1.174h2.52c1.243 0 2.261 1.01 2.146 2.247a23.864 23.864 0 01-1.341 5.974C17.153 16.323 16.072 17 14.9 17h-3.192a3 3 0 01-1.341-.317l-2.734-1.366A3 3 0 006.292 15H5V8h.963c.685 0 1.258-.483 1.612-1.068a4.011 4.011 0 012.16-1.779A10.55 10.55 0 0011 3z" />
+                                                                </svg>
+                                                            </button>
+                                                            <span className={`text-xs font-medium mx-1 min-w-[12px] text-center ${song.user_has_voted ? 'text-green-500' : 'text-text-secondary'}`}>
+                                                                {song.vote_count || 0}
+                                                            </span>
+                                                            <button
+                                                                onClick={() => song.user_has_voted && handleVote(song)}
+                                                                disabled={!song.user_has_voted}
+                                                                className={`p-1 rounded-full ${!song.user_has_voted ? 'text-text-secondary/30' : 'text-text-secondary hover:text-red-400'}`}
+                                                            >
+                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                                                    <path d="M18.905 12.75a1.25 1.25 0 01-2.5 0v-7.5a1.25 1.25 0 112.5 0v7.5zM8.905 17v1.3c0 .268-.14.526-.395.607A2 2 0 015.905 17c0-.995.182-1.948.514-2.826.204-.54-.166-1.174-.744-1.174h-2.52c-1.243 0-2.261-1.01-2.146-2.247.193-2.08.652-4.082 1.341-5.974C2.752 3.677 3.833 3 5.005 3h3.192a3 3 0 011.341.317l2.734 1.366A3 3 0 0013.613 5h1.292v7h-.963c-.685 0-1.258.483-1.612 1.068a4.011 4.011 0 01-2.16 1.779 10.55 10.55 0 00-1.265 2.153z" />
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+
+                                                        {/* Mobile Delete Option */}
+                                                        {(session?.user?.userType === 'admin' || song.created_by === session?.user?.id) && (
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    if (!song.is_recorded) handleDeleteSong(song.id);
+                                                                }}
+                                                                disabled={song.is_recorded}
+                                                                className={`p-1 lg:hidden rounded-full border border-border transition-colors ${song.is_recorded ? 'opacity-30 cursor-not-allowed' : 'text-red-400 hover:bg-red-400/10'}`}
+                                                                title={song.is_recorded ? 'Cannot delete recorded song' : 'Delete song'}
+                                                            >
+                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                                </svg>
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
@@ -471,13 +492,17 @@ export default function SongsPage() {
                                                             >
                                                                 Edit
                                                             </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-red-400"
-                                                                onClick={() => handleDeleteSong(song.id)}
-                                                            >
-                                                                Delete
-                                                            </Button>
+                                                            {(session?.user?.userType === 'admin' || song.created_by === session?.user?.id) && (
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    className={`text-xs px-3 py-1.5 h-auto ${song.is_recorded ? 'text-text-secondary/30 cursor-not-allowed' : 'text-text-secondary hover:text-red-400'}`}
+                                                                    onClick={() => !song.is_recorded && handleDeleteSong(song.id)}
+                                                                    disabled={song.is_recorded}
+                                                                    title={song.is_recorded ? 'Cannot delete recorded song' : 'Delete song'}
+                                                                >
+                                                                    Delete
+                                                                </Button>
+                                                            )}
                                                         </div>
                                                     </td>
                                                 </tr>

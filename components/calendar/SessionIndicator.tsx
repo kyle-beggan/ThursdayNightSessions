@@ -206,7 +206,14 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
                         <div className="space-y-1">
                             {session.commitments.slice(0, 10).map((commitment) => (
                                 <div key={commitment.user_id} className="flex items-center gap-1 text-xs text-text-primary">
-                                    <span className="truncate flex-1">{commitment.user.name}</span>
+                                    <span className="truncate flex-1">
+                                        {commitment.user.name}
+                                        {commitment.status === 'maybe' && (
+                                            <span className="ml-1 text-[10px] text-orange-500 font-medium">
+                                                (Maybe)
+                                            </span>
+                                        )}
+                                    </span>
                                     <div className="flex gap-0.5">
                                         {(commitment.capabilities || []).slice(0, 6).map((cap, idx) => (
                                             <span key={idx} title={toProperCase(cap.name)}>

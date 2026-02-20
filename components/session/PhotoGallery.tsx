@@ -1,8 +1,10 @@
 'use client';
 
+
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { SessionPhoto } from '@/lib/types';
+import { FaSpinner } from 'react-icons/fa';
 
 import UploadPhotoModal from './UploadPhotoModal';
 import { useSession } from 'next-auth/react';
@@ -15,6 +17,7 @@ export default function PhotoGallery({ sessionId, onUpdate }: { sessionId: strin
     const { confirm } = useConfirm();
     const toast = useToast();
     const [photos, setPhotos] = useState<SessionPhoto[]>([]);
+    const [deletingPhotoIds, setDeletingPhotoIds] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [selectedPhoto, setSelectedPhoto] = useState<SessionPhoto | null>(null);
@@ -57,6 +60,7 @@ export default function PhotoGallery({ sessionId, onUpdate }: { sessionId: strin
         })) return;
 
         try {
+            setDeletingPhotoIds(prev => [...prev, photo.id]);
             const res = await fetch(`/api/photos/${photo.id}`, {
                 method: 'DELETE',
             });
@@ -71,6 +75,8 @@ export default function PhotoGallery({ sessionId, onUpdate }: { sessionId: strin
         } catch (error) {
             console.error('Error deleting photo:', error);
             toast.error('Failed to delete photo');
+        } finally {
+            setDeletingPhotoIds(prev => prev.filter(id => id !== photo.id));
         }
     };
 
@@ -132,12 +138,15 @@ export default function PhotoGallery({ sessionId, onUpdate }: { sessionId: strin
                                         onClick={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();
-                                            handleDelete(photo);
+                                            if (!deletingPhotoIds.includes(photo.id)) {
+                                                handleDelete(photo);
+                                            }
                                         }}
-                                        className="absolute top-2 right-2 w-6 h-6 bg-surface/80 backdrop-blur-sm border border-white/20 rounded-full text-xs text-text-primary hover:text-red-500 hover:bg-white hover:shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center z-10"
+                                        disabled={deletingPhotoIds.includes(photo.id)}
+                                        className={`absolute top-2 right-2 w-6 h-6 bg-surface/80 backdrop-blur-sm border border-white/20 rounded-full text-xs text-text-primary hover:text-red-500 hover:bg-white hover:shadow-lg transition-all duration-200 flex items-center justify-center z-10 ${deletingPhotoIds.includes(photo.id) ? 'opacity-100 cursor-not-allowed' : 'opacity-0 group-hover:opacity-100'}`}
                                         title="Delete photo"
                                     >
-                                        ✕
+                                        {deletingPhotoIds.includes(photo.id) ? <FaSpinner className="animate-spin text-text-primary" /> : '✕'}
                                     </button>
                                 )
                             )}

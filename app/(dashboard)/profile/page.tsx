@@ -351,65 +351,83 @@ export default function ProfilePage() {
 
                 {/* Details Tab */}
                 {activeTab === 'details' && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-text-secondary mb-2">Name</label>
-                            {isEditing ? (
-                                <Input
-                                    type="text"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    required
-                                />
-                            ) : (
-                                <p className="text-text-primary font-medium">{user.name}</p>
-                            )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+                        {/* Left Column */}
+                        <div className="space-y-6">
+                            <div>
+                                <label className="block text-sm font-medium text-text-secondary mb-2">Name</label>
+                                {isEditing ? (
+                                    <Input
+                                        type="text"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        required
+                                    />
+                                ) : (
+                                    <p className="text-text-primary font-medium">{user.name}</p>
+                                )}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-text-secondary mb-2">Email</label>
+                                {isEditing ? (
+                                    <Input
+                                        type="email"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        required
+                                    />
+                                ) : (
+                                    <p className="text-text-primary font-medium">{user.email}</p>
+                                )}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-text-secondary mb-2">Phone</label>
+                                {isEditing ? (
+                                    <Input
+                                        type="tel"
+                                        value={formData.phone}
+                                        onChange={(e) => setFormData({ ...formData, phone: formatPhoneNumber(e.target.value) })}
+                                        required
+                                        placeholder="555-555-5555"
+                                        maxLength={12}
+                                    />
+                                ) : (
+                                    <p className="text-text-primary font-medium">{user.phone}</p>
+                                )}
+                                <div className="mt-4 p-3 bg-surface-secondary/50 rounded border border-border/50">
+                                    <p className="text-[10px] text-text-secondary leading-relaxed">
+                                        By providing your phone number and saving it to your profile, you expressly consent to receive informational text messages from Sleepy Hollows at the number provided. These messages may include account updates, service notifications, reminders, and other information related to your use of the app.
+                                    </p>
+                                    <p className="text-[10px] text-text-secondary leading-relaxed mt-2">
+                                        Messages will be manually sent. Message and data rates may apply. Message frequency varies.
+                                    </p>
+                                    <p className="text-[10px] text-text-secondary leading-relaxed mt-2">
+                                        You may opt out at any time by replying STOP to any message or by updating your account settings. Reply HELP for assistance. Consent is not required as a condition of using the app.
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-text-secondary mb-2">Email</label>
-                            {isEditing ? (
-                                <Input
-                                    type="email"
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    required
-                                />
-                            ) : (
-                                <p className="text-text-primary font-medium">{user.email}</p>
-                            )}
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-text-secondary mb-2">Phone</label>
-                            {isEditing ? (
-                                <Input
-                                    type="tel"
-                                    value={formData.phone}
-                                    onChange={(e) => setFormData({ ...formData, phone: formatPhoneNumber(e.target.value) })}
-                                    required
-                                    placeholder="555-555-5555"
-                                    maxLength={12}
-                                />
-                            ) : (
-                                <p className="text-text-primary font-medium">{user.phone}</p>
-                            )}
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-text-secondary mb-2">Status</label>
-                            <StatusBadge status={user.status} />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-text-secondary mb-2">Account Type</label>
-                            <p className="text-text-primary font-medium capitalize">{user.user_type}</p>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-text-secondary mb-2">Member Since</label>
-                            <p className="text-text-primary font-medium">
-                                {new Date(user.created_at).toLocaleDateString('en-US', {
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                })}
-                            </p>
+
+                        {/* Right Column */}
+                        <div className="space-y-6">
+                            <div>
+                                <label className="block text-sm font-medium text-text-secondary mb-2">Status</label>
+                                <StatusBadge status={user.status} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-text-secondary mb-2">Account Type</label>
+                                <p className="text-text-primary font-medium capitalize">{user.user_type}</p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-text-secondary mb-2">Member Since</label>
+                                <p className="text-text-primary font-medium">
+                                    {new Date(user.created_at).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    })}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 )}

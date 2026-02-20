@@ -167,19 +167,78 @@ export async function DELETE(
 ) {
     try {
         const session = await getServerSession(authOptions);
-        if (!session?.user) { //  && session.user.userType !== 'admin' ideally
+        if (!session?.user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const { id } = await params;
 
-        const { error } = await supabaseAdmin
+        // 1. Fetch the song to check creator and title
+        const { data: song, error: fetchError } = await supabaseAdmin
+            .from('songs')
+            .select('title, created_by')
+            .eq('id', id)
+            .single();
+
+        if (fetchError || !song) {
+            console.error('Error fetching song for deletion:', fetchError);
+            return NextResponse.json({ error: 'Song not found' }, { status: 404 });
+        }
+
+        // 2. Authorization check: Admin or Creator
+        const isAdmin = session.user.userType === 'admin';
+        const isCreator = song.created_by === session.user.id;
+
+        if (!isAdmin && !isCreator) {
+            return NextResponse.json({ error: 'You do not have permission to delete this song' }, { status: 403 });
+        }
+
+        // 3. Check if recorded
+        // Find all sessions containing this song
+        const { data: usedInSessions } = await supabaseAdmin
+            .from('session_songs')
+            .select('session_id')
+            .eq('song_name', song.title);
+
+        if (usedInSessions && usedInSessions.length > 0) {
+            const sessionIds = usedInSessions.map(s => s.session_id);
+
+            // Check if any of these sessions have recordings
+            const { data: recordings, error: recError } = await supabaseAdmin
+                .from('session_recordings')
+                .select('id')
+                .in('session_id', sessionIds)
+                .limit(1);
+
+            if (recError) {
+                console.error('Error checking recordings:', recError);
+                return NextResponse.json({ error: 'Failed to verify recording status' }, { status: 500 });
+            }
+
+            if (recordings && recordings.length > 0) {
+                return NextResponse.json({
+                    error: 'Cannot delete song because it has already been recorded in a session'
+                }, { status: 400 });
+            }
+        }
+
+        // 4. Cleanup and Delete
+        // Since we use admin client, we should manually clean up relations if they don't cascade
+
+        // Delete capabilities
+        await supabaseAdmin.from('song_capabilities').delete().eq('song_id', id);
+
+        // Delete votes
+        await supabaseAdmin.from('song_votes').delete().eq('song_id', id);
+
+        // Delete the song itself
+        const { error: deleteError } = await supabaseAdmin
             .from('songs')
             .delete()
             .eq('id', id);
 
-        if (error) {
-            console.error('Error deleting song:', error);
+        if (deleteError) {
+            console.error('Error deleting song:', deleteError);
             return NextResponse.json({ error: 'Failed to delete song' }, { status: 500 });
         }
 
