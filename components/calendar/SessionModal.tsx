@@ -87,12 +87,32 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
         setStep('rsvp');
     };
 
-    const handleCapabilityToggle = (capId: string) => {
-        setSelectedCapabilities(prev =>
-            prev.includes(capId)
-                ? prev.filter(id => id !== capId)
-                : [...prev, capId]
-        );
+    const HANGING_OUT_ID = '117ce120-30a1-4cbc-97d3-32b8d2990616';
+    const handleCapabilityToggle = async (capId: string) => {
+        if (capId === HANGING_OUT_ID && !selectedCapabilities.includes(HANGING_OUT_ID)) {
+            // Selecting Hanging Out
+            const confirmed = await confirm({
+                title: 'Hanging Out?',
+                message: "If you're coming, it's implied that you're hanging out. You should only select 'Hanging Out' if that's all you intend to do.",
+                confirmLabel: 'Confirm',
+                variant: 'primary'
+            });
+
+            if (confirmed) {
+                setSelectedCapabilities([HANGING_OUT_ID]);
+            }
+            return;
+        }
+
+        setSelectedCapabilities(prev => {
+            if (prev.includes(capId)) {
+                return prev.filter(id => id !== capId);
+            } else {
+                // If we're selecting something else, make sure Hanging Out is NOT selected
+                // (Though with the UI changes below it should be disabled anyway)
+                return [...prev.filter(id => id !== HANGING_OUT_ID), capId];
+            }
+        });
     };
 
     const [validationError, setValidationError] = useState<string | null>(null);
@@ -757,16 +777,20 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                         {userCapabilities.map(cap => {
                                             const isSelected = selectedCapabilities.includes(cap.id);
+                                            const isHangingOutSelected = selectedCapabilities.includes(HANGING_OUT_ID);
+                                            const isDisabled = isHangingOutSelected && cap.id !== HANGING_OUT_ID;
+
                                             return (
                                                 <div
                                                     key={cap.id}
-                                                    onClick={() => handleCapabilityToggle(cap.id)}
+                                                    onClick={() => !isDisabled && handleCapabilityToggle(cap.id)}
                                                     className={`
                                                 cursor-pointer flex items-center gap-2 p-3 rounded-lg border transition-colors relative group min-h-[48px]
                                                 ${isSelected
                                                             ? 'bg-primary/10 border-primary'
                                                             : 'bg-surface-secondary border-transparent hover:bg-surface-tertiary'
                                                         }
+                                                ${isDisabled ? 'opacity-50 cursor-not-allowed grayscale' : ''}
                                             `}
                                                 >
                                                     <div className="w-5 h-5 flex items-center justify-center">
