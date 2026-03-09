@@ -19,6 +19,14 @@ export default function MonthlySessionsView({ sessions, onRefresh }: MonthlySess
     const [selectedSession, setSelectedSession] = useState<SessionWithDetails | null>(null);
     const currentYear = new Date().getFullYear();
 
+    // Compute most recent and next upcoming sessions
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const sortedSessions = [...sessions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const nextUpcomingSession = sortedSessions.find(s => new Date(s.date) >= today);
+    const mostRecentPastSession = [...sortedSessions].reverse().find(s => new Date(s.date) < today);
+
     // Group sessions by month
     const sessionsByMonth = sessions.reduce((acc, session) => {
         const sessionDate = new Date(session.date);
@@ -50,6 +58,41 @@ export default function MonthlySessionsView({ sessions, onRefresh }: MonthlySess
 
     return (
         <div className="space-y-0">
+            {/* Recent & Upcoming Sessions */}
+            {(mostRecentPastSession || nextUpcomingSession) && (
+                <div className="mb-12 border-b border-border pb-8">
+                    <h2 className="text-2xl md:text-2xl font-bold text-text-primary mb-4">
+                        Recent & Upcoming
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {mostRecentPastSession && (
+                            <div className="bg-surface border border-border rounded-lg p-4 flex flex-col">
+                                <h3 className="text-sm font-semibold text-text-secondary mb-3 uppercase tracking-wider">Most Recent Session</h3>
+                                <div className="flex-grow">
+                                    <SessionIndicator
+                                        session={mostRecentPastSession}
+                                        className="h-full"
+                                        onClick={() => setSelectedSession(mostRecentPastSession)}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                        {nextUpcomingSession && (
+                            <div className="bg-surface border border-primary/30 rounded-lg p-4 flex flex-col">
+                                <h3 className="text-sm font-semibold text-primary mb-3 uppercase tracking-wider">Next Upcoming Session</h3>
+                                <div className="flex-grow">
+                                    <SessionIndicator
+                                        session={nextUpcomingSession}
+                                        className="h-full"
+                                        onClick={() => setSelectedSession(nextUpcomingSession)}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {MONTHS.map((month, index) => {
                 const monthSessions = sessionsByMonth[index] || [];
                 // Only show months that have sessions or distinct empty state if desired. 

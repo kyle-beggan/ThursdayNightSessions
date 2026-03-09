@@ -402,7 +402,7 @@ export default function ProfilePage() {
                                         Messages will be manually sent. Message and data rates may apply. Message frequency varies.
                                     </p>
                                     <p className="text-[10px] text-text-secondary leading-relaxed mt-2">
-                                        You may opt out at any time by replying STOP to any message or by updating your account settings. Reply HELP for assistance. Consent is not required as a condition of using the app.
+                                        You may opt out at any time by replying <strong>STOP</strong> to any message or by updating your account settings. Reply <strong>HELP</strong> for assistance. Consent is not required as a condition of using the app.
                                     </p>
                                 </div>
                             </div>
