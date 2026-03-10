@@ -31,6 +31,7 @@ interface AnalyticsData {
         instrumentDistribution: { name: string; count: number }[];
         songKeyDistribution?: { name: string; count: number }[];
         photosByPlayer?: { name: string; count: number }[];
+        topSongAdders?: { name: string; count: number }[];
     };
     meta?: {
         allTime: {
@@ -345,7 +346,7 @@ export default function AnalyticsPage() {
 
                 {/* Top Contributors Leaderboard */}
                 <div className="bg-surface rounded-xl p-6 border border-border">
-                    <h3 className="text-xl font-semibold mb-6 text-text-primary">Top Contributors 🏆</h3>
+                    <h3 className="text-xl font-semibold mb-6 text-text-primary">Top Attendees 🏆</h3>
                     <div className="space-y-4">
                         {data.charts.memberAttendance.slice(0, 3).map((member, index) => {
                             let rankColor = "bg-surface-secondary border-border";
@@ -370,6 +371,37 @@ export default function AnalyticsPage() {
                         })}
                         {data.charts.memberAttendance.length === 0 && (
                             <div className="text-center text-text-secondary py-8">No attendance data yet.</div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Top Song Adders Leaderboard */}
+                <div className="bg-surface rounded-xl p-6 border border-border">
+                    <h3 className="text-xl font-semibold mb-6 text-text-primary">Top Song Recommenders 🎶</h3>
+                    <div className="space-y-4">
+                        {(data.charts.topSongAdders || []).map((adder, index) => {
+                            let rankColor = "bg-surface-secondary border-border";
+                            let icon = "🎵";
+
+                            if (index === 0) { rankColor = "bg-yellow-500/10 border-yellow-500/50"; icon = "🥇"; }
+                            if (index === 1) { rankColor = "bg-gray-400/10 border-gray-400/50"; icon = "🥈"; }
+                            if (index === 2) { rankColor = "bg-orange-700/10 border-orange-700/50"; icon = "🥉"; }
+
+                            return (
+                                <div key={index} className={`flex items-center justify-between p-4 rounded-lg border ${rankColor}`}>
+                                    <div className="flex items-center gap-4">
+                                        <div className="text-2xl">{icon}</div>
+                                        <div>
+                                            <div className="font-bold text-text-primary text-lg">{adder.name}</div>
+                                            <div className="text-xs text-text-secondary">Library Contributor</div>
+                                        </div>
+                                    </div>
+                                    <div className="text-xl font-bold text-primary">{adder.count} <span className="text-sm font-normal text-text-secondary">Songs</span></div>
+                                </div>
+                            );
+                        })}
+                        {(!data.charts.topSongAdders || data.charts.topSongAdders.length === 0) && (
+                            <div className="text-center text-text-secondary py-8">No song data yet.</div>
                         )}
                     </div>
                 </div>
