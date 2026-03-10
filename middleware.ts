@@ -9,6 +9,8 @@ export async function middleware(req: NextRequest) {
     // 1. Public Paths (No Auth Required)
     const isPublicPath =
         pathname === '/login' ||
+        pathname === '/terms' ||
+        pathname === '/privacy' ||
         pathname.startsWith('/api/auth') ||
         pathname === '/logo.png' ||
         pathname.startsWith('/_next'); // Next.js assets
