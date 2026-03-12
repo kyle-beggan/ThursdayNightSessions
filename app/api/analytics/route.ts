@@ -73,7 +73,6 @@ export async function GET(request: NextRequest) {
         if (sessionsError) throw sessionsError;
 
         const attendanceHistory = sessionsData?.map(s => {
-            // Filter commitments that are confirmed or null (legacy)
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const confirmedCount = s.session_commitments?.filter((c: any) => !c.status || c.status === 'confirmed').length || 0;
             return {
@@ -82,10 +81,18 @@ export async function GET(request: NextRequest) {
             };
         }) || [];
 
-        // Calculate Average Attendance
-        const totalAttendance = attendanceHistory.reduce((sum, item) => sum + item.attendees, 0);
-        const avgAttendance = attendanceHistory.length > 0
-            ? Math.round((totalAttendance / attendanceHistory.length) * 10) / 10
+        // Calculate Average Attendance (only past sessions historically)
+        const currentIsoToday = new Date().toISOString();
+        const todayDateString = currentIsoToday.split('T')[0];
+
+        const pastSessionsWithAttendance = attendanceHistory.filter(item => {
+            if (!item.date) return false;
+            const itemDate = item.date.split('T')[0];
+            return itemDate < todayDateString;
+        });
+        const totalAttendance = pastSessionsWithAttendance.reduce((sum, item) => sum + item.attendees, 0);
+        const avgAttendance = pastSessionsWithAttendance.length > 0
+            ? Math.round((totalAttendance / pastSessionsWithAttendance.length) * 10) / 10
             : 0;
 
 
@@ -166,20 +173,29 @@ export async function GET(request: NextRequest) {
             .select('date')
             .order('date', { ascending: true });
 
-        // Simple min/max extraction (PostgREST doesn't support aggregate min/max directly in select without group by usually, 
-        // ensuring order and taking first/last is efficient enough for this scale)
+        // Simple min/max extraction
         let allTimeStart = new Date(currentYear, 0, 1).toISOString();
         let allTimeEnd = new Date(currentYear, 11, 31).toISOString();
+        let nextSessionDate = null;
 
         if (!dateRangeError && dateRangeData && dateRangeData.length > 0) {
             allTimeStart = dateRangeData[0].date;
             allTimeEnd = dateRangeData[dateRangeData.length - 1].date;
+            
+            // Find the next upcoming session
+            const currentIsoToday = new Date().toISOString();
+            const upcomingSessions = dateRangeData.filter(d => d.date >= currentIsoToday);
+            if (upcomingSessions.length > 0) {
+                nextSessionDate = upcomingSessions[0].date;
+            } else {
+                nextSessionDate = currentIsoToday; // fallback to today if no future sessions
+            }
         }
 
-        // 6. Fetch Songs Stats (Total count & Key Distribution)
+        // 6. Fetch Songs Stats (Total count & Key Distribution & Top Adders)
         const { data: songsData, error: songsError } = await supabaseAdmin
             .from('songs')
-            .select('key');
+            .select('key, created_by');
 
         if (songsError) {
             console.error('Error fetching songs stats:', songsError);
@@ -187,13 +203,19 @@ export async function GET(request: NextRequest) {
 
         const totalSongs = songsData?.length || 0;
 
-        // Calculate Key Distribution
+        // Calculate Key Distribution & Top Adders
         const keyCounts: Record<string, number> = {};
+        const adderCounts: Record<string, number> = {};
+
         songsData?.forEach(s => {
             if (s.key) {
                 // Normalize slightly if needed, but assuming standard format
                 const key = s.key.trim();
                 keyCounts[key] = (keyCounts[key] || 0) + 1;
+            }
+            if (s.created_by) {
+                const name = userMap.get(s.created_by) || 'Unknown';
+                adderCounts[name] = (adderCounts[name] || 0) + 1;
             }
         });
 
@@ -201,6 +223,11 @@ export async function GET(request: NextRequest) {
             .map(([name, count]) => ({ name, count }))
             .sort((a, b) => b.count - a.count)
             .slice(0, 5); // Top 5 keys
+
+        const topSongAdders = Object.entries(adderCounts)
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 3); // Top 3 adders
 
         // 7. Fetch Photos by Player
         // Since we can't easily group-by in standard Supabase client without raw SQL or RPC,
@@ -248,12 +275,14 @@ export async function GET(request: NextRequest) {
                 maybeAttendance,
                 instrumentDistribution,
                 songKeyDistribution,
-                photosByPlayer
+                photosByPlayer,
+                topSongAdders
             },
             meta: {
                 allTime: {
                     start: allTimeStart,
-                    end: allTimeEnd
+                    end: allTimeEnd,
+                    nextSession: nextSessionDate
                 }
             }
         });

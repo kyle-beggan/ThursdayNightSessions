@@ -20,8 +20,6 @@ const navItems: NavItem[] = [
     { name: 'Analytics', href: '/analytics', icon: '📊' },
     { name: 'Feedback', href: '/feedback', icon: '💡' },
     { name: 'Walkthrough', href: '/walkthrough', icon: '📘' },
-    { name: 'Terms & Conditions', href: '/terms', icon: '📝' },
-    { name: 'Privacy Policy', href: '/privacy', icon: '🔒' },
     { name: 'Admin', href: '/admin', icon: '⚙️', adminOnly: true },
 ];
 

@@ -20,7 +20,8 @@ export default function TermsAndConditionsPage() {
                 </p>
                 <h2 className="text-xl font-semibold text-text-primary mt-6">3. SMS Communications</h2>
                 <p className="text-text-secondary">
-                    A. Communication with band mates to remind them of upcoming recording sessions.
+                    A. By opting into SMS messaging from Sleepy Hollows, you agree to receive informational messages regarding account notifications, updates, and service alerts. Message frequency varies. Message and data rates may apply. You may opt out at any time by replying STOP. Reply HELP for support.
+                    <br></br><br></br>B. We will only send communication with band mates to remind them of upcoming recording sessions and other texts to coordinate band activities.
                     <br></br><br></br>B. You can cancel the SMS service at any time. Just text <b>&quot;STOP&quot;</b> to the short code. After you send the SMS message &quot;STOP&quot; to us, we will send you an SMS message to confirm that you have been unsubscribed. After this, you will no longer receive SMS messages from us. If you want to join again, just sign up as you did the first time and we will start sending SMS messages to you again.
                     <br></br><br></br>C. If you are experiencing issues with the messaging program you can reply with the keyword HELP for more assistance, or you can get help directly by texting Neal or Kyle at the phone numbers in their profile.
                     <br></br><br></br>D. Carriers are not liable for delayed or undelivered messages.

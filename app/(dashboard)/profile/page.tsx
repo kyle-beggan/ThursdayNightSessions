@@ -6,6 +6,7 @@ import { FaUser, FaMusic } from 'react-icons/fa';
 import { useToast } from '@/hooks/useToast';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import Link from 'next/link';
 import StatusBadge from '@/components/admin/StatusBadge';
 import Image from 'next/image';
 import CapabilityIcon from '@/components/ui/CapabilityIcon';
@@ -16,6 +17,7 @@ type User = {
     name: string;
     email: string;
     phone: string;
+    text_opt_in?: boolean;
     image?: string;
     status: 'pending' | 'approved' | 'rejected';
     user_type: 'admin' | 'user';
@@ -47,6 +49,7 @@ export default function ProfilePage() {
         email: '',
         phone: '',
         image: '',
+        text_opt_in: false,
         selectedCapabilities: [] as string[]
     });
 
@@ -70,6 +73,7 @@ export default function ProfilePage() {
                 name: user.name,
                 email: user.email,
                 phone: user.phone || '', // Should be empty but ensures state sync
+                text_opt_in: user.text_opt_in || false,
                 selectedCapabilities: user.capabilities.map(c => c.id)
             }));
         }
@@ -87,6 +91,7 @@ export default function ProfilePage() {
                     email: data.email,
                     phone: data.phone,
                     image: data.image || '',
+                    text_opt_in: data.text_opt_in || false,
                     selectedCapabilities: data.capabilities.map((c: Capability) => c.id)
                 });
             }
@@ -122,6 +127,7 @@ export default function ProfilePage() {
                 email: user.email,
                 phone: user.phone,
                 image: user.image || '',
+                text_opt_in: user.text_opt_in || false,
                 selectedCapabilities: user.capabilities.map(c => c.id)
             });
         }
@@ -196,6 +202,7 @@ export default function ProfilePage() {
                     email: formData.email,
                     phone: formData.phone,
                     image: formData.image,
+                    text_opt_in: formData.text_opt_in,
                     capabilities: formData.selectedCapabilities
                 })
             });
@@ -395,14 +402,38 @@ export default function ProfilePage() {
                                     <p className="text-text-primary font-medium">{user.phone}</p>
                                 )}
                                 <div className="mt-4 p-3 bg-surface-secondary/50 rounded border border-border/50">
-                                    <p className="text-[10px] text-text-secondary leading-relaxed">
-                                        By providing your phone number and saving it to your profile, you expressly consent to receive informational text messages from Sleepy Hollows at the number provided. These messages may include account updates, service notifications, reminders, and other information related to your use of the app.
-                                    </p>
-                                    <p className="text-[10px] text-text-secondary leading-relaxed mt-2">
-                                        Messages will be manually sent. Message and data rates may apply. Message frequency varies.
-                                    </p>
-                                    <p className="text-[10px] text-text-secondary leading-relaxed mt-2">
-                                        You may opt out at any time by replying <strong>STOP</strong> to any message or by updating your account settings. Reply <strong>HELP</strong> for assistance. Consent is not required as a condition of using the app.
+                                    <div className="mb-4">
+                                        <p className="text-[10px] text-text-secondary leading-relaxed">
+                                            By providing your mobile phone number, you consent to receive informational text messages from Sleepy Hollows related to your account activity, notifications, and updates. Message frequency varies. Message and data rates may apply. Reply STOP to opt out or HELP for assistance.
+                                        </p>
+                                    </div>
+                                    {isEditing ? (
+                                        <label className="flex items-start gap-3 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.text_opt_in}
+                                                onChange={(e) => setFormData({ ...formData, text_opt_in: e.target.checked })}
+                                                className="mt-1 w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-2"
+                                            />
+                                            <span className="text-sm text-text-primary font-medium">
+                                                I agree to receive informational text messages from Sleepy Hollows at the number provided.
+                                            </span>
+                                        </label>
+                                    ) : (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm font-medium text-text-secondary">Text message notifications:</span>
+                                            <span className={`text-sm font-bold ${user.text_opt_in ? 'text-green-500' : 'text-text-secondary'}`}>
+                                                {user.text_opt_in ? 'Opted In' : 'Not Opted In'}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="mt-3 text-center">
+                                    <p className="text-xs text-text-tertiary font-medium">
+                                        <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
+                                        <span className="mx-2">|</span>
+                                        <Link href="/terms" className="hover:text-primary transition-colors">Terms and Conditions</Link>
                                     </p>
                                 </div>
                             </div>

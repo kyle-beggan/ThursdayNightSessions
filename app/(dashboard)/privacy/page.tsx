@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 export default function PrivacyPolicyPage() {
     return (
         <div className="max-w-4xl mx-auto space-y-6 pt-6">
@@ -19,6 +21,10 @@ export default function PrivacyPolicyPage() {
                 <h2 className="text-xl font-semibold text-text-primary mt-6">3. SMS Communications</h2>
                 <p className="text-text-secondary">
                     By providing your phone number, you explicitly consent to receive informational text messages. We do not sell or share your phone number with third parties for promotional purposes. You can reply STOP to any message to opt out.
+                </p>
+                <h2 className="text-xl font-semibold text-text-primary mt-6">4. Terms and Conditions</h2>
+                <p className="text-text-secondary">
+                    If you have any questions regarding terms, please read our <Link href="/terms" className="text-primary hover:underline font-bold transition-colors">terms and conditions</Link>.
                 </p>
                 {/* Additional placeholder details can go here */}
             </div>

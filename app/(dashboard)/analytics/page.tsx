@@ -37,6 +37,7 @@ interface AnalyticsData {
         allTime: {
             start: string;
             end: string;
+            nextSession?: string;
         }
     };
 }
@@ -47,24 +48,30 @@ export default function AnalyticsPage() {
     const [data, setData] = useState<AnalyticsData | null>(null);
     const [loading, setLoading] = useState(true);
 
-    // Default range: Current Year
-    const [startDate, setStartDate] = useState(() => {
-        const year = new Date().getFullYear();
-        return `${year}-01-01`;
-    });
-    const [endDate, setEndDate] = useState(() => {
-        const year = new Date().getFullYear();
-        return `${year}-12-31`;
-    });
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
 
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const query = new URLSearchParams({ startDate, endDate });
+                // If we don't have start/end dates yet, fetch without them to get the defaults from the server
+                const query = new URLSearchParams();
+                if (startDate) query.append('startDate', startDate);
+                if (endDate) query.append('endDate', endDate);
+
                 const res = await fetch(`/api/analytics?${query.toString()}`);
                 if (res.ok) {
                     const result = await res.json();
+
+                    // If this is the initial load and no dates were set, set them based on the meta data
+                    if (!startDate && !endDate && result.meta?.allTime) {
+                        setStartDate(result.meta.allTime.start.split('T')[0]);
+                        setEndDate(result.meta.allTime.nextSession
+                            ? result.meta.allTime.nextSession.split('T')[0]
+                            : result.meta.allTime.end.split('T')[0]);
+                    }
+
                     setData(result);
                 }
             } catch (error) {
@@ -84,10 +91,22 @@ export default function AnalyticsPage() {
         return `${year}-${month}-${day}`;
     };
 
-    const setRange = (range: 'last_month' | 'this_month' | 'next_month' | 'last_6_months' | 'last_year' | 'all_time') => {
+    const setRange = (range: 'last_month' | 'this_month' | 'next_month' | 'last_6_months' | 'last_year' | 'all_time' | 'reset') => {
         const today = new Date();
         let start = new Date(today);
         let end = new Date(today); // Default end is today
+
+        if (range === 'reset') {
+            if (data?.meta?.allTime) {
+                setStartDate(data.meta.allTime.start.split('T')[0]);
+                setEndDate(data.meta.allTime.nextSession
+                    ? data.meta.allTime.nextSession.split('T')[0]
+                    : data.meta.allTime.end.split('T')[0]);
+                return;
+            } else {
+                range = 'all_time'; // fallback
+            }
+        }
 
         switch (range) {
             case 'last_month':
@@ -141,6 +160,8 @@ export default function AnalyticsPage() {
 
                 <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
                     <div className="flex flex-wrap items-center justify-center gap-2 bg-surface p-1 rounded-lg border border-border text-xs md:text-sm w-full md:w-auto">
+                        <button type="button" onClick={() => setRange('reset')} className="px-2 md:px-3 py-1 bg-surface-secondary hover:bg-surface-secondary/80 text-text-primary rounded transition-colors whitespace-nowrap border border-border">Reset</button>
+                        <div className="hidden md:block w-[1px] h-4 bg-border mx-1"></div>
                         <button type="button" onClick={() => setRange('last_month')} className="px-2 md:px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded transition-colors whitespace-nowrap">Last Month</button>
                         <div className="hidden md:block w-[1px] h-4 bg-border"></div>
                         <button type="button" onClick={() => setRange('this_month')} className="px-2 md:px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded transition-colors whitespace-nowrap">This Month</button>
@@ -190,14 +211,22 @@ export default function AnalyticsPage() {
                             <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                             <XAxis
                                 dataKey="date"
-                                tickFormatter={(date) => new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                tickFormatter={(date) => {
+                                    if (!date) return '';
+                                    const [y, m, d] = date.split('T')[0].split('-');
+                                    return new Date(parseInt(y), parseInt(m) - 1, parseInt(d)).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                                }}
                                 stroke="#888"
                             />
                             <YAxis stroke="#888" allowDecimals={false} />
                             <Tooltip
                                 contentStyle={{ backgroundColor: '#1F2937', border: 'none', borderRadius: '8px' }}
                                 itemStyle={{ color: '#E5E7EB' }}
-                                labelFormatter={(date) => new Date(date).toLocaleDateString()}
+                                labelFormatter={(date) => {
+                                    if (!date) return '';
+                                    const [y, m, d] = date.split('T')[0].split('-');
+                                    return new Date(parseInt(y), parseInt(m) - 1, parseInt(d)).toLocaleDateString();
+                                }}
                             />
                             <Line type="monotone" dataKey="attendees" stroke="#8B5CF6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 8 }} />
                         </LineChart>
@@ -205,145 +234,7 @@ export default function AnalyticsPage() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Instrument Distribution */}
-                <div className="bg-surface rounded-xl p-6 border border-border">
-                    <h3 className="text-xl font-semibold mb-6 text-text-primary">Instrument Distribution</h3>
-                    <div className="h-[400px] w-full flex items-center justify-center">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={data.charts.instrumentDistribution}
-                                    cx="50%"
-                                    cy="50%"
-                                    outerRadius={120}
-                                    fill="#8884d8"
-                                    dataKey="count"
-                                    label={(props: { x: number; y: number; cx: number; name?: string; percent?: number }) => {
-                                        const { x, y, cx, name, percent } = props;
-                                        if (!name || percent === undefined) return null;
-                                        return (
-                                            <text
-                                                x={x}
-                                                y={y}
-                                                fill="#9CA3AF"
-                                                textAnchor={x > cx ? 'start' : 'end'}
-                                                dominantBaseline="central"
-                                                className="text-[10px] md:text-xs"
-                                            >
-                                                {`${name.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} ${(percent * 100).toFixed(0)}%`}
-                                            </text>
-                                        );
-                                    }}
-                                >
-                                    {data.charts.instrumentDistribution.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Pie>
-                                <Tooltip
-                                    contentStyle={{ backgroundColor: '#1F2937', border: 'none', borderRadius: '8px' }}
-                                    itemStyle={{ color: '#E5E7EB' }}
-                                />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
-
-                {/* Member Attendance */}
-                <div className="bg-surface rounded-xl p-6 border border-border">
-                    <h3 className="text-xl font-semibold mb-6 text-text-primary">Member Attendance</h3>
-                    <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={data.charts.memberAttendance} layout="vertical" margin={{ left: 20 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={false} />
-                                <XAxis type="number" stroke="#888" allowDecimals={false} />
-                                <YAxis dataKey="name" type="category" width={100} stroke="#888" fontSize={12} />
-                                <Tooltip
-                                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
-                                    contentStyle={{ backgroundColor: '#1F2937', border: 'none', borderRadius: '8px' }}
-                                    itemStyle={{ color: '#E5E7EB' }}
-                                />
-                                <Bar dataKey="count" fill="#10B981" radius={[0, 4, 4, 0]} barSize={20} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
-            </div>
-
-            {/* Maybe Attendance */}
-            <div className="bg-surface rounded-xl p-6 border border-border">
-                <h3 className="text-xl font-semibold mb-6 text-yellow-500">Maybe Attendance</h3>
-                <div className="h-[300px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={data.charts.maybeAttendance || []} layout="vertical" margin={{ left: 20 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={false} />
-                            <XAxis type="number" stroke="#888" allowDecimals={false} />
-                            <YAxis dataKey="name" type="category" width={100} stroke="#888" fontSize={12} />
-                            <Tooltip
-                                cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
-                                contentStyle={{ backgroundColor: '#1F2937', border: 'none', borderRadius: '8px' }}
-                                itemStyle={{ color: '#FBBF24' }}
-                            />
-                            <Bar dataKey="count" fill="#F59E0B" radius={[0, 4, 4, 0]} barSize={20} name="Maybe Count" />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>
-
-            {/* Song Keys & Top Contributors */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Key Distribution */}
-                <div className="bg-surface rounded-xl p-6 border border-border">
-                    <h3 className="text-xl font-semibold mb-6 text-text-primary">Popular Song Keys</h3>
-                    <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={data.charts.songKeyDistribution || []} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                                <XAxis dataKey="name" stroke="#888" />
-                                <YAxis stroke="#888" allowDecimals={false} />
-                                <Tooltip
-                                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
-                                    contentStyle={{ backgroundColor: '#1F2937', border: 'none', borderRadius: '8px' }}
-                                    itemStyle={{ color: '#E5E7EB' }}
-                                />
-                                <Bar dataKey="count" fill="#F59E0B" radius={[4, 4, 0, 0]} barSize={40} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
-
-                {/* Photos by Player Chart */}
-                <div className="bg-surface rounded-xl p-6 border border-border mb-8">
-                    <h3 className="text-xl font-semibold mb-6 text-text-primary">Top Photographers 📸</h3>
-                    <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart
-                                data={data.charts.photosByPlayer || []}
-                                layout="vertical"
-                                margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
-                            >
-                                <CartesianGrid strokeDasharray="3 3" stroke="#374151" horizontal={false} />
-                                <XAxis type="number" stroke="#9CA3AF" />
-                                <YAxis
-                                    dataKey="name"
-                                    type="category"
-                                    stroke="#9CA3AF"
-                                    width={100}
-                                    tick={{ fill: '#9CA3AF', fontSize: 12 }}
-                                />
-                                <Tooltip
-                                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
-                                    contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
-                                    itemStyle={{ color: '#E5E7EB' }}
-                                />
-                                <Bar dataKey="count" fill="#8B5CF6" radius={[0, 4, 4, 0]} name="Photos" barSize={30}>
-                                    {/* Optional: Add labels to bars if desired, but tooltip is usually enough */}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
-
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
                 {/* Top Contributors Leaderboard */}
                 <div className="bg-surface rounded-xl p-6 border border-border">
                     <h3 className="text-xl font-semibold mb-6 text-text-primary">Top Attendees 🏆</h3>
@@ -403,6 +294,145 @@ export default function AnalyticsPage() {
                         {(!data.charts.topSongAdders || data.charts.topSongAdders.length === 0) && (
                             <div className="text-center text-text-secondary py-8">No song data yet.</div>
                         )}
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                {/* Photos by Player Chart */}
+                <div className="bg-surface rounded-xl p-6 border border-border">
+                    <h3 className="text-xl font-semibold mb-6 text-text-primary">Top Photographers 📸</h3>
+                    <div className="h-[300px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart
+                                data={data.charts.photosByPlayer || []}
+                                layout="vertical"
+                                margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
+                            >
+                                <CartesianGrid strokeDasharray="3 3" stroke="#374151" horizontal={false} />
+                                <XAxis type="number" stroke="#9CA3AF" />
+                                <YAxis
+                                    dataKey="name"
+                                    type="category"
+                                    stroke="#9CA3AF"
+                                    width={100}
+                                    tick={{ fill: '#9CA3AF', fontSize: 12 }}
+                                />
+                                <Tooltip
+                                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                                    contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
+                                    itemStyle={{ color: '#E5E7EB' }}
+                                />
+                                <Bar dataKey="count" fill="#8B5CF6" radius={[0, 4, 4, 0]} name="Photos" barSize={30}>
+                                    {/* Optional: Add labels to bars if desired, but tooltip is usually enough */}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                {/* Member Attendance */}
+                <div className="bg-surface rounded-xl p-6 border border-border">
+                    <h3 className="text-xl font-semibold mb-6 text-text-primary">Member Attendance</h3>
+                    <div className="h-[300px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={data.charts.memberAttendance} layout="vertical" margin={{ left: 20 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={false} />
+                                <XAxis type="number" stroke="#888" allowDecimals={false} />
+                                <YAxis dataKey="name" type="category" width={100} stroke="#888" fontSize={12} />
+                                <Tooltip
+                                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                                    contentStyle={{ backgroundColor: '#1F2937', border: 'none', borderRadius: '8px' }}
+                                    itemStyle={{ color: '#E5E7EB' }}
+                                />
+                                <Bar dataKey="count" fill="#10B981" radius={[0, 4, 4, 0]} barSize={20} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            </div>
+
+            {/* Maybe Attendance */}
+            <div className="bg-surface rounded-xl p-6 border border-border">
+                <h3 className="text-xl font-semibold mb-6 text-yellow-500">Maybe Attendance</h3>
+                <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={data.charts.maybeAttendance || []} layout="vertical" margin={{ left: 20 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={false} />
+                            <XAxis type="number" stroke="#888" allowDecimals={false} />
+                            <YAxis dataKey="name" type="category" width={100} stroke="#888" fontSize={12} />
+                            <Tooltip
+                                cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                                contentStyle={{ backgroundColor: '#1F2937', border: 'none', borderRadius: '8px' }}
+                                itemStyle={{ color: '#FBBF24' }}
+                            />
+                            <Bar dataKey="count" fill="#F59E0B" radius={[0, 4, 4, 0]} barSize={20} name="Maybe Count" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                {/* Key Distribution */}
+                <div className="bg-surface rounded-xl p-6 border border-border">
+                    <h3 className="text-xl font-semibold mb-6 text-text-primary">Popular Song Keys</h3>
+                    <div className="h-[300px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={data.charts.songKeyDistribution || []} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
+                                <XAxis dataKey="name" stroke="#888" />
+                                <YAxis stroke="#888" allowDecimals={false} />
+                                <Tooltip
+                                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                                    contentStyle={{ backgroundColor: '#1F2937', border: 'none', borderRadius: '8px' }}
+                                    itemStyle={{ color: '#E5E7EB' }}
+                                />
+                                <Bar dataKey="count" fill="#F59E0B" radius={[4, 4, 0, 0]} barSize={40} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                {/* Instrument Distribution */}
+                <div className="bg-surface rounded-xl p-6 border border-border">
+                    <h3 className="text-xl font-semibold mb-6 text-text-primary">Instrument Distribution</h3>
+                    <div className="h-[400px] w-full flex items-center justify-center">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={data.charts.instrumentDistribution}
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={120}
+                                    fill="#8884d8"
+                                    dataKey="count"
+                                    label={(props: { x: number; y: number; cx: number; name?: string; percent?: number }) => {
+                                        const { x, y, cx, name, percent } = props;
+                                        if (!name || percent === undefined) return null;
+                                        return (
+                                            <text
+                                                x={x}
+                                                y={y}
+                                                fill="#9CA3AF"
+                                                textAnchor={x > cx ? 'start' : 'end'}
+                                                dominantBaseline="central"
+                                                className="text-[10px] md:text-xs"
+                                            >
+                                                {`${name.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} ${(percent * 100).toFixed(0)}%`}
+                                            </text>
+                                        );
+                                    }}
+                                >
+                                    {data.charts.instrumentDistribution.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: '#1F2937', border: 'none', borderRadius: '8px' }}
+                                    itemStyle={{ color: '#E5E7EB' }}
+                                />
+                            </PieChart>
+                        </ResponsiveContainer>
                     </div>
                 </div>
             </div>
