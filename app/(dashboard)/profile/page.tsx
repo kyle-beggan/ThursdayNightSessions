@@ -401,32 +401,24 @@ export default function ProfilePage() {
                                 ) : (
                                     <p className="text-text-primary font-medium">{user.phone}</p>
                                 )}
-                                <div className="mt-4 p-3 bg-surface-secondary/50 rounded border border-border/50">
-                                    <div className="mb-4">
-                                        <p className="text-[10px] text-text-secondary leading-relaxed">
-                                            By providing your mobile phone number, you consent to receive informational text messages from Sleepy Hollows related to your account activity, notifications, and updates. Message frequency varies. Message and data rates may apply. Reply STOP to opt out or HELP for assistance.
-                                        </p>
-                                    </div>
-                                    {isEditing ? (
-                                        <label className="flex items-start gap-3 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.text_opt_in}
-                                                onChange={(e) => setFormData({ ...formData, text_opt_in: e.target.checked })}
-                                                className="mt-1 w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-2"
-                                            />
-                                            <span className="text-sm text-text-primary font-medium">
-                                                I agree to receive informational text messages from Sleepy Hollows at the number provided.
-                                            </span>
-                                        </label>
-                                    ) : (
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm font-medium text-text-secondary">Text message notifications:</span>
-                                            <span className={`text-sm font-bold ${user.text_opt_in ? 'text-green-500' : 'text-text-secondary'}`}>
-                                                {user.text_opt_in ? 'Opted In' : 'Not Opted In'}
-                                            </span>
+                                <div className="mt-4 p-4 bg-surface-secondary/50 rounded-lg border border-border/50">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-bold text-text-primary">SMS Notifications</p>
+                                            <p className={`text-sm font-medium ${user.text_opt_in ? 'text-green-500' : 'text-text-secondary'}`}>
+                                                Status: {user.text_opt_in ? 'Opted In' : 'Not Opted In'}
+                                            </p>
                                         </div>
-                                    )}
+                                        <Link
+                                            href="/sms-opt-in"
+                                            className="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold rounded-lg transition-colors border border-primary/20"
+                                        >
+                                            Manage SMS
+                                        </Link>
+                                    </div>
+                                    <p className="text-[10px] text-text-secondary leading-relaxed italic">
+                                        By providing your mobile phone number, you consent to receive informational text messages from Sleepy Hollows. Message and data rates may apply. Reply STOP to opt out.
+                                    </p>
                                 </div>
 
                                 <div className="mt-3 text-center">

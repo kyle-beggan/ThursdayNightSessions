@@ -11,6 +11,7 @@ export async function middleware(req: NextRequest) {
         pathname === '/login' ||
         pathname === '/terms' ||
         pathname === '/privacy' ||
+        pathname === '/sms-opt-in' ||
         pathname.startsWith('/api/auth') ||
         pathname === '/logo.png' ||
         pathname.startsWith('/_next'); // Next.js assets

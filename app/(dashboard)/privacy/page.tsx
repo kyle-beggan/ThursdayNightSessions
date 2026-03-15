@@ -20,7 +20,7 @@ export default function PrivacyPolicyPage() {
                 </p>
                 <h2 className="text-xl font-semibold text-text-primary mt-6">3. SMS Communications</h2>
                 <p className="text-text-secondary">
-                    By providing your phone number, you explicitly consent to receive informational text messages. We do not sell or share your phone number with third parties for promotional purposes. You can reply STOP to any message to opt out.
+                    By providing your phone number, you explicitly consent to receive informational text messages from Sleepy Hollows. We do not sell or share your phone number with third parties for promotional purposes. Message frequency varies. Message and data rates may apply. You can reply STOP to any message to opt out or HELP for assistance.
                 </p>
                 <h2 className="text-xl font-semibold text-text-primary mt-6">4. Terms and Conditions</h2>
                 <p className="text-text-secondary">
