@@ -36,12 +36,6 @@ export default function SongCommentsModal({ isOpen, onClose, song, onCommentAdde
     const [isSubmitting, setIsSubmitting] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        if (isOpen && song) {
-            fetchComments();
-        }
-    }, [isOpen, song]);
-
     const fetchComments = useCallback(async () => {
         if (!song) return;
         setLoading(true);
@@ -58,6 +52,12 @@ export default function SongCommentsModal({ isOpen, onClose, song, onCommentAdde
             setLoading(false);
         }
     }, [song, toast]);
+
+    useEffect(() => {
+        if (isOpen && song) {
+            fetchComments();
+        }
+    }, [isOpen, song, fetchComments]);
 
     useEffect(() => {
         if (scrollRef.current) {
