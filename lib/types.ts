@@ -22,6 +22,7 @@ export interface Song {
     vote_count?: number;
     user_has_voted?: boolean;
     is_recorded?: boolean;
+    comment_count?: number;
 }
 
 export interface User {

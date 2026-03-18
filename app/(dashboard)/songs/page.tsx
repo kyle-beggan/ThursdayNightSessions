@@ -8,6 +8,7 @@ import Button from '@/components/ui/Button';
 import AddSongModal from '@/components/songs/AddSongModal';
 import FindSongModal from '@/components/songs/FindSongModal';
 import SongCapabilitiesModal from '@/components/songs/SongCapabilitiesModal';
+import SongCommentsModal from '@/components/songs/SongCommentsModal';
 import { Song } from '@/lib/types';
 import { formatDate } from '@/lib/utils';
 import SessionModal from '@/components/calendar/SessionModal';
@@ -59,6 +60,10 @@ export default function SongsPage() {
     // Capabilities Modal State
     const [selectedSongForCaps, setSelectedSongForCaps] = useState<Song | null>(null);
     const [isCapsModalOpen, setIsCapsModalOpen] = useState(false);
+
+    // Comments Modal State
+    const [selectedSongForComments, setSelectedSongForComments] = useState<Song | null>(null);
+    const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
 
     // Session Modal State
     const [selectedSession, setSelectedSession] = useState<SessionWithDetails | null>(null);
@@ -339,6 +344,26 @@ export default function SongsPage() {
                                                                 </svg>
                                                             </button>
                                                         )}
+
+                                                        {/* Conversation Button */}
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setSelectedSongForComments(song);
+                                                                setIsCommentsModalOpen(true);
+                                                            }}
+                                                            className="p-1 rounded-full border border-border transition-colors hover:bg-primary/10 relative"
+                                                            title="Join the conversation"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .777-.333 48.202 48.202 0 0 0 9.03-.834c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 2.75c-6.633 0-12 1.803-12 4.022v6.012Z" />
+                                                            </svg>
+                                                            {song.comment_count ? (
+                                                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white">
+                                                                    {song.comment_count}
+                                                                </span>
+                                                            ) : null}
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -487,6 +512,21 @@ export default function SongsPage() {
                                                             )}
                                                             <Button
                                                                 variant="ghost"
+                                                                className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-text-primary flex items-center gap-1"
+                                                                onClick={() => {
+                                                                    setSelectedSongForComments(song);
+                                                                    setIsCommentsModalOpen(true);
+                                                                }}
+                                                            >
+                                                                <span>Chat</span>
+                                                                {song.comment_count ? (
+                                                                    <span className="bg-primary/20 text-primary text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                                                                        {song.comment_count}
+                                                                    </span>
+                                                                ) : null}
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
                                                                 className="text-xs px-3 py-1.5 h-auto text-text-secondary hover:text-text-primary"
                                                                 onClick={() => handleEditSong(song)}
                                                             >
@@ -576,6 +616,16 @@ export default function SongsPage() {
                 onClose={() => setIsCapsModalOpen(false)}
                 song={selectedSongForCaps}
                 onSave={fetchSongs}
+            />
+
+            <SongCommentsModal
+                isOpen={isCommentsModalOpen}
+                onClose={() => {
+                    setIsCommentsModalOpen(false);
+                    fetchSongs(); // Refresh to update comment count
+                }}
+                song={selectedSongForComments}
+                onCommentAdded={fetchSongs}
             />
 
             {selectedSession && (

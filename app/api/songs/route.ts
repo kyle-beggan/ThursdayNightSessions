@@ -133,8 +133,17 @@ export async function GET(request: NextRequest) {
             .select('session_id');
         const sessionIdsWithRecordings = new Set(sessionsWithRecordings?.map(r => r.session_id) || []);
 
-        // Count votes per song
         const voteCounts = (allVotes || []).reduce((acc, curr) => {
+            acc[curr.song_id] = (acc[curr.song_id] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+
+        // 3. Get all comment counts
+        const { data: allComments } = await supabaseAdmin
+            .from('song_comments')
+            .select('song_id');
+
+        const commentCounts = (allComments || []).reduce((acc, curr) => {
             acc[curr.song_id] = (acc[curr.song_id] || 0) + 1;
             return acc;
         }, {} as Record<string, number>);
@@ -169,6 +178,7 @@ export async function GET(request: NextRequest) {
                 session_date: sessionInfo?.date || null,
                 session_id: sessionInfo?.id || null,
                 vote_count: voteCounts[song.id] || 0,
+                comment_count: commentCounts[song.id] || 0,
                 user_has_voted: userVotedSongIds.has(song.id),
                 is_recorded: isRecorded
             };
