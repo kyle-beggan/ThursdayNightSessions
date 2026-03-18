@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useToast } from '@/hooks/useToast';
-import { FaSpinner, FaCheckCircle } from 'react-icons/fa';
+import { FaSpinner, FaCheckCircle, FaMobileAlt } from 'react-icons/fa';
 
 export default function SMSOptInPage() {
     const { status, update: updateSession } = useSession();
@@ -113,6 +113,18 @@ export default function SMSOptInPage() {
                             {isOptedIn ? 'Opted In' : 'Not Opted In'}
                         </p>
                     </div>
+                </div>
+
+                <div className="bg-surface-secondary/30 rounded-lg border border-border p-5 space-y-3 shadow-inner">
+                    <div className="flex items-center gap-2.5 text-primary">
+                        <FaMobileAlt className="h-4.5 w-4.5" />
+                        <span className="text-sm font-bold uppercase tracking-wider">Alternative: Quick Opt-in</span>
+                    </div>
+                    <p className="text-sm text-text-primary leading-relaxed">
+                        Text <code className="bg-primary/20 px-2 py-0.5 rounded font-mono font-bold text-primary border border-primary/20 shadow-sm mx-1">TIPTOE</code> to 
+                        <span className="font-bold ml-1.5">(571) 500-4807</span> to opt in. 
+                        You will receive a confirmation message from Sleepy Hollows.
+                    </p>
                 </div>
 
                 <div className="p-4 bg-primary/10 rounded-lg border border-primary/20 italic text-text-primary text-sm">
