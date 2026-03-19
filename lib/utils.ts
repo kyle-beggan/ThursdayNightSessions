@@ -108,3 +108,25 @@ END:VCALENDAR`;
     link.click();
     document.body.removeChild(link);
 }
+
+export function formatDateTime(date: string | Date): string {
+    let d: Date;
+    if (typeof date === 'string') {
+        // If date is YYYY-MM-DD, append T00:00:00 to force local time
+        if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+            d = new Date(date + 'T00:00:00');
+        } else {
+            d = new Date(date);
+        }
+    } else {
+        d = date;
+    }
+    return d.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
+}

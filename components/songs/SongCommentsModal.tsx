@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import { useToast } from '@/hooks/useToast';
-import { formatDate } from '@/lib/utils';
+import { formatDateTime } from '@/lib/utils';
 import { Song } from '@/lib/types';
 
 interface Comment {
@@ -155,7 +155,7 @@ export default function SongCommentsModal({ isOpen, onClose, song, onCommentAdde
                                     <div className="flex items-center justify-between gap-2 mb-1">
                                         <div className="flex items-center gap-2">
                                             <span className="text-xs font-bold text-text-primary">{comment.user.name}</span>
-                                            <span className="text-[10px] text-text-tertiary">{formatDate(comment.created_at)}</span>
+                                            <span className="text-[10px] text-text-tertiary">{formatDateTime(comment.created_at)}</span>
                                         </div>
                                         {(session?.user?.id === comment.user_id || session?.user?.userType === 'admin') && (
                                             <button

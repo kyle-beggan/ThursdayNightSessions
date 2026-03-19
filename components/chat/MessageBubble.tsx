@@ -66,7 +66,7 @@ export default function MessageBubble({ message, onReact }: MessageBubbleProps) 
             {/* Message Body & Reactions */}
             <div className={`flex flex-col max-w-[70%] ${isMe ? 'items-end' : 'items-start'}`}>
                 <div className="text-xs text-text-secondary mb-1 px-1">
-                    {senderName} • {format(new Date(message.created_at), 'h:mm a')}
+                    {senderName} • {format(new Date(message.created_at), 'MMM d, yyyy • h:mm a')}
                 </div>
 
                 <div className="relative group/message">

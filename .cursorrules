@@ -1,0 +1,1 @@
+Do not open a test browser, run lint, commit to git, or deploy to production unless I ask you to.  If there is a dev server running, please stop it. Start the dev server.
