@@ -5,9 +5,17 @@ import { getToken } from 'next-auth/jwt';
 export async function middleware(req: NextRequest) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     const { pathname } = req.nextUrl;
+    const host = req.headers.get('host') || '';
+    const isBaseDomain = host === 'sleepyhollows.com' || host === 'www.sleepyhollows.com';
+
+    // If on base domain and at root, show landing page
+    if (isBaseDomain && pathname === '/') {
+        return NextResponse.rewrite(new URL('/landing', req.url));
+    }
 
     // 1. Public Paths (No Auth Required)
     const isPublicPath =
+        pathname === '/landing' ||
         pathname === '/login' ||
         pathname === '/terms' ||
         pathname === '/privacy' ||
@@ -33,6 +41,8 @@ export async function middleware(req: NextRequest) {
 
     // 2. Unauthenticated Users -> Redirect to Login
     if (!token) {
+        // If on base domain, we might want to redirect to tns subdomain for login, 
+        // but for now let's keep it on the same domain to avoid confusion.
         return NextResponse.redirect(new URL('/login', req.url));
     }
 

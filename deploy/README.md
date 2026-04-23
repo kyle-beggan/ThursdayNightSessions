@@ -64,6 +64,43 @@ Go to your GitHub Repository > Settings > Secrets and Variables > Actions. Add:
     ```
 
 2.  **Enable SSL**:
+    Run Certbot for both the base domain and the subdomain:
+    ```bash
+    sudo certbot --nginx -d sleepyhollows.com -d www.sleepyhollows.com -d tns.sleepyhollows.com
+    ```
+
+## 6. Troubleshooting & Maintenance
+
+### SSL Renewal Issues
+If SSL renewal fails due to a "Port 80 in use" error:
+
+1.  **Identify the process** using port 80:
+    ```bash
+    sudo ss -tulpn | grep :80
+    # If it says "apache2", stop and disable it:
+    sudo systemctl stop apache2
+    sudo systemctl disable apache2
+    ```
+2.  **Kill the offending process** (if it's not a service):
+    ```bash
+    sudo fuser -k 80/tcp
+    ```
+3.  **Ensure Nginx is running** before trying Certbot again:
+    ```bash
+    sudo systemctl restart nginx
+    ```
+4.  **Run renewal with the Nginx plugin**:
     ```bash
     sudo certbot --nginx -d tns.sleepyhollows.com
     ```
+
+### Viewing Logs
+- **Application Logs**: `docker compose logs -f`
+- **Nginx Error Logs**: `sudo tail -f /var/log/nginx/error.log`
+- **Certbot Logs**: `sudo tail -f /var/log/letsencrypt/letsencrypt.log`
+
+### Domain Redirection Issues
+If `sleepyhollows.com` keeps redirecting to `tns.sleepyhollows.com` even after the Nginx update:
+1.  **Check Domain Registrar**: Ensure you don't have "Domain Forwarding" enabled at GoDaddy/Namecheap. It should be a simple A Record pointing to the static IP.
+2.  **Clear Browser Cache**: Redirects (especially 301s) are heavily cached by browsers.
+3.  **Check Nginx Rules**: Ensure no specific `return 301` rules were left behind in `/etc/nginx/sites-enabled/`.
