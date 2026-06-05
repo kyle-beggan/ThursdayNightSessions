@@ -27,6 +27,34 @@ export default function AddSongModal({ isOpen, onClose, onSongAdded, initialData
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [availableCapabilities, setAvailableCapabilities] = useState<Capability[]>([]);
     const [isLoadingCaps, setIsLoadingCaps] = useState(false);
+    const [isAutoFilling, setIsAutoFilling] = useState(false);
+
+    const handleAutoFill = async () => {
+        if (!formData.title) return;
+        setIsAutoFilling(true);
+        try {
+            const url = `/api/songs/lookup?title=${encodeURIComponent(formData.title)}&artist=${encodeURIComponent(formData.artist)}`;
+            const res = await fetch(url);
+            if (res.ok) {
+                const data = await res.json();
+                setFormData(prev => ({
+                    ...prev,
+                    key: data.key || prev.key,
+                    tempo: data.tempo || prev.tempo,
+                    resource_url: data.youtube_url || prev.resource_url
+                }));
+                toast.success('Successfully auto-filled song details!');
+            } else {
+                const errData = await res.json();
+                toast.error(errData.error || 'Failed to auto-fill song details');
+            }
+        } catch (error) {
+            console.error('Error auto-filling song details:', error);
+            toast.error('Failed to auto-fill song details');
+        } finally {
+            setIsAutoFilling(false);
+        }
+    };
 
     // Fetch capabilities on mount
     useEffect(() => {
@@ -156,6 +184,30 @@ export default function AddSongModal({ isOpen, onClose, onSongAdded, initialData
                                 onChange={(e) => setFormData({ ...formData, artist: e.target.value })}
                                 placeholder="Artist Name"
                             />
+                        </div>
+                        <div className="flex justify-end">
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant="secondary"
+                                onClick={handleAutoFill}
+                                disabled={!formData.title || isAutoFilling}
+                                className="h-8 text-xs font-semibold flex items-center gap-1.5"
+                            >
+                                {isAutoFilling ? (
+                                    <>
+                                        <svg className="animate-spin h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        <span>Auto-filling...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>✨ Auto-fill Details</span>
+                                    </>
+                                )}
+                            </Button>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>

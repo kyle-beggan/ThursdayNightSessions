@@ -1,17 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ChatWindow from '@/components/chat/ChatWindow';
-import { FaInfoCircle, FaComments, FaUserFriends, FaMicrophone, FaCamera } from 'react-icons/fa';
+import { FaInfoCircle, FaComments, FaUserFriends, FaMicrophone, FaCamera, FaEye } from 'react-icons/fa';
 import { useSession } from 'next-auth/react';
 import { useConfirm } from '@/providers/ConfirmProvider';
 import { useToast } from '@/hooks/useToast';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
-import { SessionWithDetails, SessionCommitment, Capability, Song } from '@/lib/types';
+import { SessionWithDetails, SessionCommitment, Capability, Song, User } from '@/lib/types';
 import CapabilityIcon from '@/components/ui/CapabilityIcon';
 import { formatDate, formatTime, generateGoogleCalendarLink, downloadICSFile } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import SongPicker from '@/components/ui/SongPicker';
 import PhotoGallery from '@/components/session/PhotoGallery';
+import VisibilitySelector from '@/components/admin/VisibilitySelector';
 
 interface SessionModalProps {
     isOpen: boolean;
@@ -24,6 +25,13 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
     const toast = useToast();
     const { confirm } = useConfirm();
     const { data: sessionData } = useSession();
+    const userId = sessionData?.user?.id;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const userType = sessionData?.user?.userType;
+    const isAdmin = userType === 'admin';
+    const userCommitment = session.commitments?.find((c: SessionCommitment) => c.user_id === userId);
+    const isCommitted = !!userCommitment;
     const [isCommitting, setIsCommitting] = useState(false);
 
     const [step, setStep] = useState<'details' | 'rsvp'>('details');
@@ -34,18 +42,79 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
     const [isUploading, setIsUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
     const [mainTab, setMainTab] = useState<'details' | 'chat'>('details');
-    const [subTab, setSubTab] = useState<'players' | 'recordings' | 'photos'>('players');
+    const [subTab, setSubTab] = useState<'players' | 'recordings' | 'photos' | 'visibility'>('players');
+
+    // Visibility State
+    const [allUsers, setAllUsers] = useState<User[]>([]);
+    const [isPublic, setIsPublic] = useState(session.is_public !== false);
+    const [visibleUserIds, setVisibleUserIds] = useState<string[]>([]);
+
+    const fetchUsers = async () => {
+        try {
+            const res = await fetch('/api/admin/users');
+            if (res.ok) {
+                const data = await res.json();
+                const approvedUsers = data.filter((u: User) => u.status === 'approved');
+                setAllUsers(approvedUsers);
+                return approvedUsers as User[];
+            }
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        }
+        return [];
+    };
+
+    // Fetch users when modal opens
+    useEffect(() => {
+        if (isOpen && isAdmin) {
+            fetchUsers();
+        }
+    }, [isOpen, isAdmin]);
+
+    // Sync visibility state from the session prop
+    useEffect(() => {
+        if (isOpen) {
+            setIsPublic(session.is_public !== false);
+            const dbVisibility = (session as any).visibility || [];
+            const explicitIds = dbVisibility.map((v: any) => v.user_id) || [];
+            
+            if (explicitIds.length > 0) {
+                setVisibleUserIds(explicitIds);
+            } else if (allUsers.length > 0) {
+                const adminIds = allUsers.filter(u => u.user_type === 'admin').map(u => u.id);
+                setVisibleUserIds(adminIds);
+            }
+        }
+    }, [isOpen, session, allUsers]);
+
+    const handleVisibilityChange = async (newIsPublic: boolean, newSelectedIds: string[]) => {
+        setIsPublic(newIsPublic);
+        setVisibleUserIds(newSelectedIds);
+
+        try {
+            const res = await fetch(`/api/sessions/${session.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    is_public: newIsPublic,
+                    visible_user_ids: newSelectedIds
+                })
+            });
+
+            if (res.ok) {
+                toast.success('Visibility updated');
+                onUpdate();
+            } else {
+                toast.error('Failed to update visibility');
+            }
+        } catch (error) {
+            console.error('Error updating visibility:', error);
+            toast.error('Failed to update visibility');
+        }
+    };
 
     // Admin Song Management State
     const [isPickerOpen, setIsPickerOpen] = useState(false);
-
-    const userId = sessionData?.user?.id;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const userType = sessionData?.user?.userType;
-    const isAdmin = userType === 'admin';
-    const userCommitment = session.commitments?.find((c: SessionCommitment) => c.user_id === userId);
-    const isCommitted = !!userCommitment;
 
     const fetchUserCapabilities = async () => {
         setIsLoadingCapabilities(true);
@@ -523,6 +592,19 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                         <FaCamera className="w-3.5 h-3.5" />
                                         Photos ({session.photos?.length || 0})
                                     </button>
+                                    {isAdmin && (
+                                        <button
+                                            type="button"
+                                            className={`flex-1 min-w-0 md:min-w-[100px] px-2 md:px-3 py-2 text-xs md:text-sm font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-1.5 md:gap-2 ${subTab === 'visibility'
+                                                ? 'bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] scale-[1.02]'
+                                                : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
+                                                }`}
+                                            onClick={() => setSubTab('visibility')}
+                                        >
+                                            <FaEye className="w-3.5 h-3.5" />
+                                            Visibility
+                                        </button>
+                                    )}
                                 </div>
 
                                 {/* Committed Players */}
@@ -689,6 +771,18 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
                                 {subTab === 'photos' && (
                                     <div className="flex-1 min-h-[100px] border-t border-border/50 pt-4 mt-2">
                                         <PhotoGallery sessionId={session.id} onUpdate={onUpdate} />
+                                    </div>
+                                )}
+
+                                {/* Session Visibility */}
+                                {subTab === 'visibility' && isAdmin && (
+                                    <div className="flex-1 min-h-[100px] border-t border-border/50 pt-4 mt-2">
+                                        <VisibilitySelector
+                                            users={allUsers}
+                                            selectedUserIds={visibleUserIds}
+                                            isPublic={isPublic}
+                                            onChange={handleVisibilityChange}
+                                        />
                                     </div>
                                 )}
                             </div>

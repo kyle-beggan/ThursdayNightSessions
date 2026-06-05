@@ -129,3 +129,68 @@ export async function GET() {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
+
+export async function DELETE(request: NextRequest) {
+    try {
+        const session = await getServerSession(authOptions);
+
+        if (!session?.user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const searchParams = request.nextUrl.searchParams;
+        const feedbackId = searchParams.get('id');
+
+        if (!feedbackId) {
+            return NextResponse.json({ error: 'Missing feedback id' }, { status: 400 });
+        }
+
+        // Fetch user type to check if they are an admin
+        const { data: user, error: userError } = await supabaseAdmin
+            .from('users')
+            .select('user_type')
+            .eq('id', session.user.id)
+            .single();
+
+        if (userError) {
+            console.error('Error verifying user type:', userError);
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+
+        // Fetch feedback to check creator
+        const { data: feedback, error: feedbackError } = await supabaseAdmin
+            .from('feedback')
+            .select('user_id')
+            .eq('id', feedbackId)
+            .single();
+
+        if (feedbackError) {
+            console.error('Error verifying feedback ownership:', feedbackError);
+            return NextResponse.json({ error: 'Feedback not found' }, { status: 404 });
+        }
+
+        const isAdmin = user?.user_type === 'admin';
+        const isCreator = feedback?.user_id === session.user.id;
+
+        if (!isAdmin && !isCreator) {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+
+        // Delete the feedback item (cascades automatically delete replies and votes in db)
+        const { error: deleteError } = await supabaseAdmin
+            .from('feedback')
+            .delete()
+            .eq('id', feedbackId);
+
+        if (deleteError) {
+            console.error('Error deleting feedback:', deleteError);
+            return NextResponse.json({ error: 'Failed to delete feedback' }, { status: 500 });
+        }
+
+        return NextResponse.json({ success: true });
+
+    } catch (error) {
+        console.error('Error in DELETE /api/feedback:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    }
+}

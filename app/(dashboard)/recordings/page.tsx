@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react';
 import CapabilityIcon from '@/components/ui/CapabilityIcon';
 import { useToast } from '@/hooks/useToast';
 import { useConfirm } from '@/providers/ConfirmProvider';
+import RecordingCommentsModal from '@/components/recordings/RecordingCommentsModal';
 
 interface Player {
     name: string;
@@ -20,6 +21,7 @@ interface Recording {
     created_at: string;
     session_date: string;
     players: Player[];
+    comment_count?: number;
 }
 
 export default function RecordingsPage() {
@@ -34,21 +36,25 @@ export default function RecordingsPage() {
     // @ts-ignore
     const isAdmin = session?.user?.userType === 'admin';
 
-    useEffect(() => {
-        const fetchRecordings = async () => {
-            try {
-                const res = await fetch('/api/recordings');
-                if (res.ok) {
-                    const data = await res.json();
-                    setRecordings(data);
-                }
-            } catch (error) {
-                console.error('Failed to fetch recordings:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
+    // Comments Modal State
+    const [selectedRecordingForComments, setSelectedRecordingForComments] = useState<Recording | null>(null);
+    const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
 
+    const fetchRecordings = async () => {
+        try {
+            const res = await fetch('/api/recordings');
+            if (res.ok) {
+                const data = await res.json();
+                setRecordings(data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch recordings:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchRecordings();
     }, []);
 
@@ -168,6 +174,22 @@ export default function RecordingsPage() {
                                             >
                                                 <span className="text-xs">⬇</span>
                                             </Button>
+                                            <Button
+                                                variant="primary"
+                                                className="w-8 h-8 p-0 flex items-center justify-center rounded-full flex-shrink-0 relative"
+                                                onClick={() => {
+                                                    setSelectedRecordingForComments(rec);
+                                                    setIsCommentsModalOpen(true);
+                                                }}
+                                                title="Comments"
+                                            >
+                                                <span className="text-xs">Chat</span>
+                                                {!!rec.comment_count && (
+                                                    <span className="absolute -top-1.5 -right-1.5 bg-danger text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center border border-surface">
+                                                        {rec.comment_count}
+                                                    </span>
+                                                )}
+                                            </Button>
                                         </div>
                                     </div>
                                 </div>
@@ -271,6 +293,22 @@ export default function RecordingsPage() {
                                                 >
                                                     <span className="text-xs">⬇</span>
                                                 </Button>
+                                                <Button
+                                                    variant="primary"
+                                                    className="w-8 h-8 p-0 flex items-center justify-center rounded-full flex-shrink-0 relative"
+                                                    onClick={() => {
+                                                        setSelectedRecordingForComments(rec);
+                                                        setIsCommentsModalOpen(true);
+                                                    }}
+                                                    title="Comments"
+                                                 >
+                                                    <span className="text-xs">Chat</span>
+                                                    {!!rec.comment_count && (
+                                                        <span className="absolute -top-1.5 -right-1.5 bg-danger text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center border border-surface">
+                                                            {rec.comment_count}
+                                                        </span>
+                                                    )}
+                                                </Button>
                                                 {isAdmin && (
                                                     <Button
                                                         variant="ghost"
@@ -290,6 +328,15 @@ export default function RecordingsPage() {
                     </table>
                 </div>
             </div>
+            <RecordingCommentsModal
+                isOpen={isCommentsModalOpen}
+                onClose={() => {
+                    setIsCommentsModalOpen(false);
+                    setSelectedRecordingForComments(null);
+                }}
+                recording={selectedRecordingForComments}
+                onCommentAdded={fetchRecordings}
+            />
         </div>
     );
 }

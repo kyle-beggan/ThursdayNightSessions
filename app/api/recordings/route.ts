@@ -107,6 +107,23 @@ export async function GET() {
             } | null;
         }
 
+        // Fetch comment counts
+        let commentCounts: Record<string, number> = {};
+        try {
+            const { data: allComments, error: commentsError } = await supabaseAdmin
+                .from('recording_comments')
+                .select('recording_id');
+            
+            if (!commentsError && allComments) {
+                commentCounts = allComments.reduce((acc, curr) => {
+                    acc[curr.recording_id] = (acc[curr.recording_id] || 0) + 1;
+                    return acc;
+                }, {} as Record<string, number>);
+            }
+        } catch (err) {
+            console.warn('Could not fetch recording comments, table might not exist yet:', err);
+        }
+
         // Transform data for easier frontend consumption
         const formattedRecordings = (data as unknown as RecordingDB[]).map((rec) => {
             const players = rec.sessions?.session_commitments?.map((commitment) => {
@@ -127,7 +144,8 @@ export async function GET() {
                 url: rec.url,
                 created_at: rec.created_at,
                 session_date: rec.sessions?.date,
-                players
+                players,
+                comment_count: commentCounts[rec.id] || 0
             };
         });
 

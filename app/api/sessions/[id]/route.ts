@@ -46,7 +46,8 @@ export async function GET(
                   )
                 ),
                 recordings:session_recordings(*),
-                photos:session_photos(*)
+                photos:session_photos(*),
+                visibility:session_visibility(user_id)
             `)
             .eq('id', id)
             .single();
