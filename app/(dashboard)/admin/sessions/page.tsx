@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import CreateSessionModal from '@/components/admin/CreateSessionModal';
+import DeleteSessionModal from '@/components/admin/DeleteSessionModal';
 import { Song, SessionWithDetails, SessionSong } from '@/lib/types';
 import { useToast } from '@/hooks/useToast';
 import { useConfirm } from '@/providers/ConfirmProvider';
@@ -16,6 +17,8 @@ export default function AdminSessionsPage() {
     const [sessions, setSessions] = useState<SessionWithDetails[]>([]);
     const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [sessionToDelete, setSessionToDelete] = useState<SessionWithDetails | null>(null);
+    const [isDeletingSession, setIsDeletingSession] = useState(false);
 
     // Add state for filtration
     const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all');
@@ -76,6 +79,16 @@ export default function AdminSessionsPage() {
     };
 
     const handleDeleteSession = async (id: string, date: string) => {
+        const session = sessions.find(s => s.id === id);
+        if (!session) return;
+
+        const confirmedPlayers = session.commitments?.filter(c => !c.status || c.status === 'confirmed') || [];
+
+        if (confirmedPlayers.length > 0) {
+            setSessionToDelete(session);
+            return;
+        }
+
         if (!await confirm({
             title: 'Delete Session',
             message: `Are you sure you want to delete the session on ${format(new Date(date + 'T00:00:00'), 'MMMM do, yyyy')}?`,
@@ -85,13 +98,23 @@ export default function AdminSessionsPage() {
             return;
         }
 
+        await performDeleteSession(id);
+    };
+
+    const performDeleteSession = async (id: string, message?: string) => {
+        setIsDeletingSession(true);
         try {
             const response = await fetch(`/api/sessions/${id}`, {
                 method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: message ? JSON.stringify({ message }) : undefined
             });
 
             if (response.ok) {
                 toast.success('Session deleted successfully');
+                setSessionToDelete(null);
                 await fetchSessions();
             } else {
                 toast.error('Failed to delete session');
@@ -99,6 +122,8 @@ export default function AdminSessionsPage() {
         } catch (error) {
             console.error('Error deleting session:', error);
             toast.error('Failed to delete session');
+        } finally {
+            setIsDeletingSession(false);
         }
     };
 
@@ -337,6 +362,16 @@ export default function AdminSessionsPage() {
                 onSessionCreated={fetchSessions}
                 initialData={editingSession}
             />
+
+            {sessionToDelete && (
+                <DeleteSessionModal
+                    isOpen={!!sessionToDelete}
+                    onClose={() => setSessionToDelete(null)}
+                    session={sessionToDelete}
+                    onConfirm={(message) => performDeleteSession(sessionToDelete.id, message)}
+                    isDeleting={isDeletingSession}
+                />
+            )}
         </div>
     );
 }

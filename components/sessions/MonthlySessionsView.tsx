@@ -4,7 +4,11 @@ import { useState } from 'react';
 import { SessionWithDetails } from '@/lib/types';
 import SessionIndicator from '../calendar/SessionIndicator';
 import SessionModal from '../calendar/SessionModal';
+import DeleteSessionModal from '../admin/DeleteSessionModal';
+import { useToast } from '@/hooks/useToast';
+import { useConfirm } from '@/providers/ConfirmProvider';
 import { FaChevronDown } from 'react-icons/fa';
+import { format } from 'date-fns';
 
 interface MonthlySessionsViewProps {
     sessions: SessionWithDetails[];
@@ -17,10 +21,62 @@ const MONTHS = [
 ];
 
 export default function MonthlySessionsView({ sessions, onRefresh }: MonthlySessionsViewProps) {
+    const toast = useToast();
+    const { confirm } = useConfirm();
+
     const [selectedSession, setSelectedSession] = useState<SessionWithDetails | null>(null);
+    const [sessionToDelete, setSessionToDelete] = useState<SessionWithDetails | null>(null);
+    const [isDeletingSession, setIsDeletingSession] = useState(false);
+
     const [isUpcomingCollapsed, setIsUpcomingCollapsed] = useState(true);
     const [isPastCollapsed, setIsPastCollapsed] = useState(true);
     const currentYear = new Date().getFullYear();
+
+    const handleDeleteSession = async (session: SessionWithDetails) => {
+        const confirmedPlayers = session.commitments?.filter(c => !c.status || c.status === 'confirmed') || [];
+
+        if (confirmedPlayers.length > 0) {
+            setSessionToDelete(session);
+            return;
+        }
+
+        if (!await confirm({
+            title: 'Delete Session',
+            message: `Are you sure you want to delete the session on ${format(new Date(session.date + 'T00:00:00'), 'MMMM do, yyyy')}?`,
+            confirmLabel: 'Delete',
+            variant: 'danger'
+        })) {
+            return;
+        }
+
+        await performDeleteSession(session.id);
+    };
+
+    const performDeleteSession = async (id: string, message?: string) => {
+        setIsDeletingSession(true);
+        try {
+            const response = await fetch(`/api/sessions/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: message ? JSON.stringify({ message }) : undefined
+            });
+
+            if (response.ok) {
+                toast.success('Session deleted successfully');
+                setSessionToDelete(null);
+                onRefresh();
+            } else {
+                toast.error('Failed to delete session');
+            }
+        } catch (error) {
+            console.error('Error deleting session:', error);
+            toast.error('Failed to delete session');
+        } finally {
+            setIsDeletingSession(false);
+        }
+    };
 
     // Compute most recent and next upcoming sessions
     const today = new Date();
@@ -83,6 +139,7 @@ export default function MonthlySessionsView({ sessions, onRefresh }: MonthlySess
                                         session={mostRecentPastSession}
                                         className="h-full"
                                         onClick={() => setSelectedSession(mostRecentPastSession)}
+                                        onDelete={() => handleDeleteSession(mostRecentPastSession)}
                                     />
                                 </div>
                             </div>
@@ -95,6 +152,7 @@ export default function MonthlySessionsView({ sessions, onRefresh }: MonthlySess
                                         session={nextUpcomingSession}
                                         className="h-full"
                                         onClick={() => setSelectedSession(nextUpcomingSession)}
+                                        onDelete={() => handleDeleteSession(nextUpcomingSession)}
                                     />
                                 </div>
                             </div>
@@ -145,6 +203,7 @@ export default function MonthlySessionsView({ sessions, onRefresh }: MonthlySess
                                                     session={session}
                                                     className="h-full"
                                                     onClick={() => setSelectedSession(session)}
+                                                    onDelete={() => handleDeleteSession(session)}
                                                 />
                                             </div>
                                         ))}
@@ -198,6 +257,7 @@ export default function MonthlySessionsView({ sessions, onRefresh }: MonthlySess
                                                     session={session}
                                                     className="h-full"
                                                     onClick={() => setSelectedSession(session)}
+                                                    onDelete={() => handleDeleteSession(session)}
                                                 />
                                             </div>
                                         ))}
@@ -227,6 +287,16 @@ export default function MonthlySessionsView({ sessions, onRefresh }: MonthlySess
                         // Don't close here, let the modal handle closing if needed (e.g. RSVP)
                         // This allows uploads to refresh data without closing the modal
                     }}
+                />
+            )}
+
+            {sessionToDelete && (
+                <DeleteSessionModal
+                    isOpen={!!sessionToDelete}
+                    onClose={() => setSessionToDelete(null)}
+                    session={sessionToDelete}
+                    onConfirm={(message) => performDeleteSession(sessionToDelete.id, message)}
+                    isDeleting={isDeletingSession}
                 />
             )}
         </div>

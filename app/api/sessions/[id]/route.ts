@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createClient } from '@supabase/supabase-js';
+import twilio from 'twilio';
 
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,6 +14,12 @@ const supabaseAdmin = createClient(
         }
     }
 );
+
+// Initialize Twilio Client
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
+const twilioClient = (accountSid && authToken) ? twilio(accountSid, authToken) : null;
 
 // context: { params: { id: string } }
 export async function GET(
@@ -54,7 +61,7 @@ export async function GET(
 
         if (error) {
             console.error('Error fetching session:', error);
-            return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+            return NextResponse.json({ error: 'Failed to fetch session' }, { status: 500 });
         }
 
         // Transform data to match frontend types (handling capabilities nesting)
@@ -67,6 +74,9 @@ export async function GET(
                     capabilities: c.user?.capabilities?.map((uc) => uc.capability) || []
                 },
                 capabilities: c.capabilities?.map((cc) => cc.capability) || []
+            })) || [],
+            visibility: session.visibility?.map((v: { user_id: string }) => ({
+                user_id: v.user_id
             })) || []
         };
 
@@ -86,9 +96,9 @@ export async function DELETE(
     try {
         const session = await getServerSession(authOptions);
 
-        // Ensure user is authenticated
-        if (!session?.user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        // Ensure user is authenticated and is an admin
+        if (!session?.user || (session.user as { userType?: string }).userType !== 'admin') {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         }
 
         // Await params as required in newer Next.js versions
@@ -96,6 +106,36 @@ export async function DELETE(
 
         if (!id) {
             return NextResponse.json({ error: 'Session ID is required' }, { status: 400 });
+        }
+
+        let message: string | undefined;
+        try {
+            const body = await request.json();
+            message = body?.message;
+        } catch {
+            // body is optional/empty
+        }
+
+        // Get commitments and phone numbers before deleting
+        const { data: sessionData, error: sessionFetchError } = await supabaseAdmin
+            .from('sessions')
+            .select(`
+                *,
+                session_commitments (
+                    status,
+                    user_id,
+                    users (
+                        name,
+                        phone
+                    )
+                )
+            `)
+            .eq('id', id)
+            .single();
+
+        if (sessionFetchError) {
+            console.error('Error fetching session details before deletion:', sessionFetchError);
+            return NextResponse.json({ error: 'Session not found' }, { status: 404 });
         }
 
         const { error } = await supabaseAdmin
@@ -108,7 +148,64 @@ export async function DELETE(
             return NextResponse.json({ error: 'Failed to delete session' }, { status: 500 });
         }
 
-        return NextResponse.json({ success: true });
+        let sentCount = 0;
+        let failCount = 0;
+        let recipientsCount = 0;
+
+        if (message && sessionData?.session_commitments) {
+            interface CommitmentUser {
+                name: string;
+                phone: string | null;
+            }
+            interface Commitment {
+                status: string | null;
+                user_id: string;
+                users: CommitmentUser | null;
+            }
+
+            const commitments = sessionData.session_commitments as unknown as Commitment[];
+            const recipients = commitments
+                .filter((c) => !c.status || c.status === 'confirmed')
+                .map((c) => c.users)
+                .filter((u): u is CommitmentUser => !!(u && u.phone && u.phone.replace(/\D/g, '').length >= 10));
+
+            recipientsCount = recipients.length;
+
+            if (recipients.length > 0) {
+                if (twilioClient && twilioPhoneNumber) {
+                    await Promise.all(recipients.map(async (user) => {
+                        try {
+                            let cleanPhone = user.phone!.replace(/\D/g, '');
+                            if (cleanPhone.length === 10) {
+                                cleanPhone = `+1${cleanPhone}`;
+                            } else if (cleanPhone.length === 11 && cleanPhone.startsWith('1')) {
+                                cleanPhone = `+${cleanPhone}`;
+                            } else if (!user.phone!.startsWith('+')) {
+                                cleanPhone = `+${cleanPhone}`;
+                            } else {
+                                cleanPhone = user.phone!;
+                            }
+
+                            console.log(`[SMS] Sending cancellation to ${user.name} (${cleanPhone})...`);
+                            await twilioClient.messages.create({
+                                body: message!,
+                                from: twilioPhoneNumber,
+                                to: cleanPhone
+                            });
+                            sentCount++;
+                        } catch (err) {
+                            const errorMessage = err instanceof Error ? err.message : String(err);
+                            console.error(`[SMS] Failed to send cancellation to ${user.name}:`, errorMessage);
+                            failCount++;
+                        }
+                    }));
+                } else {
+                    console.warn('[SMS] Twilio client not configured. Skipping SMS sending.');
+                }
+            }
+        }
+
+        return NextResponse.json({ success: true, sentCount, failCount, totalRecipients: recipientsCount });
     } catch (error) {
         console.error('Error in DELETE /api/sessions/[id]:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

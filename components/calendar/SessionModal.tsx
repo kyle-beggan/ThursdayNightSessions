@@ -75,8 +75,8 @@ export default function SessionModal({ isOpen, onClose, session, onUpdate }: Ses
     useEffect(() => {
         if (isOpen) {
             setIsPublic(session.is_public !== false);
-            const dbVisibility = (session as any).visibility || [];
-            const explicitIds = dbVisibility.map((v: any) => v.user_id) || [];
+            const dbVisibility = (session as SessionWithDetails & { visibility?: { user_id: string }[] }).visibility || [];
+            const explicitIds = dbVisibility.map((v) => v.user_id) || [];
             
             if (explicitIds.length > 0) {
                 setVisibleUserIds(explicitIds);

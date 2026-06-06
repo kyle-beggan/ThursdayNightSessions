@@ -13,6 +13,7 @@ interface SessionIndicatorProps {
     session: SessionWithDetails;
     onClick: () => void;
     className?: string;
+    onDelete?: () => void;
 }
 
 
@@ -23,7 +24,7 @@ const toProperCase = (str: string) => {
     });
 };
 
-export default function SessionIndicator({ session, onClick, className }: SessionIndicatorProps) {
+export default function SessionIndicator({ session, onClick, className, onDelete }: SessionIndicatorProps) {
     const { data: authSession } = useSession();
     const toast = useToast();
 
@@ -85,7 +86,13 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
         });
     };
 
-
+    const handleDeleteClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (onDelete) {
+            onDelete();
+        }
+    };
 
     const userCommitment = session.commitments?.find(c => c.user_id === authSession?.user?.id);
 
@@ -104,8 +111,19 @@ export default function SessionIndicator({ session, onClick, className }: Sessio
     return (
         <>
             <div
-                className={`relative h-full ${className || ''}`}
+                className={`relative h-full group ${className || ''}`}
             >
+                {isAdmin && onDelete && (
+                    <button
+                        onClick={handleDeleteClick}
+                        className="absolute -top-1.5 -right-1.5 z-20 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
+                        title="Delete Session"
+                    >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                )}
 
                 <button
                     onClick={onClick}
